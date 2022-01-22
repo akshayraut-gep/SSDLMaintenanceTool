@@ -1,4 +1,4 @@
-﻿namespace SSDLMaintenanceTool
+﻿namespace SSDLMaintenanceTool.Forms
 {
     partial class PredefinedQueriesEditor
     {

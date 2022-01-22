@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDLMaintenanceTool.Forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,22 +18,58 @@ namespace SSDLMaintenanceTool
             InitializeComponent();
         }
 
-        private void openFileCorrutValidatorToolStripMenuItem_Click(object sender, EventArgs e)
+        #region File Corrupt Validator
+        private void OpenFileCorruptValidator()
         {
             var fileCorruptValidator = new FileCorruptValidator();
             fileCorruptValidator.ShowDialog(this);
         }
 
-        private void openPredefinedQueryEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void fileCorruptValidator_Click(object sender, EventArgs e)
         {
-            var fileCorruptValidator = new PredefinedQueriesEditor();
-            fileCorruptValidator.ShowDialog(this);
+            OpenFileCorruptValidator();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void openFileCorrutValidatorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var fileCorruptValidator = new PredefinedQueriesEditor();
-            fileCorruptValidator.ShowDialog(this);
+            OpenFileCorruptValidator();
         }
+        #endregion
+
+        #region Predefined Query Editor
+        private void OpenPredefinedQueryEditor()
+        {
+            var predefinedQueriesEditor = new PredefinedQueriesEditor();
+            predefinedQueriesEditor.ShowDialog(this);
+        }
+
+        private void openPredefinedQueryEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenPredefinedQueryEditor();
+        }
+
+        private void queryEditorButton_Click(object sender, EventArgs e)
+        {
+            OpenPredefinedQueryEditor();
+        }
+        #endregion
+
+        #region Query Executioner
+        private void OpenQueryExecutioner()
+        {
+            var queryExecutionerForm = new QueryExecutioner();
+            queryExecutionerForm.ShowDialog(this);
+        }
+
+        private void queryExecutorButton_Click(object sender, EventArgs e)
+        {
+            OpenQueryExecutioner();
+        }
+
+        private void openQueryExecutionerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenQueryExecutioner();
+        }
+        #endregion
     }
 }

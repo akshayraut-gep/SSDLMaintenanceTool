@@ -1,4 +1,4 @@
-﻿namespace SSDLMaintenanceTool
+﻿namespace SSDLMaintenanceTool.Forms
 {
     partial class QueryExecutioner
     {
@@ -34,9 +34,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.domainsCheckListBox = new System.Windows.Forms.CheckedListBox();
             this.button2 = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.connectionStringsComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
@@ -45,7 +45,7 @@
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(344, 319);
+            this.button1.Location = new System.Drawing.Point(344, 490);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(144, 55);
@@ -56,7 +56,7 @@
             // 
             // tbQuery
             // 
-            this.tbQuery.Location = new System.Drawing.Point(17, 152);
+            this.tbQuery.Location = new System.Drawing.Point(17, 323);
             this.tbQuery.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tbQuery.Multiline = true;
             this.tbQuery.Name = "tbQuery";
@@ -77,7 +77,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.label2.Location = new System.Drawing.Point(12, 106);
+            this.label2.Location = new System.Drawing.Point(12, 277);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 29);
             this.label2.TabIndex = 3;
@@ -87,7 +87,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.tabControl1.Location = new System.Drawing.Point(17, 379);
+            this.tabControl1.Location = new System.Drawing.Point(17, 550);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(200, 100);
@@ -104,42 +104,43 @@
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // checkedListBox1
+            // domainsCheckListBox
             // 
-            this.checkedListBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Items.AddRange(new object[] {
+            this.domainsCheckListBox.CheckOnClick = true;
+            this.domainsCheckListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.domainsCheckListBox.FormattingEnabled = true;
+            this.domainsCheckListBox.Items.AddRange(new object[] {
             "A",
             "B",
             "C"});
-            this.checkedListBox1.Location = new System.Drawing.Point(169, 59);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(181, 31);
-            this.checkedListBox1.TabIndex = 5;
+            this.domainsCheckListBox.Location = new System.Drawing.Point(169, 104);
+            this.domainsCheckListBox.Name = "domainsCheckListBox";
+            this.domainsCheckListBox.Size = new System.Drawing.Size(370, 166);
+            this.domainsCheckListBox.TabIndex = 5;
             // 
             // button2
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             this.button2.Location = new System.Drawing.Point(356, 61);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(119, 30);
+            this.button2.Size = new System.Drawing.Size(183, 32);
             this.button2.TabIndex = 6;
-            this.button2.Text = "Reload";
+            this.button2.Text = "Load all domains";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // comboBox1
+            // connectionStringsComboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.connectionStringsComboBox.FormattingEnabled = true;
+            this.connectionStringsComboBox.Items.AddRange(new object[] {
             "Dev",
             "QC",
             "UAT",
             "Production"});
-            this.comboBox1.Location = new System.Drawing.Point(169, 12);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(181, 28);
-            this.comboBox1.TabIndex = 7;
+            this.connectionStringsComboBox.Location = new System.Drawing.Point(169, 12);
+            this.connectionStringsComboBox.Name = "connectionStringsComboBox";
+            this.connectionStringsComboBox.Size = new System.Drawing.Size(370, 28);
+            this.connectionStringsComboBox.TabIndex = 7;
             // 
             // label3
             // 
@@ -154,7 +155,7 @@
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(494, 319);
+            this.button3.Location = new System.Drawing.Point(494, 490);
             this.button3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(239, 55);
@@ -169,9 +170,9 @@
             this.ClientSize = new System.Drawing.Size(768, 682);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.connectionStringsComboBox);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.checkedListBox1);
+            this.Controls.Add(this.domainsCheckListBox);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -195,9 +196,9 @@
         #endregion
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.CheckedListBox domainsCheckListBox;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox connectionStringsComboBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button3;
     }

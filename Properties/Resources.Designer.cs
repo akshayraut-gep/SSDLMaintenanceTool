@@ -63,6 +63,16 @@ namespace SSDLMaintenanceTool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap corrupt_file {
+            get {
+                object obj = ResourceManager.GetObject("corrupt_file", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap sql_configure_icon {
             get {
                 object obj = ResourceManager.GetObject("sql-configure-icon", resourceCulture);

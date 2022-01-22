@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace SSDLMaintenanceTool
+namespace SSDLMaintenanceTool.Forms
 {
     public partial class PredefinedQueriesEditor : Form
     {

@@ -33,7 +33,9 @@
             this.openQueryExecutionerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openPredefinedQueryEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileCorrutValidatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.button1 = new System.Windows.Forms.Button();
+            this.fileCorruptValidator = new System.Windows.Forms.Button();
+            this.queryExecutorButton = new System.Windows.Forms.Button();
+            this.queryEditorButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -45,7 +47,7 @@
             this.menuToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 36);
+            this.menuStrip1.Size = new System.Drawing.Size(846, 36);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -64,6 +66,7 @@
             this.openQueryExecutionerToolStripMenuItem.Name = "openQueryExecutionerToolStripMenuItem";
             this.openQueryExecutionerToolStripMenuItem.Size = new System.Drawing.Size(360, 34);
             this.openQueryExecutionerToolStripMenuItem.Text = "Open QueryExecutioner";
+            this.openQueryExecutionerToolStripMenuItem.Click += new System.EventHandler(this.openQueryExecutionerToolStripMenuItem_Click);
             // 
             // openPredefinedQueryEditorToolStripMenuItem
             // 
@@ -79,26 +82,56 @@
             this.openFileCorrutValidatorToolStripMenuItem.Text = "Open File Corrut Validator";
             this.openFileCorrutValidatorToolStripMenuItem.Click += new System.EventHandler(this.openFileCorrutValidatorToolStripMenuItem_Click);
             // 
-            // button1
+            // fileCorruptValidator
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.button1.Image = global::SSDLMaintenanceTool.Properties.Resources.sql_configure_icon;
-            this.button1.Location = new System.Drawing.Point(82, 72);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(219, 260);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Predefined Query Editor";
-            this.button1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.fileCorruptValidator.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.fileCorruptValidator.Image = global::SSDLMaintenanceTool.Properties.Resources.corrupt_file;
+            this.fileCorruptValidator.Location = new System.Drawing.Point(82, 356);
+            this.fileCorruptValidator.Name = "fileCorruptValidator";
+            this.fileCorruptValidator.Size = new System.Drawing.Size(219, 260);
+            this.fileCorruptValidator.TabIndex = 3;
+            this.fileCorruptValidator.Text = "File Corrupt Validator";
+            this.fileCorruptValidator.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.fileCorruptValidator.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.fileCorruptValidator.UseVisualStyleBackColor = true;
+            this.fileCorruptValidator.Click += new System.EventHandler(this.fileCorruptValidator_Click);
+            // 
+            // queryExecutorButton
+            // 
+            this.queryExecutorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.queryExecutorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.sql_configure_icon;
+            this.queryExecutorButton.Location = new System.Drawing.Point(410, 72);
+            this.queryExecutorButton.Name = "queryExecutorButton";
+            this.queryExecutorButton.Size = new System.Drawing.Size(219, 260);
+            this.queryExecutorButton.TabIndex = 2;
+            this.queryExecutorButton.Text = "DML Query Executioner";
+            this.queryExecutorButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.queryExecutorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.queryExecutorButton.UseVisualStyleBackColor = true;
+            this.queryExecutorButton.Click += new System.EventHandler(this.queryExecutorButton_Click);
+            // 
+            // queryEditorButton
+            // 
+            this.queryEditorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.queryEditorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.sql_configure_icon;
+            this.queryEditorButton.Location = new System.Drawing.Point(82, 72);
+            this.queryEditorButton.Name = "queryEditorButton";
+            this.queryEditorButton.Size = new System.Drawing.Size(219, 260);
+            this.queryEditorButton.TabIndex = 1;
+            this.queryEditorButton.Text = "Predefined Query Editor";
+            this.queryEditorButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.queryEditorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.queryEditorButton.UseVisualStyleBackColor = true;
+            this.queryEditorButton.Click += new System.EventHandler(this.queryEditorButton_Click);
             // 
             // Parent
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(846, 659);
+            this.Controls.Add(this.fileCorruptValidator);
+            this.Controls.Add(this.queryExecutorButton);
+            this.Controls.Add(this.queryEditorButton);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Parent";
@@ -117,7 +150,9 @@
         private System.Windows.Forms.ToolStripMenuItem openQueryExecutionerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openPredefinedQueryEditorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openFileCorrutValidatorToolStripMenuItem;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button queryEditorButton;
+        private System.Windows.Forms.Button queryExecutorButton;
+        private System.Windows.Forms.Button fileCorruptValidator;
     }
 }
 
