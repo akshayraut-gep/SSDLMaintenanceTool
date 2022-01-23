@@ -1,0 +1,17 @@
+[
+  {
+    "DisplayName": "",
+    "Name": "",
+    "Server": "",
+    "Database": "",
+    "IsInputCredentialsRequired": true,
+    "IsMFA": true,
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "",
+    "Region": "",
+    "Instance": ""
+  },
+]
