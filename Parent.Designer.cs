@@ -47,7 +47,7 @@
             this.menuToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(846, 36);
+            this.menuStrip1.Size = new System.Drawing.Size(846, 33);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -58,7 +58,7 @@
             this.openPredefinedQueryEditorToolStripMenuItem,
             this.openFileCorrutValidatorToolStripMenuItem});
             this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
-            this.menuToolStripMenuItem.Size = new System.Drawing.Size(73, 30);
+            this.menuToolStripMenuItem.Size = new System.Drawing.Size(73, 29);
             this.menuToolStripMenuItem.Text = "Menu";
             // 
             // openQueryExecutionerToolStripMenuItem
@@ -99,7 +99,7 @@
             // queryExecutorButton
             // 
             this.queryExecutorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.queryExecutorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.sql_configure_icon;
+            this.queryExecutorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.query_analysis;
             this.queryExecutorButton.Location = new System.Drawing.Point(410, 72);
             this.queryExecutorButton.Name = "queryExecutorButton";
             this.queryExecutorButton.Size = new System.Drawing.Size(219, 260);

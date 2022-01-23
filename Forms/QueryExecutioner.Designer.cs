@@ -28,40 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
-            this.tbQuery = new System.Windows.Forms.TextBox();
+            this.executeQueryButton = new System.Windows.Forms.Button();
+            this.queryTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.domainsCheckListBox = new System.Windows.Forms.CheckedListBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.loadDomainsButton = new System.Windows.Forms.Button();
             this.connectionStringsComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
+            this.exportQueryResultButton = new System.Windows.Forms.Button();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.exportDomainsButton = new System.Windows.Forms.Button();
+            this.queryExecutionBackgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.tabControl1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // button1
+            // executeQueryButton
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(344, 490);
-            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(144, 55);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Execute";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.executeQueryButton.Location = new System.Drawing.Point(344, 490);
+            this.executeQueryButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.executeQueryButton.Name = "executeQueryButton";
+            this.executeQueryButton.Size = new System.Drawing.Size(144, 55);
+            this.executeQueryButton.TabIndex = 0;
+            this.executeQueryButton.Text = "Execute";
+            this.executeQueryButton.UseVisualStyleBackColor = true;
+            this.executeQueryButton.Click += new System.EventHandler(this.executeQueryButton_Click);
             // 
-            // tbQuery
+            // queryTextBox
             // 
-            this.tbQuery.Location = new System.Drawing.Point(17, 323);
-            this.tbQuery.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tbQuery.Multiline = true;
-            this.tbQuery.Name = "tbQuery";
-            this.tbQuery.Size = new System.Drawing.Size(716, 163);
-            this.tbQuery.TabIndex = 1;
+            this.queryTextBox.Location = new System.Drawing.Point(17, 323);
+            this.queryTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.queryTextBox.Multiline = true;
+            this.queryTextBox.Name = "queryTextBox";
+            this.queryTextBox.Size = new System.Drawing.Size(716, 163);
+            this.queryTextBox.TabIndex = 1;
             // 
             // label1
             // 
@@ -117,20 +121,22 @@
             this.domainsCheckListBox.Name = "domainsCheckListBox";
             this.domainsCheckListBox.Size = new System.Drawing.Size(370, 166);
             this.domainsCheckListBox.TabIndex = 5;
+            this.domainsCheckListBox.SelectedIndexChanged += new System.EventHandler(this.DomainsCheckListBox_SelectedIndexChanged);
             // 
-            // button2
+            // loadDomainsButton
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.button2.Location = new System.Drawing.Point(356, 61);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(183, 32);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "Load all domains";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.loadDomainsButton.Location = new System.Drawing.Point(169, 61);
+            this.loadDomainsButton.Name = "loadDomainsButton";
+            this.loadDomainsButton.Size = new System.Drawing.Size(183, 32);
+            this.loadDomainsButton.TabIndex = 6;
+            this.loadDomainsButton.Text = "Load all domains";
+            this.loadDomainsButton.UseVisualStyleBackColor = true;
+            this.loadDomainsButton.Click += new System.EventHandler(this.loadDomainsButton_Click);
             // 
             // connectionStringsComboBox
             // 
+            this.connectionStringsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.connectionStringsComboBox.FormattingEnabled = true;
             this.connectionStringsComboBox.Items.AddRange(new object[] {
             "Dev",
@@ -152,35 +158,52 @@
             this.label3.TabIndex = 8;
             this.label3.Text = "Environment";
             // 
-            // button3
+            // exportQueryResultButton
             // 
-            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(494, 490);
-            this.button3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(239, 55);
-            this.button3.TabIndex = 9;
-            this.button3.Text = "Export to Excel";
-            this.button3.UseVisualStyleBackColor = true;
+            this.exportQueryResultButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportQueryResultButton.Location = new System.Drawing.Point(494, 490);
+            this.exportQueryResultButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.exportQueryResultButton.Name = "exportQueryResultButton";
+            this.exportQueryResultButton.Size = new System.Drawing.Size(239, 55);
+            this.exportQueryResultButton.TabIndex = 9;
+            this.exportQueryResultButton.Text = "Export to Excel";
+            this.exportQueryResultButton.UseVisualStyleBackColor = true;
+            this.exportQueryResultButton.Click += new System.EventHandler(this.exportQueryResultButton_Click);
+            // 
+            // exportDomainsButton
+            // 
+            this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.exportDomainsButton.Location = new System.Drawing.Point(358, 61);
+            this.exportDomainsButton.Name = "exportDomainsButton";
+            this.exportDomainsButton.Size = new System.Drawing.Size(181, 32);
+            this.exportDomainsButton.TabIndex = 10;
+            this.exportDomainsButton.Text = "Export domains";
+            this.exportDomainsButton.UseVisualStyleBackColor = true;
+            this.exportDomainsButton.Click += new System.EventHandler(this.exportDomainsButton_Click);
+            // 
+            // queryExecutionBackgroundWorker
+            // 
+            this.queryExecutionBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.queryExecutionBackgroundWorker_DoWork);
             // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(768, 682);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.exportDomainsButton);
+            this.Controls.Add(this.exportQueryResultButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.connectionStringsComboBox);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.loadDomainsButton);
             this.Controls.Add(this.domainsCheckListBox);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.tbQuery);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.queryTextBox);
+            this.Controls.Add(this.executeQueryButton);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "QueryExecutioner";
-            this.Text = "NewQuery";
+            this.Text = "DML Query Executioner";
             this.Load += new System.EventHandler(this.QueryExecutioner_Load);
             this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -188,8 +211,8 @@
 
         }
 
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox tbQuery;
+        private System.Windows.Forms.Button executeQueryButton;
+        private System.Windows.Forms.TextBox queryTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
 
@@ -197,9 +220,13 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.CheckedListBox domainsCheckListBox;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button loadDomainsButton;
         private System.Windows.Forms.ComboBox connectionStringsComboBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button exportQueryResultButton;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.Button exportDomainsButton;
+        private System.ComponentModel.BackgroundWorker queryExecutionBackgroundWorker;
     }
 }

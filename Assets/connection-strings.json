@@ -5,47 +5,89 @@
     "Server": "tcp:smartgepdev.database.windows.net,1433",
     "Database": "DEVSmartConfiguration",
     "IsInputCredentialsRequired": true,
-    "IsMFA": true
+    "IsMFA": true,
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "DEV",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "DEV Micro DB - MFA",
     "Name": "DevMicroDBMFA",
     "Server": "tcp:smartgepdev.database.windows.net,1433",
+    "Database": null,
     "IsInputCredentialsRequired": true,
     "IsMFA": true,
-    "ConfigDBConnectionName": "DevSmartConfigurationMFA"
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": "DevSmartConfigurationMFA",
+    "IsMultiTenant": true,
+    "Environment": "DEV",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "QC Smart Configuration - MFA",
     "Name": "QCSmartConfigurationMFA",
     "Server": "tcp:smartgepqaus.database.windows.net",
+    "Database": "QCSmartConfiguration",
     "IsInputCredentialsRequired": true,
     "IsMFA": true,
-    "Database": "QCSmartConfiguration"
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "QC",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "QC Micro DB - MFA",
     "Name": "QCMicroDBMFA",
     "Server": "tcp:smartgepqaus.database.windows.net",
+    "Database": null,
     "IsInputCredentialsRequired": true,
     "IsMFA": true,
-    "ConfigDBConnectionName": "QCSmartConfigurationMFA"
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": "QCSmartConfigurationMFA",
+    "IsMultiTenant": true,
+    "Environment": "QC",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "QC Smart Configuration - Full Access",
     "Name": "QCSmartConfigurationFullAccess",
     "Server": "tcp:smartgepqaus.database.windows.net",
     "Database": "QCSmartConfiguration",
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "QC_Config_User",
-    "Password": "q5tcfCF4MYBC"
+    "Password": "q5tcfCF4MYBC",
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "QC",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "QC Micro DB - Full Access",
     "Name": "QCMicroDBFullAccess",
     "Server": "tcp:smartgepqaus.database.windows.net",
+    "Database": null,
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "QC_SpendSelfserve_User",
     "Password": "mK7hxRfXEBg",
-    "ConfigDBConnectionName": "QCSmartConfigurationFullAccess"
+    "ConfigDBConnectionName": "QCSmartConfigurationFullAccess",
+    "IsMultiTenant": true,
+    "Environment": "QC",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "UAT Smart Configuration - MFA - Read Only",
@@ -53,62 +95,118 @@
     "Server": "gjc6phtaz8.database.windows.net",
     "Database": "UATSmartConfiguration",
     "IsInputCredentialsRequired": true,
-    "IsMFA": true
+    "IsMFA": true,
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "UAT",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "UAT Micro DB - MFA - Read Only",
     "Name": "UATMicroDBMFAReadOnly",
     "Server": "gjc6phtaz8.database.windows.net",
+    "Database": null,
     "IsInputCredentialsRequired": true,
     "IsMFA": true,
-    "ConfigDBConnectionName": "UATSmartConfigurationMFAReadOnly"
+    "UserName": null,
+    "Password": null,
+    "ConfigDBConnectionName": "UATSmartConfigurationMFAReadOnly",
+    "IsMultiTenant": true,
+    "Environment": "UAT",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "Prod Smart Configuration US 1 - Read Only",
     "Name": "ProdSmartConfigurationUS1ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
     "Database": "GEPSmartConfiguration",
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
-    "Password": "Password@321"
+    "Password": "Password@321",
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "PROD",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "Prod Micro DB US 1 - Read Only",
     "Name": "ProdMicroDBUS1ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
+    "Database": null,
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
     "Password": "Password@321",
-    "ConfigDBConnectionName": "ProdSmartConfigurationUS1ReadOnly"
+    "ConfigDBConnectionName": "ProdSmartConfigurationUS1ReadOnly",
+    "IsMultiTenant": true,
+    "Environment": "PROD",
+    "Region": "US",
+    "Instance": "1"
   },
   {
     "DisplayName": "Prod Smart Configuration US 2 - Read Only",
     "Name": "ProdSmartConfigurationUS2ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
     "Database": "GEPSmartConfiguration",
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
-    "Password": "Password@321"
+    "Password": "Password@321",
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "PROD",
+    "Region": "US",
+    "Instance": "2"
   },
   {
     "DisplayName": "Prod Micro DB US 2 - Read Only",
     "Name": "ProdMicroDBUS2ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
+    "Database": null,
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
     "Password": "Password@321",
-    "ConfigDBConnectionName": "ProdSmartConfigurationUS2ReadOnly"
+    "ConfigDBConnectionName": "ProdSmartConfigurationUS2ReadOnly",
+    "IsMultiTenant": true,
+    "Environment": "PROD",
+    "Region": "US",
+    "Instance": "2"
   },
   {
     "DisplayName": "Prod Smart Configuration EU 1 - Read Only",
     "Name": "ProdSmartConfigurationEU1ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
     "Database": "GEPSmartConfiguration",
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
-    "Password": "Password@321"
+    "Password": "Password@321",
+    "ConfigDBConnectionName": null,
+    "IsMultiTenant": false,
+    "Environment": "PROD",
+    "Region": "EU",
+    "Instance": "1"
   },
   {
     "DisplayName": "Prod Micro DB EU 1 - Read Only",
     "Name": "ProdMicroDBEU1ReadOnly",
     "Server": "gpag7ej4m0.database.windows.net",
+    "Database": null,
+    "IsInputCredentialsRequired": false,
+    "IsMFA": false,
     "UserName": "RM_DBReader",
     "Password": "Password@321",
-    "ConfigDBConnectionName": "ProdSmartConfigurationEU1ReadOnly"
+    "ConfigDBConnectionName": "ProdSmartConfigurationEU1ReadOnly",
+    "IsMultiTenant": true,
+    "Environment": "PROD",
+    "Region": "EU",
+    "Instance": "1"
   }
 ]

@@ -1,4 +1,5 @@
 ﻿using SSDLMaintenanceTool.Forms;
+using SSDLMaintenanceTool.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +17,7 @@ namespace SSDLMaintenanceTool
         public Parent()
         {
             InitializeComponent();
+            new EPPlugExcelHelper();
         }
 
         #region File Corrupt Validator

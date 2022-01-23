@@ -2,14 +2,8 @@
 using SSDLMaintenanceTool.Models;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace SSDLMaintenanceTool.Implementations
 {
@@ -27,19 +21,23 @@ namespace SSDLMaintenanceTool.Implementations
             }
         }
 
-        public static ConnectionDetails GetDeepCopy(ConnectionDetails sourceConnectionDetails)
+        public ConnectionDetails GetDeepCopy(ConnectionDetails source)
         {
-            var newConnectionDetails = new ConnectionDetails();
-            newConnectionDetails.ConfigDBConnectionName = sourceConnectionDetails.ConfigDBConnectionName;
-            newConnectionDetails.Database = sourceConnectionDetails.Database;
-            newConnectionDetails.DisplayName = sourceConnectionDetails.DisplayName;
-            newConnectionDetails.IsInputCredentialsRequired = sourceConnectionDetails.IsInputCredentialsRequired;
-            newConnectionDetails.Name = sourceConnectionDetails.Name;
-            newConnectionDetails.Password = sourceConnectionDetails.Password;
-            newConnectionDetails.Server = sourceConnectionDetails.Server;
-            newConnectionDetails.UserName = sourceConnectionDetails.UserName;
-            newConnectionDetails.IsMFA = sourceConnectionDetails.IsMFA;
-            return newConnectionDetails;
+            var copy = new ConnectionDetails();
+            copy.DisplayName = source.DisplayName;
+            copy.Name = source.Name;
+            copy.Server = source.Server;
+            copy.Database = source.Database;
+            copy.IsInputCredentialsRequired = source.IsInputCredentialsRequired;
+            copy.IsMFA = source.IsMFA;
+            copy.UserName = source.UserName;
+            copy.Password = source.Password;
+            copy.ConfigDBConnectionName = source.ConfigDBConnectionName;
+            copy.IsMultiTenant = source.IsMultiTenant;
+            copy.Environment = source.Environment;
+            copy.Region = source.Region;
+            copy.Instance = source.Instance;
+            return copy;
         }
     }
 }
