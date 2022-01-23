@@ -68,5 +68,9 @@ namespace SSDLMaintenanceTool.Helpers
             }
             return result;
         }
+        public static bool HasContent(this object value)
+        {
+            return value != null && !string.IsNullOrWhiteSpace(value.ToString());
+        }
     }
 }

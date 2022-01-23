@@ -38,21 +38,22 @@
             this.loadDomainsButton = new System.Windows.Forms.Button();
             this.connectionStringsComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.exportQueryResultButton = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.exportDomainsButton = new System.Windows.Forms.Button();
             this.queryExecutionBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.savedTemplatesComboBox = new System.Windows.Forms.ComboBox();
+            this.useSavedTemplateCheckBox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.SuspendLayout();
             // 
             // executeQueryButton
             // 
-            this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.executeQueryButton.Location = new System.Drawing.Point(344, 490);
+            this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.executeQueryButton.Location = new System.Drawing.Point(392, 486);
             this.executeQueryButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.executeQueryButton.Name = "executeQueryButton";
-            this.executeQueryButton.Size = new System.Drawing.Size(144, 55);
+            this.executeQueryButton.Size = new System.Drawing.Size(133, 32);
             this.executeQueryButton.TabIndex = 0;
             this.executeQueryButton.Text = "Execute";
             this.executeQueryButton.UseVisualStyleBackColor = true;
@@ -60,30 +61,30 @@
             // 
             // queryTextBox
             // 
-            this.queryTextBox.Location = new System.Drawing.Point(17, 323);
+            this.queryTextBox.Location = new System.Drawing.Point(16, 319);
             this.queryTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.queryTextBox.Multiline = true;
             this.queryTextBox.Name = "queryTextBox";
-            this.queryTextBox.Size = new System.Drawing.Size(716, 163);
+            this.queryTextBox.Size = new System.Drawing.Size(510, 163);
             this.queryTextBox.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.label1.Location = new System.Drawing.Point(12, 61);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label1.Location = new System.Drawing.Point(12, 66);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(96, 29);
+            this.label1.Size = new System.Drawing.Size(64, 20);
             this.label1.TabIndex = 3;
             this.label1.Text = "Domain";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.label2.Location = new System.Drawing.Point(12, 277);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label2.Location = new System.Drawing.Point(12, 287);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(78, 29);
+            this.label2.Size = new System.Drawing.Size(51, 20);
             this.label2.TabIndex = 3;
             this.label2.Text = "Query";
             // 
@@ -111,22 +112,22 @@
             // domainsCheckListBox
             // 
             this.domainsCheckListBox.CheckOnClick = true;
-            this.domainsCheckListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.domainsCheckListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
             this.domainsCheckListBox.FormattingEnabled = true;
             this.domainsCheckListBox.Items.AddRange(new object[] {
             "A",
             "B",
             "C"});
-            this.domainsCheckListBox.Location = new System.Drawing.Point(169, 104);
+            this.domainsCheckListBox.Location = new System.Drawing.Point(116, 104);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
-            this.domainsCheckListBox.Size = new System.Drawing.Size(370, 166);
+            this.domainsCheckListBox.Size = new System.Drawing.Size(410, 165);
             this.domainsCheckListBox.TabIndex = 5;
             this.domainsCheckListBox.SelectedIndexChanged += new System.EventHandler(this.DomainsCheckListBox_SelectedIndexChanged);
             // 
             // loadDomainsButton
             // 
-            this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.loadDomainsButton.Location = new System.Drawing.Point(169, 61);
+            this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.loadDomainsButton.Location = new System.Drawing.Point(116, 60);
             this.loadDomainsButton.Name = "loadDomainsButton";
             this.loadDomainsButton.Size = new System.Drawing.Size(183, 32);
             this.loadDomainsButton.TabIndex = 6;
@@ -137,43 +138,32 @@
             // connectionStringsComboBox
             // 
             this.connectionStringsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.connectionStringsComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
             this.connectionStringsComboBox.FormattingEnabled = true;
             this.connectionStringsComboBox.Items.AddRange(new object[] {
             "Dev",
             "QC",
             "UAT",
             "Production"});
-            this.connectionStringsComboBox.Location = new System.Drawing.Point(169, 12);
+            this.connectionStringsComboBox.Location = new System.Drawing.Point(116, 12);
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
-            this.connectionStringsComboBox.Size = new System.Drawing.Size(370, 28);
+            this.connectionStringsComboBox.Size = new System.Drawing.Size(410, 28);
             this.connectionStringsComboBox.TabIndex = 7;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.label3.Location = new System.Drawing.Point(12, 11);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label3.Location = new System.Drawing.Point(12, 15);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(147, 29);
+            this.label3.Size = new System.Drawing.Size(98, 20);
             this.label3.TabIndex = 8;
             this.label3.Text = "Environment";
             // 
-            // exportQueryResultButton
-            // 
-            this.exportQueryResultButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.exportQueryResultButton.Location = new System.Drawing.Point(494, 490);
-            this.exportQueryResultButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.exportQueryResultButton.Name = "exportQueryResultButton";
-            this.exportQueryResultButton.Size = new System.Drawing.Size(239, 55);
-            this.exportQueryResultButton.TabIndex = 9;
-            this.exportQueryResultButton.Text = "Export to Excel";
-            this.exportQueryResultButton.UseVisualStyleBackColor = true;
-            this.exportQueryResultButton.Click += new System.EventHandler(this.exportQueryResultButton_Click);
-            // 
             // exportDomainsButton
             // 
-            this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.exportDomainsButton.Location = new System.Drawing.Point(358, 61);
+            this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.exportDomainsButton.Location = new System.Drawing.Point(345, 60);
             this.exportDomainsButton.Name = "exportDomainsButton";
             this.exportDomainsButton.Size = new System.Drawing.Size(181, 32);
             this.exportDomainsButton.TabIndex = 10;
@@ -185,13 +175,42 @@
             // 
             this.queryExecutionBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.queryExecutionBackgroundWorker_DoWork);
             // 
+            // savedTemplatesComboBox
+            // 
+            this.savedTemplatesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.savedTemplatesComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.savedTemplatesComboBox.FormattingEnabled = true;
+            this.savedTemplatesComboBox.Items.AddRange(new object[] {
+            "Dev",
+            "QC",
+            "UAT",
+            "Production"});
+            this.savedTemplatesComboBox.Location = new System.Drawing.Point(256, 284);
+            this.savedTemplatesComboBox.Name = "savedTemplatesComboBox";
+            this.savedTemplatesComboBox.Size = new System.Drawing.Size(269, 28);
+            this.savedTemplatesComboBox.TabIndex = 11;
+            this.savedTemplatesComboBox.SelectedIndexChanged += new System.EventHandler(this.savedTemplatesComboBox_SelectedIndexChanged);
+            // 
+            // useSavedTemplateCheckBox
+            // 
+            this.useSavedTemplateCheckBox.AutoSize = true;
+            this.useSavedTemplateCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.useSavedTemplateCheckBox.Location = new System.Drawing.Point(116, 286);
+            this.useSavedTemplateCheckBox.Name = "useSavedTemplateCheckBox";
+            this.useSavedTemplateCheckBox.Size = new System.Drawing.Size(134, 24);
+            this.useSavedTemplateCheckBox.TabIndex = 12;
+            this.useSavedTemplateCheckBox.Text = "Use Template";
+            this.useSavedTemplateCheckBox.UseVisualStyleBackColor = true;
+            this.useSavedTemplateCheckBox.CheckedChanged += new System.EventHandler(this.useSavedTemplateCheckBox_CheckedChanged);
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(768, 682);
+            this.ClientSize = new System.Drawing.Size(610, 682);
+            this.Controls.Add(this.useSavedTemplateCheckBox);
+            this.Controls.Add(this.savedTemplatesComboBox);
             this.Controls.Add(this.exportDomainsButton);
-            this.Controls.Add(this.exportQueryResultButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.connectionStringsComboBox);
             this.Controls.Add(this.loadDomainsButton);
@@ -223,10 +242,11 @@
         private System.Windows.Forms.Button loadDomainsButton;
         private System.Windows.Forms.ComboBox connectionStringsComboBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button exportQueryResultButton;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button exportDomainsButton;
         private System.ComponentModel.BackgroundWorker queryExecutionBackgroundWorker;
+        private System.Windows.Forms.ComboBox savedTemplatesComboBox;
+        private System.Windows.Forms.CheckBox useSavedTemplateCheckBox;
     }
 }
