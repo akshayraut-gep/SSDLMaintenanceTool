@@ -325,6 +325,8 @@ namespace SSDLMaintenanceTool.Forms
             BackupDomains = new List<Domain>();
             BackupDomains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
             BackupDomains.Insert(1, new Domain() { Name = "A", DisplayName = "Aaa" });
+            BackupDomains.Insert(2, new Domain() { Name = "B", DisplayName = "Bbb" });
+            BackupDomains.Insert(3, new Domain() { Name = "C", DisplayName = "Ccc" });
             if (DomainsTableSet != null && DomainsTableSet.Tables.Count > 0 && DomainsTableSet.Tables[0].Rows.Count > 0)
             {
                 foreach (DataRow row in DomainsTableSet.Tables[0].Rows)
@@ -347,10 +349,27 @@ namespace SSDLMaintenanceTool.Forms
 
         private void PopulateDomainsCheckListBox()
         {
+            this.domainsCheckListBox.SelectedIndexChanged -= DomainsCheckListBox_SelectedIndexChanged;
             this.domainsCheckListBox.DataSource = Domains;
             this.domainsCheckListBox.ValueMember = "Name";
-            this.domainsCheckListBox.DisplayMember = "Name";
+            this.domainsCheckListBox.DisplayMember = "DisplayName";
             this.exportDomainsButton.Enabled = true;
+            this.domainsCheckListBox.SelectedIndexChanged += DomainsCheckListBox_SelectedIndexChanged;
+
+            var checkedDomains = Domains.Where(a => a.IsChecked).ToList();
+            if (checkedDomains.Count > 0)
+            {
+                foreach (var checkedDomain in checkedDomains)
+                {
+                    for (int i = 0; i < this.domainsCheckListBox.Items.Count; i++)
+                    {
+                        if ((this.domainsCheckListBox.Items[i] as Domain).Name == checkedDomain.Name)
+                        {
+                            this.domainsCheckListBox.SetItemChecked(i, true);
+                        }
+                    }
+                }
+            }
         }
 
         public ConnectionDetails GetSelectedConnectionDetails(out string validationMessage)
@@ -373,20 +392,25 @@ namespace SSDLMaintenanceTool.Forms
 
         private void DomainsCheckListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (domainsCheckListBox.Items != null && domainsCheckListBox.Items.Count > 0)
+            if (this.domainsCheckListBox.Items != null && this.domainsCheckListBox.Items.Count > 0)
             {
-                for (int j = 0; j < domainsCheckListBox.Items.Count; j++)
+                for (int j = 0; j < this.domainsCheckListBox.Items.Count; j++)
                 {
-                    var isDomainSelected = domainsCheckListBox.GetItemChecked(j);
-                    var itemDomain = domainsCheckListBox.Items[j] as Domain;
+                    var isDomainSelected = this.domainsCheckListBox.GetItemChecked(j);
+                    var itemDomain = this.domainsCheckListBox.Items[j] as Domain;
                     if (itemDomain != null)
                     {
                         itemDomain.IsChecked = isDomainSelected;
+
+                        var matchedBackupDomain = BackupDomains.FirstOrDefault(a => a.Name == itemDomain.Name);
+                        if (matchedBackupDomain != null)
+                            matchedBackupDomain.IsChecked = isDomainSelected;
+
                         if (itemDomain.Name == "SelectAll" && IsAllDomainsSelected != isDomainSelected)
                         {
-                            for (int i = 0; i < domainsCheckListBox.Items.Count; i++)
+                            for (int i = 0; i < this.domainsCheckListBox.Items.Count; i++)
                             {
-                                domainsCheckListBox.SetItemChecked(i, isDomainSelected);
+                                this.domainsCheckListBox.SetItemChecked(i, isDomainSelected);
                             }
                             IsAllDomainsSelected = isDomainSelected;
                         }
@@ -621,7 +645,15 @@ namespace SSDLMaintenanceTool.Forms
 
         private void filterDomainsTextBox_TextChanged(object sender, EventArgs e)
         {
-            Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()));
+            if (filterDomainsTextBox.Text.HasContent())
+            {
+                Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()) && a.Name != "SelectAll");
+                Domains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
+            }
+            else
+                Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()));
+
+            PopulateDomainsCheckListBox();
         }
     }
 }
