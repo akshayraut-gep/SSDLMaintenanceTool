@@ -28,7 +28,7 @@ namespace SSDLMaintenanceTool.Forms
         public delegate bool MethodInvokerWithDataSetResult();
         public delegate void QueryCompletion();
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
-        public DataSet QueryResultDataSet { get; set; }
+        public Dictionary<string, DataSet> QueryResultDataSet { get; set; }
         public bool IsAllDomainsSelected { get; set; }
 
         public QueryExecutioner()
@@ -36,8 +36,6 @@ namespace SSDLMaintenanceTool.Forms
             InitializeComponent();
             DAO = new DAO();
             _connectionStringHandler = new ConnectionStringHandler();
-            queryExecutionBackgroundWorker.WorkerReportsProgress = true;
-            queryExecutionBackgroundWorker.WorkerSupportsCancellation = true;
             synchronizationContext = SynchronizationContext.Current; //context from UI thread
         }
 
@@ -156,23 +154,75 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutionCompleted()
         {
-            if (QueryResultDataSet == null || QueryResultDataSet.Tables.Count == 0)
+            if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
             {
                 MessageBox.Show("No records found in any of the SSDL domains");
                 return;
             }
-            VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
-            vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
-            vistaFolderBrowserDialog.UseDescriptionForTitle = true;
-            var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
-            if (saveFileDialogResult == DialogResult.OK)
+            if (canExportToExcelCheckBox.Checked)
             {
-                ExportDataSetToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+                vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
+                vistaFolderBrowserDialog.UseDescriptionForTitle = true;
+                var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
+                if (saveFileDialogResult == DialogResult.OK)
+                {
+                    ExportDataSetCollectionToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                }
+            }
+            if (displayQueryOutputCheckBox.Checked)
+                DisplayOutputInTabs(QueryResultDataSet);
+        }
+
+        private void DisplayOutputInTabs(Dictionary<string, DataSet> dataSetCollection)
+        {
+            queryOutputTabControl.TabPages.Clear();
+            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
+            foreach (var item in dataSetCollection)
+            {
+                queryOutputTabControl.TabPages.Add(item.Key, item.Key);
+                if (item.Value.Tables.Count > 0)
+                {
+                    if (multiTabOutputCheckBox.Checked)
+                    {
+                        var thisTabPage = queryOutputTabControl.TabPages[item.Key];
+                        var thisTabControl = new TabControl();
+                        thisTabPage.Controls.Add(thisTabControl);
+
+                        foreach (DataTable dataTable in item.Value.Tables)
+                        {
+                            thisTabControl.TabPages.Add(dataTable.TableName, dataTable.TableName);
+
+                            var newTabPage = thisTabControl.TabPages[dataTable.TableName];
+
+                            DataGridView dataGridView = new DataGridView();
+                            dataGridView.DataSource = item.Value.Tables[0];
+
+                            dataGridView.Height = thisTabPage.Height;
+                            dataGridView.Width = thisTabPage.Width;
+
+                            newTabPage.Controls.Add(dataGridView);
+                            newTabPage.AutoScroll = true;
+                        }
+                        thisTabPage.AutoScroll = true;
+                    }
+                    else
+                    {
+                        var thisTabPage = queryOutputTabControl.TabPages[item.Key];
+                        DataGridView dataGridView = new DataGridView();
+                        dataGridView.DataSource = item.Value.Tables[0];
+                        thisTabPage.Controls.Add(dataGridView);
+                        dataGridView.Height = thisTabPage.Height;
+                        dataGridView.Width = thisTabPage.Width;
+                        thisTabPage.AutoScroll = true;
+                    }
+                }
             }
         }
+
         private void PredefinedQueriesCompleted()
         {
-            if (QueryResultDataSet == null || QueryResultDataSet.Tables.Count == 0)
+            if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
             {
                 MessageBox.Show("No records found in any of the SSDL domains");
                 return;
@@ -193,32 +243,32 @@ namespace SSDLMaintenanceTool.Forms
             foreach (var checkedDomainItem in domainsCheckListBox.CheckedItems)
             {
                 var checkedDomain = checkedDomainItem as Domain;
-                if (checkedDomain != null)
+                if (checkedDomain != null && checkedDomain.Name != "SelectAll")
                     checkedDomains.Add(checkedDomain);
             }
             return checkedDomains;
         }
 
-        public DataSet ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
+        public Dictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
         {
-            var dataSet = new DataSet();
+            var domainDataSet = new Dictionary<string, DataSet>();
             errorMessage = "";
 
             if (connectionDetails.IsMultiTenant)
             {
-                var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                foreach (var checkedDomain in checkedDomains)
+                var parallelOptions = new ParallelOptions();
+                parallelOptions.MaxDegreeOfParallelism = 10;
+                Parallel.ForEach(checkedDomains, parallelOptions, (checkedDomain) =>
                 {
+                    var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                     copyConnection.Database = checkedDomain.DatabaseName;
                     var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
                     if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                     {
                         resultSet.Tables[0].TableName = copyConnection.Database;
-                        dataSet.Tables.Add(resultSet.Tables[0].Copy());
-                        //errorMessage = "No data found";
-                        //return null;
+                        domainDataSet.Add(copyConnection.Database, resultSet.Copy());
                     }
-                }
+                });
             }
             else
             {
@@ -228,8 +278,9 @@ namespace SSDLMaintenanceTool.Forms
                     errorMessage = "No data found";
                     return null;
                 }
+                domainDataSet.Add(connectionDetails.Database, resultSet.Copy());
             }
-            return dataSet;
+            return domainDataSet;
         }
 
         private void loadDomainsButton_Click(object sender, EventArgs e)
@@ -513,99 +564,131 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        void ExportPublishPredefinedQueries(DataSet dataSet, string usersSaveDirectoryPath, string rootDirectoryName)
+        void ExportDataSetCollectionToExcel(Dictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
         {
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
 
-            foreach (DataTable dataTable in dataSet.Tables)
+            foreach (var item in dataSetCollection)
             {
-                var resolvedFilePath = resolvedDirectoryPath + dataTable.TableName + ".xlsx";
-
+                var resolvedFilePath = resolvedDirectoryPath + item.Key + ".xlsx";
                 using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
                 {
-                    try
+                    if (pck.Workbook.Worksheets.Count > 0)
                     {
-                        if (pck.Workbook.Worksheets.Count > 0)
+                        for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
                         {
-                            for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
-                            {
-                                pck.Workbook.Worksheets.Delete(i);
-                            }
+                            pck.Workbook.Worksheets.Delete(i);
                         }
-                        ExcelWorksheet worksheet = pck.Workbook.Worksheets.Add(dataTable.TableName);
-                        worksheet.Cells["B1"].LoadFromDataTable(dataTable, true);
-
-                        var childJobQueries = dataTable.Select("ParentJobId IS NOT NULL");
-
-                        if (childJobQueries != null && childJobQueries.Length > 0)
+                    }
+                    foreach (DataTable dataTable in item.Value.Tables)
+                    {
+                        try
                         {
-                            int rowStart = worksheet.Dimension.Start.Row;
-                            int rowEnd = worksheet.Dimension.End.Row;
+                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
+                            ws.Cells["A1"].LoadFromDataTable(dataTable, true);
+                        }
+                        catch (Exception ex)
+                        {
 
-                            int columnStart = worksheet.Dimension.Start.Column;
-                            int columnEnd = worksheet.Dimension.End.Column;
+                        }
+                        pck.Save();
+                    }
+                }
+            }
+            var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
+            if (successDialogResult == DialogResult.Yes)
+                Process.Start("explorer.exe", resolvedDirectoryPath);
+        }
 
-                            var dataExcelRange = worksheet.Cells[rowStart, columnStart, rowEnd, columnEnd];
+        void ExportPublishPredefinedQueries(Dictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
+        {
+            var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
+            Directory.CreateDirectory(resolvedDirectoryPath);
 
-                            var jobIdColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
-                                              where cell.Value != null && cell.Value.ToString() == "JobId"
-                                              select cell.Start.Column;
+            foreach (var item in dataSetCollection)
+            {
+                var resolvedFilePath = resolvedDirectoryPath + item.Key + ".xlsx";
+                using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
+                {
+                    if (pck.Workbook.Worksheets.Count > 0)
+                    {
+                        for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                        {
+                            pck.Workbook.Worksheets.Delete(i);
+                        }
+                    }
+                    foreach (DataTable dataTable in item.Value.Tables)
+                    {
+                        try
+                        {
+                            ExcelWorksheet worksheet = pck.Workbook.Worksheets.Add(dataTable.TableName);
+                            worksheet.Cells["B1"].LoadFromDataTable(dataTable, true);
 
-                            var jobIdColumnNumber = jobIdColumn.FirstOrDefault();
+                            var childJobQueries = dataTable.Select("ParentJobId IS NOT NULL");
 
-                            var queryNameColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
-                                                  where cell.Value != null && cell.Value.ToString() == "QueryName"
+                            if (childJobQueries != null && childJobQueries.Length > 0)
+                            {
+                                int rowStart = worksheet.Dimension.Start.Row;
+                                int rowEnd = worksheet.Dimension.End.Row;
+
+                                int columnStart = worksheet.Dimension.Start.Column;
+                                int columnEnd = worksheet.Dimension.End.Column;
+
+                                var dataExcelRange = worksheet.Cells[rowStart, columnStart, rowEnd, columnEnd];
+
+                                var jobIdColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
+                                                  where cell.Value != null && cell.Value.ToString() == "JobId"
                                                   select cell.Start.Column;
 
-                            var queryNameColumnNumber = queryNameColumn.FirstOrDefault();
+                                var jobIdColumnNumber = jobIdColumn.FirstOrDefault();
 
-                            worksheet.Cells["A" + 1].Value = "New Query Name";
+                                var queryNameColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
+                                                      where cell.Value != null && cell.Value.ToString() == "QueryName"
+                                                      select cell.Start.Column;
 
-                            foreach (DataRow childQueryRow in childJobQueries)
-                            {
-                                var childJobId = childQueryRow["JobId"].ToString();
-                                var parentJobId = childQueryRow["ParentJobId"].ToString();
-                                var queryName = childQueryRow["QueryName"].ToString();
+                                var queryNameColumnNumber = queryNameColumn.FirstOrDefault();
 
-                                for (int parentQueryIterator = 2; parentQueryIterator <= rowEnd; parentQueryIterator++)
+                                worksheet.Cells["A" + 1].Value = "New Query Name";
+
+                                foreach (DataRow childQueryRow in childJobQueries)
                                 {
-                                    var parentJobIdCell = worksheet.Cells[parentQueryIterator, jobIdColumnNumber];
-                                    var parentQueryNameCell = worksheet.Cells[parentQueryIterator, queryNameColumnNumber];
-                                    if (parentJobIdCell != null && parentJobIdCell.Value != null && parentJobIdCell.Value.ToString() == parentJobId && parentQueryNameCell != null && parentQueryNameCell.Value != null && parentQueryNameCell.Value.ToString() == queryName)
-                                    {
-                                        for (int childQueryIterator = 2; childQueryIterator <= rowEnd; childQueryIterator++)
-                                        {
-                                            var childJobIdCell = worksheet.Cells[childQueryIterator, jobIdColumnNumber];
-                                            var childQueryNameCell = worksheet.Cells[childQueryIterator, queryNameColumnNumber];
+                                    var childJobId = childQueryRow["JobId"].ToString();
+                                    var parentJobId = childQueryRow["ParentJobId"].ToString();
+                                    var queryName = childQueryRow["QueryName"].ToString();
 
-                                            if (childJobIdCell != null && childJobIdCell.Value != null && childJobIdCell.Value.ToString() == childJobId && childQueryNameCell != null && childQueryNameCell.Value != null && childQueryNameCell.Value.ToString() == queryName)
+                                    for (int parentQueryIterator = 2; parentQueryIterator <= rowEnd; parentQueryIterator++)
+                                    {
+                                        var parentJobIdCell = worksheet.Cells[parentQueryIterator, jobIdColumnNumber];
+                                        var parentQueryNameCell = worksheet.Cells[parentQueryIterator, queryNameColumnNumber];
+                                        if (parentJobIdCell != null && parentJobIdCell.Value != null && parentJobIdCell.Value.ToString() == parentJobId && parentQueryNameCell != null && parentQueryNameCell.Value != null && parentQueryNameCell.Value.ToString() == queryName)
+                                        {
+                                            for (int childQueryIterator = 2; childQueryIterator <= rowEnd; childQueryIterator++)
                                             {
-                                                worksheet.Cells["A" + childJobIdCell.Start.Row].Formula = "=" + worksheet.Cells["A" + parentJobIdCell.Start.Row].Address;
-                                                break;
+                                                var childJobIdCell = worksheet.Cells[childQueryIterator, jobIdColumnNumber];
+                                                var childQueryNameCell = worksheet.Cells[childQueryIterator, queryNameColumnNumber];
+
+                                                if (childJobIdCell != null && childJobIdCell.Value != null && childJobIdCell.Value.ToString() == childJobId && childQueryNameCell != null && childQueryNameCell.Value != null && childQueryNameCell.Value.ToString() == queryName)
+                                                {
+                                                    worksheet.Cells["A" + childJobIdCell.Start.Row].Formula = "=" + worksheet.Cells["A" + parentJobIdCell.Start.Row].Address;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                //worksheet.Cells[2, columnEnd + 1].Value = "Akshay";
-                                //var testAdd = worksheet.Cells[2, columnEnd + 1];
-                                //worksheet.Cells[3, columnEnd + 1].Formula = "=" + worksheet.Cells[2, columnEnd + 1].Address;
+                                    //worksheet.Cells[2, columnEnd + 1].Value = "Akshay";
+                                    //var testAdd = worksheet.Cells[2, columnEnd + 1];
+                                    //worksheet.Cells[3, columnEnd + 1].Formula = "=" + worksheet.Cells[2, columnEnd + 1].Address;
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
 
-                        //var totalColumns = worksheet.Columns.Count();
-                        //for (int i = 1; i <= totalColumns - 2; i++)
-                        //{
-                        //    worksheet.Columns[i].AutoFit(4.64, 50.0);
-                        //}
-
+                        }
+                        pck.Save();
                     }
-                    catch (Exception ex)
-                    {
-
-                    }
-                    pck.Save();
                 }
             }
             var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
@@ -614,11 +697,6 @@ namespace SSDLMaintenanceTool.Forms
         }
 
         private void exportQueryResultButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void queryExecutionBackgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
 
         }
@@ -645,15 +723,31 @@ namespace SSDLMaintenanceTool.Forms
 
         private void filterDomainsTextBox_TextChanged(object sender, EventArgs e)
         {
+            var filterText = filterDomainsTextBox.Text.ToLower();
+            var filteredDomains = new List<Domain>();
             if (filterDomainsTextBox.Text.HasContent())
             {
-                Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()) && a.Name != "SelectAll");
-                Domains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
+                filteredDomains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterText) && a.Name != "SelectAll")
+                ;
+                filteredDomains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
             }
             else
-                Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()));
+                filteredDomains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterText));
 
+            Domains = filteredDomains.Select(a => new Domain()
+            {
+                Name = a.Name,
+                DatabaseName = a.DatabaseName,
+                DisplayName = a.DisplayName,
+                IsChecked = a.IsChecked
+            }).ToList(); ;
             PopulateDomainsCheckListBox();
+        }
+
+        private void QueryExecutioner_SizeChanged(object sender, EventArgs e)
+        {
+            this.queryOutputTabControl.Width = this.Width - 20;
+            this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
         }
     }
 }
