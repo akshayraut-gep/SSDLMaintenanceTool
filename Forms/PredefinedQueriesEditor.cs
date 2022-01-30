@@ -15,8 +15,8 @@ namespace SSDLMaintenanceTool.Forms
     {
         DataTable _queriesTable;
 
-        #region Consolidation queries
         string sqlQueryTemplateForJobVariable = "DECLARE @JobId INT = {JobId}, @EventId INT = {EventId};\n";
+        #region Consolidation queries
         string sqlQueryTemplateWorkflowEventSettingStep = "DECLARE @ActivityId INT = {ActivityId}, @StageId INT = {StageId};\n";
         string sqlQueryTemplateWorkflowEventSettingStepInsert = "\nINSERT INTO SSDL.WorkflowEventSetting(JobId, ActivityId, StageId, EventId, SettingName, SettingValue, CreatedBy, CreatedOn, ModifiedBy, ModifiedOn)\n"
                                         + "VALUES(@JobId, @ActivityId, @StageId, null, '{StepName}', '{StepSettingJson}', 1, GETDATE(), 1, GETDATE());\n";

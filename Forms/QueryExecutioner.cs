@@ -23,11 +23,13 @@ namespace SSDLMaintenanceTool.Forms
         public DAO DAO { get; set; }
         public ConnectionStringHandler _connectionStringHandler;
         public List<Domain> Domains { get; set; }
+        public List<Domain> BackupDomains { get; set; }
         private readonly SynchronizationContext synchronizationContext;
         public delegate bool MethodInvokerWithDataSetResult();
         public delegate void QueryCompletion();
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
         public DataSet QueryResultDataSet { get; set; }
+        public bool IsAllDomainsSelected { get; set; }
 
         public QueryExecutioner()
         {
@@ -68,6 +70,9 @@ namespace SSDLMaintenanceTool.Forms
             this.QueryCompleted = new Dictionary<string, QueryCompletion>();
             this.QueryCompleted.Add(GlobalConstants.PublishPredefinedQueriesMigration, PredefinedQueriesCompleted);
             this.QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
+
+            ConvertToDomainModel();
+            PopulateDomainsCheckListBox();
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -206,13 +211,13 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     copyConnection.Database = checkedDomain.DatabaseName;
                     var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
-                    if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
+                    if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                     {
-                        errorMessage = "No data found";
-                        return null;
+                        resultSet.Tables[0].TableName = copyConnection.Database;
+                        dataSet.Tables.Add(resultSet.Tables[0].Copy());
+                        //errorMessage = "No data found";
+                        //return null;
                     }
-                    resultSet.Tables[0].TableName = copyConnection.Database;
-                    dataSet.Tables.Add(resultSet.Tables[0].Copy());
                 }
             }
             else
@@ -317,15 +322,27 @@ namespace SSDLMaintenanceTool.Forms
 
         private void ConvertToDomainModel()
         {
-            Domains = new List<Domain>();
-            foreach (DataRow row in DomainsTableSet.Tables[0].Rows)
+            BackupDomains = new List<Domain>();
+            BackupDomains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
+            BackupDomains.Insert(1, new Domain() { Name = "A", DisplayName = "Aaa" });
+            if (DomainsTableSet != null && DomainsTableSet.Tables.Count > 0 && DomainsTableSet.Tables[0].Rows.Count > 0)
             {
-                Domain domain = new Domain();
-                domain.Name = row["Name"].ToString();
-                domain.DisplayName = row["Name"].ToString();
-                domain.DatabaseName = row["Name"].ToString();
-                Domains.Add(domain);
+                foreach (DataRow row in DomainsTableSet.Tables[0].Rows)
+                {
+                    Domain domain = new Domain();
+                    domain.Name = row["Name"].ToString();
+                    domain.DisplayName = row["Name"].ToString();
+                    domain.DatabaseName = row["Name"].ToString();
+                    BackupDomains.Add(domain);
+                }
             }
+            Domains = BackupDomains.Select(a => new Domain()
+            {
+                Name = a.Name,
+                DatabaseName = a.DatabaseName,
+                DisplayName = a.DisplayName,
+                IsChecked = a.IsChecked
+            }).ToList();
         }
 
         private void PopulateDomainsCheckListBox()
@@ -333,8 +350,6 @@ namespace SSDLMaintenanceTool.Forms
             this.domainsCheckListBox.DataSource = Domains;
             this.domainsCheckListBox.ValueMember = "Name";
             this.domainsCheckListBox.DisplayMember = "Name";
-            this.domainsCheckListBox.SelectedIndex = -1;
-            this.domainsCheckListBox.Text = "Select domain";
             this.exportDomainsButton.Enabled = true;
         }
 
@@ -358,7 +373,26 @@ namespace SSDLMaintenanceTool.Forms
 
         private void DomainsCheckListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            if (domainsCheckListBox.Items != null && domainsCheckListBox.Items.Count > 0)
+            {
+                for (int j = 0; j < domainsCheckListBox.Items.Count; j++)
+                {
+                    var isDomainSelected = domainsCheckListBox.GetItemChecked(j);
+                    var itemDomain = domainsCheckListBox.Items[j] as Domain;
+                    if (itemDomain != null)
+                    {
+                        itemDomain.IsChecked = isDomainSelected;
+                        if (itemDomain.Name == "SelectAll" && IsAllDomainsSelected != isDomainSelected)
+                        {
+                            for (int i = 0; i < domainsCheckListBox.Items.Count; i++)
+                            {
+                                domainsCheckListBox.SetItemChecked(i, isDomainSelected);
+                            }
+                            IsAllDomainsSelected = isDomainSelected;
+                        }
+                    }
+                }
+            }
         }
 
         private void connectionStringsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -583,6 +617,11 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 queryTextBox.Text = File.ReadAllText(selectedQueryTemplate.QueryTemplateFilePath);
             }
+        }
+
+        private void filterDomainsTextBox_TextChanged(object sender, EventArgs e)
+        {
+            Domains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterDomainsTextBox.Text.ToLower()));
         }
     }
 }
