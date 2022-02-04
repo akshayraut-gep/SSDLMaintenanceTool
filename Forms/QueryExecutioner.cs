@@ -81,6 +81,7 @@ namespace SSDLMaintenanceTool.Forms
             this.progressBarToolStrip.Maximum = 100;
             this.successDomainsToolStrip.Text = "";
             this.failureDomainsToolStrip.Text = "";
+            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -253,7 +254,6 @@ namespace SSDLMaintenanceTool.Forms
 
         private void DisplayOutputInTabs(ConcurrentDictionary<string, DataSet> dataSetCollection)
         {
-            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
             foreach (var item in dataSetCollection)
             {
                 TabPage tabPage = new TabPage(item.Key);
@@ -278,6 +278,9 @@ namespace SSDLMaintenanceTool.Forms
 
                             dataGridView.Height = tabPage.Height;
                             dataGridView.Width = tabPage.Width;
+
+                            dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
+                            dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
 
                             innerTabPage.Controls.Add(dataGridView);
                             innerTabPage.AutoScroll = true;
@@ -328,6 +331,9 @@ namespace SSDLMaintenanceTool.Forms
 
                         dataGridView.Height = thisTabPage.Height;
                         dataGridView.Width = thisTabPage.Width;
+
+                        dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
+                        dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
 
                         newTabPage.Controls.Add(dataGridView);
                         newTabPage.AutoScroll = true;
@@ -454,7 +460,6 @@ namespace SSDLMaintenanceTool.Forms
                             //Send the update to our UI thread
                             synchronizationContext.Post(new SendOrPostCallback(o =>
                             {
-                                queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
                                 QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
                                 SuccessDomainsCount++;
                                 var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
