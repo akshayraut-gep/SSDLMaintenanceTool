@@ -47,13 +47,14 @@
             this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
             this.statusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.progressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
+            this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.bottomStatusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // executeQueryButton
             // 
             this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.executeQueryButton.Location = new System.Drawing.Point(465, 523);
+            this.executeQueryButton.Location = new System.Drawing.Point(500, 523);
             this.executeQueryButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.executeQueryButton.Name = "executeQueryButton";
             this.executeQueryButton.Size = new System.Drawing.Size(133, 32);
@@ -68,7 +69,7 @@
             this.queryTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.queryTextBox.Multiline = true;
             this.queryTextBox.Name = "queryTextBox";
-            this.queryTextBox.Size = new System.Drawing.Size(582, 163);
+            this.queryTextBox.Size = new System.Drawing.Size(617, 163);
             this.queryTextBox.TabIndex = 1;
             // 
             // label1
@@ -111,7 +112,7 @@
             "C"});
             this.domainsCheckListBox.Location = new System.Drawing.Point(116, 141);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
-            this.domainsCheckListBox.Size = new System.Drawing.Size(482, 165);
+            this.domainsCheckListBox.Size = new System.Drawing.Size(517, 165);
             this.domainsCheckListBox.TabIndex = 5;
             this.domainsCheckListBox.SelectedIndexChanged += new System.EventHandler(this.DomainsCheckListBox_SelectedIndexChanged);
             // 
@@ -138,7 +139,7 @@
             "Production"});
             this.connectionStringsComboBox.Location = new System.Drawing.Point(116, 12);
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
-            this.connectionStringsComboBox.Size = new System.Drawing.Size(482, 28);
+            this.connectionStringsComboBox.Size = new System.Drawing.Size(517, 28);
             this.connectionStringsComboBox.TabIndex = 7;
             // 
             // label3
@@ -154,7 +155,7 @@
             // exportDomainsButton
             // 
             this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.exportDomainsButton.Location = new System.Drawing.Point(417, 60);
+            this.exportDomainsButton.Location = new System.Drawing.Point(452, 60);
             this.exportDomainsButton.Name = "exportDomainsButton";
             this.exportDomainsButton.Size = new System.Drawing.Size(181, 32);
             this.exportDomainsButton.TabIndex = 10;
@@ -174,7 +175,7 @@
             "Production"});
             this.savedTemplatesComboBox.Location = new System.Drawing.Point(256, 321);
             this.savedTemplatesComboBox.Name = "savedTemplatesComboBox";
-            this.savedTemplatesComboBox.Size = new System.Drawing.Size(342, 28);
+            this.savedTemplatesComboBox.Size = new System.Drawing.Size(377, 28);
             this.savedTemplatesComboBox.TabIndex = 11;
             this.savedTemplatesComboBox.SelectedIndexChanged += new System.EventHandler(this.savedTemplatesComboBox_SelectedIndexChanged);
             // 
@@ -194,14 +195,14 @@
             // 
             this.filterDomainsTextBox.Location = new System.Drawing.Point(117, 109);
             this.filterDomainsTextBox.Name = "filterDomainsTextBox";
-            this.filterDomainsTextBox.Size = new System.Drawing.Size(481, 26);
+            this.filterDomainsTextBox.Size = new System.Drawing.Size(516, 26);
             this.filterDomainsTextBox.TabIndex = 13;
             this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
             // 
             // canExportToExcelCheckBox
             // 
             this.canExportToExcelCheckBox.AutoSize = true;
-            this.canExportToExcelCheckBox.Location = new System.Drawing.Point(157, 528);
+            this.canExportToExcelCheckBox.Location = new System.Drawing.Point(108, 528);
             this.canExportToExcelCheckBox.Name = "canExportToExcelCheckBox";
             this.canExportToExcelCheckBox.Size = new System.Drawing.Size(141, 24);
             this.canExportToExcelCheckBox.TabIndex = 14;
@@ -211,7 +212,7 @@
             // displayQueryOutputCheckBox
             // 
             this.displayQueryOutputCheckBox.AutoSize = true;
-            this.displayQueryOutputCheckBox.Location = new System.Drawing.Point(65, 528);
+            this.displayQueryOutputCheckBox.Location = new System.Drawing.Point(16, 528);
             this.displayQueryOutputCheckBox.Name = "displayQueryOutputCheckBox";
             this.displayQueryOutputCheckBox.Size = new System.Drawing.Size(86, 24);
             this.displayQueryOutputCheckBox.TabIndex = 15;
@@ -221,7 +222,7 @@
             // multiTabOutputCheckBox
             // 
             this.multiTabOutputCheckBox.AutoSize = true;
-            this.multiTabOutputCheckBox.Location = new System.Drawing.Point(304, 528);
+            this.multiTabOutputCheckBox.Location = new System.Drawing.Point(255, 528);
             this.multiTabOutputCheckBox.Name = "multiTabOutputCheckBox";
             this.multiTabOutputCheckBox.Size = new System.Drawing.Size(155, 24);
             this.multiTabOutputCheckBox.TabIndex = 16;
@@ -236,7 +237,7 @@
             this.statusLabelToolStrip});
             this.bottomStatusStrip.Location = new System.Drawing.Point(0, 650);
             this.bottomStatusStrip.Name = "bottomStatusStrip";
-            this.bottomStatusStrip.Size = new System.Drawing.Size(610, 32);
+            this.bottomStatusStrip.Size = new System.Drawing.Size(643, 32);
             this.bottomStatusStrip.TabIndex = 17;
             this.bottomStatusStrip.Text = "statusStrip1";
             // 
@@ -251,11 +252,22 @@
             this.progressBarToolStrip.Name = "progressBarToolStrip";
             this.progressBarToolStrip.Size = new System.Drawing.Size(200, 24);
             // 
+            // asyncCheckBox
+            // 
+            this.asyncCheckBox.AutoSize = true;
+            this.asyncCheckBox.Location = new System.Drawing.Point(416, 528);
+            this.asyncCheckBox.Name = "asyncCheckBox";
+            this.asyncCheckBox.Size = new System.Drawing.Size(78, 24);
+            this.asyncCheckBox.TabIndex = 18;
+            this.asyncCheckBox.Text = "Async";
+            this.asyncCheckBox.UseVisualStyleBackColor = true;
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(610, 682);
+            this.ClientSize = new System.Drawing.Size(643, 682);
+            this.Controls.Add(this.asyncCheckBox);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.multiTabOutputCheckBox);
             this.Controls.Add(this.displayQueryOutputCheckBox);
@@ -306,5 +318,6 @@
         private System.Windows.Forms.StatusStrip bottomStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusLabelToolStrip;
         private System.Windows.Forms.ToolStripProgressBar progressBarToolStrip;
+        private System.Windows.Forms.CheckBox asyncCheckBox;
     }
 }

@@ -5,6 +5,7 @@ using SSDLMaintenanceTool.Helpers;
 using SSDLMaintenanceTool.Implementations;
 using SSDLMaintenanceTool.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -28,7 +29,7 @@ namespace SSDLMaintenanceTool.Forms
         public delegate bool MethodInvokerWithDataSetResult();
         public delegate void QueryCompletion();
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
-        public Dictionary<string, DataSet> QueryResultDataSet { get; set; }
+        public ConcurrentDictionary<string, DataSet> QueryResultDataSet { get; set; }
         public bool IsAllDomainsSelected { get; set; }
 
         public QueryExecutioner()
@@ -90,22 +91,77 @@ namespace SSDLMaintenanceTool.Forms
                 return;
             }
 
-            if (domainsCheckListBox.CheckedItems.Count == 0)
+            List<Domain> domains = new List<Domain>();
+
+            if (connectionDetails.IsMultiTenant)
             {
-                MessageBox.Show("Select at least one SSDL domain");
-                return;
+                if (domainsCheckListBox.CheckedItems.Count == 0)
+                {
+                    MessageBox.Show("Select at least one SSDL domain");
+                    return;
+                }
+                domains = ConvertToDomainDatabases();
             }
-            var checkDomains = ConvertToDomainDatabases();
-
             EnableUIForQueryExecution(false);
+            queryOutputTabControl.TabPages.Clear();
 
+            if (asyncCheckBox.Checked)
+            {
+                StartQueryExecutionAsync(connectionDetails, domains);
+            }
+            else
+            {
+                StartQueryExecution(connectionDetails, domains);
+            }
+        }
+
+        private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains)
+        {
             Task.Run(() =>
             {
                 try
                 {
-                    QueryResultDataSet = ExecuteQuery(connectionDetails, checkDomains, out var errorMessage);
+                    //QueryResultDataSet = ExecuteQuery(connectionDetails, checkDomains, out var errorMessage);
+                    ExecuteQueryAsync(connectionDetails, domains, out var errorMessage); ;
 
-                    //Send the update to our UI thread  
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        if (errorMessage.HasContent())
+                        {
+                            MessageBox.Show(errorMessage);
+                            return;
+                        }
+                    }), null);
+                }
+                catch (Exception ex)
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        QueryFailed(ex);
+                    }), null);
+                }
+                finally
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        EnableUIForQueryExecution();
+                    }), null);
+                }
+            });
+        }
+
+        private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    QueryResultDataSet = ExecuteQuery(connectionDetails, domains, out var errorMessage);
+
+                    //Send the update to our UI thread
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
                         EnableUIForQueryExecution();
@@ -114,25 +170,12 @@ namespace SSDLMaintenanceTool.Forms
                             MessageBox.Show(errorMessage);
                             return;
                         }
-                        if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
-                        {
-                            var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
-                            if (selectedQueryTemplate == null)
-                            {
-                                MessageBox.Show("Template is not available");
-                                return;
-                            }
-                            this.QueryCompleted[selectedQueryTemplate.Value]();
-                        }
-                        else
-                        {
-                            QueryExecutionCompleted();
-                        }
+                        QueryExecutionCompleted();
                     }), null);
                 }
                 catch (Exception ex)
                 {
-                    //Send the update to our UI thread  
+                    //Send the update to our UI thread
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
                         QueryFailed(ex);
@@ -140,7 +183,7 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 finally
                 {
-                    //Send the update to our UI thread  
+                    //Send the update to our UI thread
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
                         EnableUIForQueryExecution();
@@ -156,29 +199,61 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutionCompleted()
         {
-            if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
+            if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
             {
-                MessageBox.Show("No records found in any of the SSDL domains");
-                return;
-            }
-            if (canExportToExcelCheckBox.Checked)
-            {
-                VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
-                vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
-                vistaFolderBrowserDialog.UseDescriptionForTitle = true;
-                var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
-                if (saveFileDialogResult == DialogResult.OK)
+                var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
+                if (selectedQueryTemplate == null)
                 {
-                    ExportDataSetCollectionToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                    MessageBox.Show("Template is not available");
+                    return;
                 }
+                this.QueryCompleted[selectedQueryTemplate.Value]();
             }
-            if (displayQueryOutputCheckBox.Checked)
-                DisplayOutputInTabs(QueryResultDataSet);
+            else
+            {
+                if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
+                {
+                    MessageBox.Show("No records found in any of the SSDL domains");
+                    return;
+                }
+                if (canExportToExcelCheckBox.Checked)
+                {
+                    VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+                    vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
+                    vistaFolderBrowserDialog.UseDescriptionForTitle = true;
+                    var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
+                    if (saveFileDialogResult == DialogResult.OK)
+                    {
+                        ExportDataSetCollectionToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                    }
+                }
+                if (displayQueryOutputCheckBox.Checked)
+                    DisplayOutputInTabs(QueryResultDataSet);
+            }
         }
 
-        private void DisplayOutputInTabs(Dictionary<string, DataSet> dataSetCollection)
+        private void QueryExecutionCompletedAsync(string databaseName, DataSet dataSet)
         {
-            queryOutputTabControl.TabPages.Clear();
+            if (dataSet != null && dataSet.Tables.Count > 0)
+            {
+                if (canExportToExcelCheckBox.Checked)
+                {
+                    VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+                    vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
+                    vistaFolderBrowserDialog.UseDescriptionForTitle = true;
+                    var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
+                    if (saveFileDialogResult == DialogResult.OK)
+                    {
+                        ExportDataSetToExcel(dataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                    }
+                }
+                if (displayQueryOutputCheckBox.Checked)
+                    DisplayOutputInTabsAsync(databaseName, dataSet);
+            }
+        }
+
+        private void DisplayOutputInTabs(ConcurrentDictionary<string, DataSet> dataSetCollection)
+        {
             queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
             foreach (var item in dataSetCollection)
             {
@@ -222,6 +297,48 @@ namespace SSDLMaintenanceTool.Forms
             }
         }
 
+        private void DisplayOutputInTabsAsync(string databaseName, DataSet dataSetWithKey)
+        {
+            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
+            queryOutputTabControl.TabPages.Add(databaseName, databaseName);
+            if (dataSetWithKey.Tables.Count > 0)
+            {
+                if (multiTabOutputCheckBox.Checked)
+                {
+                    var thisTabPage = queryOutputTabControl.TabPages[databaseName];
+                    var thisTabControl = new TabControl();
+                    thisTabPage.Controls.Add(thisTabControl);
+
+                    foreach (DataTable dataTable in dataSetWithKey.Tables)
+                    {
+                        thisTabControl.TabPages.Add(dataTable.TableName, dataTable.TableName);
+
+                        var newTabPage = thisTabControl.TabPages[dataTable.TableName];
+
+                        DataGridView dataGridView = new DataGridView();
+                        dataGridView.DataSource = dataSetWithKey.Tables[0];
+
+                        dataGridView.Height = thisTabPage.Height;
+                        dataGridView.Width = thisTabPage.Width;
+
+                        newTabPage.Controls.Add(dataGridView);
+                        newTabPage.AutoScroll = true;
+                    }
+                    thisTabPage.AutoScroll = true;
+                }
+                else
+                {
+                    var thisTabPage = queryOutputTabControl.TabPages[databaseName];
+                    DataGridView dataGridView = new DataGridView();
+                    dataGridView.DataSource = dataSetWithKey.Tables[0];
+                    thisTabPage.Controls.Add(dataGridView);
+                    dataGridView.Height = thisTabPage.Height;
+                    dataGridView.Width = thisTabPage.Width;
+                    thisTabPage.AutoScroll = true;
+                }
+            }
+        }
+
         private void PredefinedQueriesCompleted()
         {
             if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
@@ -251,9 +368,9 @@ namespace SSDLMaintenanceTool.Forms
             return checkedDomains;
         }
 
-        public Dictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
+        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
         {
-            var domainDataSet = new Dictionary<string, DataSet>();
+            var domainDataSet = new ConcurrentDictionary<string, DataSet>();
             errorMessage = "";
 
             if (connectionDetails.IsMultiTenant)
@@ -268,7 +385,7 @@ namespace SSDLMaintenanceTool.Forms
                     if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                     {
                         resultSet.Tables[0].TableName = copyConnection.Database;
-                        domainDataSet.Add(copyConnection.Database, resultSet.Copy());
+                        domainDataSet.TryAdd(copyConnection.Database, resultSet.Copy());
                     }
                 });
             }
@@ -280,9 +397,50 @@ namespace SSDLMaintenanceTool.Forms
                     errorMessage = "No data found";
                     return null;
                 }
-                domainDataSet.Add(connectionDetails.Database, resultSet.Copy());
+                domainDataSet.TryAdd(connectionDetails.Database, resultSet.Copy());
             }
             return domainDataSet;
+        }
+
+        public void ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
+        {
+            errorMessage = "";
+
+            if (connectionDetails.IsMultiTenant)
+            {
+                var parallelOptions = new ParallelOptions();
+                parallelOptions.MaxDegreeOfParallelism = 2;
+                Parallel.ForEach(checkedDomains, parallelOptions, (checkedDomain) =>
+                {
+                    var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
+                    copyConnection.Database = checkedDomain.DatabaseName;
+                    var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
+                    if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
+                    {
+                        resultSet.Tables[0].TableName = copyConnection.Database;
+
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
+                        }), null);
+                    }
+                });
+            }
+            else
+            {
+                var resultSet = DAO.GetData(queryTextBox.Text, connectionDetails);
+                if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
+                {
+                    errorMessage = "No data found";
+                    return;
+                }
+                //Send the update to our UI thread
+                synchronizationContext.Post(new SendOrPostCallback(o =>
+                {
+                    QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy());
+                }), null);
+            }
         }
 
         private void loadDomainsButton_Click(object sender, EventArgs e)
@@ -563,7 +721,7 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        void ExportDataSetCollectionToExcel(Dictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
+        void ExportDataSetCollectionToExcel(ConcurrentDictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
         {
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
@@ -600,7 +758,7 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        void ExportPublishPredefinedQueries(Dictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
+        void ExportPublishPredefinedQueries(ConcurrentDictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
         {
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
