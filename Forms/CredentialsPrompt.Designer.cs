@@ -30,8 +30,8 @@
         {
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.userNameTxBx = new System.Windows.Forms.TextBox();
-            this.passwordTxBx = new System.Windows.Forms.TextBox();
+            this.userNameTextBox = new System.Windows.Forms.TextBox();
+            this.passwordTextBox = new System.Windows.Forms.TextBox();
             this.submitButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -55,21 +55,23 @@
             this.label2.TabIndex = 1;
             this.label2.Text = "Password";
             // 
-            // userNameTxBx
+            // userNameTextBox
             // 
-            this.userNameTxBx.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.userNameTxBx.Location = new System.Drawing.Point(152, 59);
-            this.userNameTxBx.Name = "userNameTxBx";
-            this.userNameTxBx.Size = new System.Drawing.Size(227, 30);
-            this.userNameTxBx.TabIndex = 2;
+            this.userNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.userNameTextBox.Location = new System.Drawing.Point(152, 59);
+            this.userNameTextBox.Name = "userNameTextBox";
+            this.userNameTextBox.Size = new System.Drawing.Size(227, 30);
+            this.userNameTextBox.TabIndex = 2;
+            this.userNameTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.userNameTextBox_KeyPress);
             // 
-            // passwordTxBx
+            // passwordTextBox
             // 
-            this.passwordTxBx.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.passwordTxBx.Location = new System.Drawing.Point(152, 170);
-            this.passwordTxBx.Name = "passwordTxBx";
-            this.passwordTxBx.Size = new System.Drawing.Size(227, 30);
-            this.passwordTxBx.TabIndex = 3;
+            this.passwordTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.passwordTextBox.Location = new System.Drawing.Point(152, 170);
+            this.passwordTextBox.Name = "passwordTextBox";
+            this.passwordTextBox.Size = new System.Drawing.Size(227, 30);
+            this.passwordTextBox.TabIndex = 3;
+            this.passwordTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.passwordTextBox_KeyPress);
             // 
             // submitButton
             // 
@@ -88,8 +90,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(430, 359);
             this.Controls.Add(this.submitButton);
-            this.Controls.Add(this.passwordTxBx);
-            this.Controls.Add(this.userNameTxBx);
+            this.Controls.Add(this.passwordTextBox);
+            this.Controls.Add(this.userNameTextBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "CredentialsPrompt";
@@ -103,8 +105,8 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox userNameTxBx;
-        private System.Windows.Forms.TextBox passwordTxBx;
+        private System.Windows.Forms.TextBox userNameTextBox;
+        private System.Windows.Forms.TextBox passwordTextBox;
         private System.Windows.Forms.Button submitButton;
     }
 }

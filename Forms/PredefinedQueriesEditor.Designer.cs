@@ -100,6 +100,7 @@
             this.tbQueries.Name = "tbQueries";
             this.tbQueries.Size = new System.Drawing.Size(759, 146);
             this.tbQueries.TabIndex = 3;
+            this.tbQueries.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbQueries_KeyPress);
             // 
             // btnGenerateSQL
             // 
@@ -141,6 +142,7 @@
             this.tbJobID.Name = "tbJobID";
             this.tbJobID.Size = new System.Drawing.Size(229, 35);
             this.tbJobID.TabIndex = 5;
+            this.tbJobID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbJobID_KeyPress);
             // 
             // label4
             // 
@@ -160,6 +162,7 @@
             this.tbStepName.Name = "tbStepName";
             this.tbStepName.Size = new System.Drawing.Size(229, 35);
             this.tbStepName.TabIndex = 5;
+            this.tbStepName.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbStepName_KeyPress);
             // 
             // cbExistingStep
             // 

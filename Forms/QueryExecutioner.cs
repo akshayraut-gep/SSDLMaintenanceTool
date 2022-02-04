@@ -31,6 +31,7 @@ namespace SSDLMaintenanceTool.Forms
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
         public ConcurrentDictionary<string, DataSet> QueryResultDataSet { get; set; }
         public bool IsAllDomainsSelected { get; set; }
+        public int DomainsExecuteCount { get; set; }
 
         public QueryExecutioner()
         {
@@ -74,6 +75,8 @@ namespace SSDLMaintenanceTool.Forms
             PopulateDomainsCheckListBox();
             this.queryOutputTabControl.Width = this.Width - 20;
             this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
+            this.progressBarToolStrip.Minimum = 0;
+            this.progressBarToolStrip.Maximum = 100;
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -104,101 +107,89 @@ namespace SSDLMaintenanceTool.Forms
             }
             EnableUIForQueryExecution(false);
             queryOutputTabControl.TabPages.Clear();
+            progressBarToolStrip.Value = 0;
+            statusLabelToolStrip.Text = "Running";
+            DomainsExecuteCount = 0;
 
-            if (asyncCheckBox.Checked)
+            StartExecution(connectionDetails, domains, asyncCheckBox.Checked);
+        }
+
+        private void StartExecution(ConnectionDetails connectionDetails, List<Domain> domains, bool isAsync)
+        {
+            Task.Run(() =>
             {
-                StartQueryExecutionAsync(connectionDetails, domains);
-            }
-            else
-            {
-                StartQueryExecution(connectionDetails, domains);
-            }
+                try
+                {
+                    if (isAsync)
+                    {
+                        StartQueryExecutionAsync(connectionDetails, domains);
+                    }
+                    else
+                    {
+                        StartQueryExecution(connectionDetails, domains);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        QueryFailed(ex);
+                    }), null);
+                }
+                finally
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        EnableUIForQueryExecution();
+                    }), null);
+                }
+            });
         }
 
         private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains)
         {
-            Task.Run(() =>
-            {
-                try
-                {
-                    //QueryResultDataSet = ExecuteQuery(connectionDetails, checkDomains, out var errorMessage);
-                    ExecuteQueryAsync(connectionDetails, domains, out var errorMessage); ;
+            //QueryResultDataSet = ExecuteQuery(connectionDetails, checkDomains, out var errorMessage);
+            ExecuteQueryAsync(connectionDetails, domains, out var errorMessage); ;
 
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        if (errorMessage.HasContent())
-                        {
-                            MessageBox.Show(errorMessage);
-                            return;
-                        }
-                    }), null);
-                }
-                catch (Exception ex)
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                if (errorMessage.HasContent())
                 {
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        QueryFailed(ex);
-                    }), null);
+                    MessageBox.Show(errorMessage);
+                    return;
                 }
-                finally
-                {
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        EnableUIForQueryExecution();
-                    }), null);
-                }
-            });
+            }), null);
         }
 
         private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains)
         {
-            Task.Run(() =>
-            {
-                try
-                {
-                    QueryResultDataSet = ExecuteQuery(connectionDetails, domains, out var errorMessage);
+            QueryResultDataSet = ExecuteQuery(connectionDetails, domains, out var errorMessage);
 
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        EnableUIForQueryExecution();
-                        if (errorMessage.HasContent())
-                        {
-                            MessageBox.Show(errorMessage);
-                            return;
-                        }
-                        QueryExecutionCompleted();
-                    }), null);
-                }
-                catch (Exception ex)
+            //Send the update to our UI thread
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                EnableUIForQueryExecution();
+                if (errorMessage.HasContent())
                 {
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        QueryFailed(ex);
-                    }), null);
+                    MessageBox.Show(errorMessage);
+                    return;
                 }
-                finally
-                {
-                    //Send the update to our UI thread
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        EnableUIForQueryExecution();
-                    }), null);
-                }
-            });
+                QueryExecutionCompleted();
+            }), null);
         }
 
         private void QueryFailed(Exception ex)
         {
+            statusLabelToolStrip.Text = "Failed";
             MessageBox.Show(ex.Message);
         }
 
         private void QueryExecutionCompleted()
         {
+            statusLabelToolStrip.Text = "Completed";
             if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
             {
                 var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
@@ -368,7 +359,7 @@ namespace SSDLMaintenanceTool.Forms
             return checkedDomains;
         }
 
-        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
+        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> domains, out string errorMessage)
         {
             var domainDataSet = new ConcurrentDictionary<string, DataSet>();
             errorMessage = "";
@@ -377,15 +368,25 @@ namespace SSDLMaintenanceTool.Forms
             {
                 var parallelOptions = new ParallelOptions();
                 parallelOptions.MaxDegreeOfParallelism = 10;
-                Parallel.ForEach(checkedDomains, parallelOptions, (checkedDomain) =>
+                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
                 {
+                    var domain = domains[domainIndex];
                     var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                    copyConnection.Database = checkedDomain.DatabaseName;
+                    copyConnection.Database = domain.DatabaseName;
                     var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
                     if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                     {
                         resultSet.Tables[0].TableName = copyConnection.Database;
                         domainDataSet.TryAdd(copyConnection.Database, resultSet.Copy());
+
+                        DomainsExecuteCount++;
+                        var percentage = ((double)DomainsExecuteCount / (double)domains.Count) * 100;
+
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            progressBarToolStrip.Value = (int)percentage;
+                        }), null);
                     }
                 });
             }
@@ -402,30 +403,47 @@ namespace SSDLMaintenanceTool.Forms
             return domainDataSet;
         }
 
-        public void ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> checkedDomains, out string errorMessage)
+        public void ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, out string errorMessage)
         {
             errorMessage = "";
 
             if (connectionDetails.IsMultiTenant)
             {
                 var parallelOptions = new ParallelOptions();
-                parallelOptions.MaxDegreeOfParallelism = 2;
-                Parallel.ForEach(checkedDomains, parallelOptions, (checkedDomain) =>
+                parallelOptions.MaxDegreeOfParallelism = 1;
+                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
                 {
-                    var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                    copyConnection.Database = checkedDomain.DatabaseName;
-                    var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
-                    if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
+                    try
                     {
-                        resultSet.Tables[0].TableName = copyConnection.Database;
-
-                        //Send the update to our UI thread
-                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        var domain = domains[domainIndex];
+                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
+                        copyConnection.Database = domain.DatabaseName;
+                        var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
+                        if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
-                            QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
-                        }), null);
+                            resultSet.Tables[0].TableName = copyConnection.Database;
+                            DomainsExecuteCount++;
+                            var percentage = ((double)DomainsExecuteCount / (double)domains.Count) * 100;
+
+                            //Send the update to our UI thread
+                            synchronizationContext.Post(new SendOrPostCallback(o =>
+                            {
+                                QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
+                                progressBarToolStrip.Value = (int)percentage;
+                            }), null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                 });
+
+                //Send the update to our UI thread
+                synchronizationContext.Post(new SendOrPostCallback(o =>
+                {
+                    statusLabelToolStrip.Text = "Completed";
+                }), null);
             }
             else
             {
@@ -905,6 +923,18 @@ namespace SSDLMaintenanceTool.Forms
         {
             this.queryOutputTabControl.Width = this.Width - 20;
             this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
+        }
+
+        private void queryTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+                e.Handled = true;
+        }
+
+        private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+                e.Handled = true;
         }
     }
 }

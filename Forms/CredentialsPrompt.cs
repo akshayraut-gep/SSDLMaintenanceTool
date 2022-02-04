@@ -22,9 +22,21 @@ namespace SSDLMaintenanceTool.Forms
 
         private void submitButton_Click(object sender, EventArgs e)
         {
-            this.UserName = this.userNameTxBx.Text;
-            this.Password = this.passwordTxBx.Text;
+            this.UserName = this.userNameTextBox.Text;
+            this.Password = this.passwordTextBox.Text;
             this.Close();
+        }
+
+        private void userNameTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+                e.Handled = true;
+        }
+
+        private void passwordTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+                e.Handled = true;
         }
     }
 }

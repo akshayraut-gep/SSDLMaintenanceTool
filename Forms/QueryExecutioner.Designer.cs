@@ -71,6 +71,7 @@
             this.queryTextBox.Name = "queryTextBox";
             this.queryTextBox.Size = new System.Drawing.Size(617, 163);
             this.queryTextBox.TabIndex = 1;
+            this.queryTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.queryTextBox_KeyPress);
             // 
             // label1
             // 
@@ -198,6 +199,7 @@
             this.filterDomainsTextBox.Size = new System.Drawing.Size(516, 26);
             this.filterDomainsTextBox.TabIndex = 13;
             this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
+            this.filterDomainsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filterDomainsTextBox_KeyPress);
             // 
             // canExportToExcelCheckBox
             // 

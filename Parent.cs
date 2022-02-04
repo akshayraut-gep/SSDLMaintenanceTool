@@ -24,7 +24,7 @@ namespace SSDLMaintenanceTool
         private void OpenFileCorruptValidator()
         {
             var fileCorruptValidator = new FileCorruptValidator();
-            fileCorruptValidator.ShowDialog(this);
+            fileCorruptValidator.Show();
         }
 
         private void fileCorruptValidator_Click(object sender, EventArgs e)
@@ -42,7 +42,7 @@ namespace SSDLMaintenanceTool
         private void OpenPredefinedQueryEditor()
         {
             var predefinedQueriesEditor = new PredefinedQueriesEditor();
-            predefinedQueriesEditor.ShowDialog(this);
+            predefinedQueriesEditor.Show();
         }
 
         private void openPredefinedQueryEditorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -60,7 +60,7 @@ namespace SSDLMaintenanceTool
         private void OpenQueryExecutioner()
         {
             var queryExecutionerForm = new QueryExecutioner();
-            queryExecutionerForm.ShowDialog(this);
+            queryExecutionerForm.Show();
         }
 
         private void queryExecutorButton_Click(object sender, EventArgs e)
