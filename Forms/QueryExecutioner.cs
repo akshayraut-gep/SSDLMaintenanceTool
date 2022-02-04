@@ -52,7 +52,7 @@ namespace SSDLMaintenanceTool.Forms
             this.connectionStringsComboBox.Text = "Select a connection";
             this.connectionStringsComboBox.SelectedIndexChanged += connectionStringsComboBox_SelectedIndexChanged;
             this.exportDomainsButton.Enabled = false;
-            this.queryTextBox.ScrollBars = ScrollBars.Both;
+            this.queryRichTextBox.ScrollBars = RichTextBoxScrollBars.Both;
 
             List<QueryTemplate> queryTemplates = new List<QueryTemplate>();
             queryTemplates.Add(new QueryTemplate { Name = "Select a template", Value = "" });
@@ -93,7 +93,7 @@ namespace SSDLMaintenanceTool.Forms
                 return;
             }
 
-            if (queryTextBox.Text == null || queryTextBox.Text.Trim() == "")
+            if (queryRichTextBox.Text == null || queryRichTextBox.Text.Trim() == "")
             {
                 MessageBox.Show("Query Text is mandatory");
                 return;
@@ -397,7 +397,7 @@ namespace SSDLMaintenanceTool.Forms
                         var domain = domains[domainIndex];
                         var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                         copyConnection.Database = domain.DatabaseName;
-                        var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
+                        var resultSet = DAO.GetData(queryRichTextBox.Text, copyConnection);
                         if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
@@ -420,7 +420,7 @@ namespace SSDLMaintenanceTool.Forms
             }
             else
             {
-                var resultSet = DAO.GetData(queryTextBox.Text, connectionDetails);
+                var resultSet = DAO.GetData(queryRichTextBox.Text, connectionDetails);
                 if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
                 {
                     errorMessage = "No data found";
@@ -452,7 +452,7 @@ namespace SSDLMaintenanceTool.Forms
                         var domain = domains[domainIndex];
                         var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                         copyConnection.Database = domain.DatabaseName;
-                        var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
+                        var resultSet = DAO.GetData(queryRichTextBox.Text, copyConnection);
                         if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
@@ -486,7 +486,7 @@ namespace SSDLMaintenanceTool.Forms
                 var resultSet = new DataSet();
                 try
                 {
-                    resultSet = DAO.GetData(queryTextBox.Text, connectionDetails);
+                    resultSet = DAO.GetData(queryRichTextBox.Text, connectionDetails);
                     if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
                     {
                         errorMessage = "No data found";
@@ -582,7 +582,7 @@ namespace SSDLMaintenanceTool.Forms
         private void EnableUIForQueryExecution(bool value = true)
         {
             EnableUIForDomainList(value);
-            queryTextBox.ReadOnly = !value;
+            queryRichTextBox.ReadOnly = !value;
         }
 
         private void LoadSSDLDomains(ConnectionDetails copyConnection)
@@ -919,15 +919,10 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        private void exportQueryResultButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void useSavedTemplateCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             this.savedTemplatesComboBox.Enabled = this.useSavedTemplateCheckBox.Checked;
-            this.queryTextBox.ReadOnly = this.useSavedTemplateCheckBox.Checked;
+            this.queryRichTextBox.ReadOnly = this.useSavedTemplateCheckBox.Checked;
         }
 
         private void savedTemplatesComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -940,7 +935,7 @@ namespace SSDLMaintenanceTool.Forms
                     MessageBox.Show("Template is not available");
                     return;
                 }
-                queryTextBox.Text = File.ReadAllText(selectedQueryTemplate.QueryTemplateFilePath);
+                queryRichTextBox.Text = File.ReadAllText(selectedQueryTemplate.QueryTemplateFilePath);
             }
         }
 
@@ -973,16 +968,17 @@ namespace SSDLMaintenanceTool.Forms
             this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
         }
 
-        private void queryTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Back)
-                e.Handled = true;
-        }
-
         private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Back)
+            {
                 e.Handled = true;
+                if (filterDomainsTextBox.Text.HasContent())
+                {
+                    filterDomainsTextBox.Text = filterDomainsTextBox.Text.Substring(0, filterDomainsTextBox.Text.Length - 1);
+                    filterDomainsTextBox.SelectionStart = filterDomainsTextBox.TextLength;
+                }
+            }
         }
     }
 }

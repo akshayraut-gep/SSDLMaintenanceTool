@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.executeQueryButton = new System.Windows.Forms.Button();
-            this.queryTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.queryOutputTabControl = new System.Windows.Forms.TabControl();
@@ -47,11 +46,12 @@
             this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
             this.progressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
             this.statusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
-            this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.successDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.failureDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
+            this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.queryRichTextBox = new System.Windows.Forms.RichTextBox();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -67,16 +67,6 @@
             this.executeQueryButton.Text = "Execute";
             this.executeQueryButton.UseVisualStyleBackColor = true;
             this.executeQueryButton.Click += new System.EventHandler(this.executeQueryButton_Click);
-            // 
-            // queryTextBox
-            // 
-            this.queryTextBox.Location = new System.Drawing.Point(16, 356);
-            this.queryTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.queryTextBox.Multiline = true;
-            this.queryTextBox.Name = "queryTextBox";
-            this.queryTextBox.Size = new System.Drawing.Size(747, 163);
-            this.queryTextBox.TabIndex = 1;
-            this.queryTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.queryTextBox_KeyPress);
             // 
             // label1
             // 
@@ -261,16 +251,6 @@
             this.statusLabelToolStrip.Size = new System.Drawing.Size(88, 25);
             this.statusLabelToolStrip.Text = "Loading...";
             // 
-            // asyncCheckBox
-            // 
-            this.asyncCheckBox.AutoSize = true;
-            this.asyncCheckBox.Location = new System.Drawing.Point(685, 526);
-            this.asyncCheckBox.Name = "asyncCheckBox";
-            this.asyncCheckBox.Size = new System.Drawing.Size(78, 24);
-            this.asyncCheckBox.TabIndex = 18;
-            this.asyncCheckBox.Text = "Async";
-            this.asyncCheckBox.UseVisualStyleBackColor = true;
-            // 
             // successDomainsToolStrip
             // 
             this.successDomainsToolStrip.Name = "successDomainsToolStrip";
@@ -282,6 +262,16 @@
             this.failureDomainsToolStrip.Name = "failureDomainsToolStrip";
             this.failureDomainsToolStrip.Size = new System.Drawing.Size(131, 25);
             this.failureDomainsToolStrip.Text = "Failed domains";
+            // 
+            // asyncCheckBox
+            // 
+            this.asyncCheckBox.AutoSize = true;
+            this.asyncCheckBox.Location = new System.Drawing.Point(685, 526);
+            this.asyncCheckBox.Name = "asyncCheckBox";
+            this.asyncCheckBox.Size = new System.Drawing.Size(78, 24);
+            this.asyncCheckBox.TabIndex = 18;
+            this.asyncCheckBox.Text = "Async";
+            this.asyncCheckBox.UseVisualStyleBackColor = true;
             // 
             // label4
             // 
@@ -299,11 +289,20 @@
             this.parallelismDegreeNumericUpDown.Size = new System.Drawing.Size(120, 26);
             this.parallelismDegreeNumericUpDown.TabIndex = 21;
             // 
+            // queryRichTextBox
+            // 
+            this.queryRichTextBox.Location = new System.Drawing.Point(16, 353);
+            this.queryRichTextBox.Name = "queryRichTextBox";
+            this.queryRichTextBox.Size = new System.Drawing.Size(747, 166);
+            this.queryRichTextBox.TabIndex = 22;
+            this.queryRichTextBox.Text = "";
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(777, 781);
+            this.Controls.Add(this.queryRichTextBox);
             this.Controls.Add(this.parallelismDegreeNumericUpDown);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.asyncCheckBox);
@@ -322,7 +321,6 @@
             this.Controls.Add(this.queryOutputTabControl);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.queryTextBox);
             this.Controls.Add(this.executeQueryButton);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "QueryExecutioner";
@@ -338,7 +336,6 @@
         }
 
         private System.Windows.Forms.Button executeQueryButton;
-        private System.Windows.Forms.TextBox queryTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
 
@@ -363,5 +360,6 @@
         private System.Windows.Forms.ToolStripStatusLabel failureDomainsToolStrip;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown parallelismDegreeNumericUpDown;
+        private System.Windows.Forms.RichTextBox queryRichTextBox;
     }
 }
