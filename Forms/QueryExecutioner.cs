@@ -71,6 +71,8 @@ namespace SSDLMaintenanceTool.Forms
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
+            this.queryOutputTabControl.Width = this.Width - 20;
+            this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -375,9 +377,6 @@ namespace SSDLMaintenanceTool.Forms
         {
             BackupDomains = new List<Domain>();
             BackupDomains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
-            BackupDomains.Insert(1, new Domain() { Name = "A", DisplayName = "Aaa" });
-            BackupDomains.Insert(2, new Domain() { Name = "B", DisplayName = "Bbb" });
-            BackupDomains.Insert(3, new Domain() { Name = "C", DisplayName = "Ccc" });
             if (DomainsTableSet != null && DomainsTableSet.Tables.Count > 0 && DomainsTableSet.Tables[0].Rows.Count > 0)
             {
                 foreach (DataRow row in DomainsTableSet.Tables[0].Rows)

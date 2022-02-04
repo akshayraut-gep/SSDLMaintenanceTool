@@ -33,7 +33,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.queryOutputTabControl = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.domainsCheckListBox = new System.Windows.Forms.CheckedListBox();
             this.loadDomainsButton = new System.Windows.Forms.Button();
             this.connectionStringsComboBox = new System.Windows.Forms.ComboBox();
@@ -45,7 +44,10 @@
             this.canExportToExcelCheckBox = new System.Windows.Forms.CheckBox();
             this.displayQueryOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.multiTabOutputCheckBox = new System.Windows.Forms.CheckBox();
-            this.queryOutputTabControl.SuspendLayout();
+            this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
+            this.statusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
+            this.bottomStatusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // executeQueryButton
@@ -91,24 +93,12 @@
             // 
             // queryOutputTabControl
             // 
-            this.queryOutputTabControl.Controls.Add(this.tabPage1);
             this.queryOutputTabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.queryOutputTabControl.Location = new System.Drawing.Point(17, 576);
             this.queryOutputTabControl.Name = "queryOutputTabControl";
             this.queryOutputTabControl.SelectedIndex = 0;
             this.queryOutputTabControl.Size = new System.Drawing.Size(200, 100);
             this.queryOutputTabControl.TabIndex = 4;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.tabPage1.Location = new System.Drawing.Point(4, 38);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(192, 58);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // domainsCheckListBox
             // 
@@ -238,11 +228,35 @@
             this.multiTabOutputCheckBox.Text = "Multi tabs display";
             this.multiTabOutputCheckBox.UseVisualStyleBackColor = true;
             // 
+            // bottomStatusStrip
+            // 
+            this.bottomStatusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.bottomStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.progressBarToolStrip,
+            this.statusLabelToolStrip});
+            this.bottomStatusStrip.Location = new System.Drawing.Point(0, 650);
+            this.bottomStatusStrip.Name = "bottomStatusStrip";
+            this.bottomStatusStrip.Size = new System.Drawing.Size(610, 32);
+            this.bottomStatusStrip.TabIndex = 17;
+            this.bottomStatusStrip.Text = "statusStrip1";
+            // 
+            // statusLabelToolStrip
+            // 
+            this.statusLabelToolStrip.Name = "statusLabelToolStrip";
+            this.statusLabelToolStrip.Size = new System.Drawing.Size(88, 25);
+            this.statusLabelToolStrip.Text = "Loading...";
+            // 
+            // progressBarToolStrip
+            // 
+            this.progressBarToolStrip.Name = "progressBarToolStrip";
+            this.progressBarToolStrip.Size = new System.Drawing.Size(200, 24);
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(610, 682);
+            this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.multiTabOutputCheckBox);
             this.Controls.Add(this.displayQueryOutputCheckBox);
             this.Controls.Add(this.canExportToExcelCheckBox);
@@ -264,7 +278,8 @@
             this.Text = "DML Query Executioner";
             this.Load += new System.EventHandler(this.QueryExecutioner_Load);
             this.SizeChanged += new System.EventHandler(this.QueryExecutioner_SizeChanged);
-            this.queryOutputTabControl.ResumeLayout(false);
+            this.bottomStatusStrip.ResumeLayout(false);
+            this.bottomStatusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -277,7 +292,6 @@
 
         #endregion
         private System.Windows.Forms.TabControl queryOutputTabControl;
-        private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.CheckedListBox domainsCheckListBox;
         private System.Windows.Forms.Button loadDomainsButton;
         private System.Windows.Forms.ComboBox connectionStringsComboBox;
@@ -289,5 +303,8 @@
         private System.Windows.Forms.CheckBox canExportToExcelCheckBox;
         private System.Windows.Forms.CheckBox displayQueryOutputCheckBox;
         private System.Windows.Forms.CheckBox multiTabOutputCheckBox;
+        private System.Windows.Forms.StatusStrip bottomStatusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabelToolStrip;
+        private System.Windows.Forms.ToolStripProgressBar progressBarToolStrip;
     }
 }
