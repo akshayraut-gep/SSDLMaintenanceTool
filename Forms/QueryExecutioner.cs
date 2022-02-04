@@ -31,7 +31,9 @@ namespace SSDLMaintenanceTool.Forms
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
         public ConcurrentDictionary<string, DataSet> QueryResultDataSet { get; set; }
         public bool IsAllDomainsSelected { get; set; }
-        public int DomainsExecuteCount { get; set; }
+        public int SuccessDomainsCount { get; set; }
+        public int FailureDomainsCount { get; set; }
+        public List<TabPage> OutputTabPages { get; set; }
 
         public QueryExecutioner()
         {
@@ -77,6 +79,8 @@ namespace SSDLMaintenanceTool.Forms
             this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
             this.progressBarToolStrip.Minimum = 0;
             this.progressBarToolStrip.Maximum = 100;
+            this.successDomainsToolStrip.Text = "";
+            this.failureDomainsToolStrip.Text = "";
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -109,7 +113,9 @@ namespace SSDLMaintenanceTool.Forms
             queryOutputTabControl.TabPages.Clear();
             progressBarToolStrip.Value = 0;
             statusLabelToolStrip.Text = "Running";
-            DomainsExecuteCount = 0;
+            SuccessDomainsCount = 0;
+            FailureDomainsCount = 0;
+            this.OutputTabPages = new List<TabPage>();
 
             StartExecution(connectionDetails, domains, asyncCheckBox.Checked);
         }
@@ -190,6 +196,8 @@ namespace SSDLMaintenanceTool.Forms
         private void QueryExecutionCompleted()
         {
             statusLabelToolStrip.Text = "Completed";
+            successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
+            failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
             if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
             {
                 var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
@@ -248,55 +256,64 @@ namespace SSDLMaintenanceTool.Forms
             queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
             foreach (var item in dataSetCollection)
             {
-                queryOutputTabControl.TabPages.Add(item.Key, item.Key);
+                TabPage tabPage = new TabPage(item.Key);
+                OutputTabPages.Add(tabPage);
+
                 if (item.Value.Tables.Count > 0)
                 {
                     if (multiTabOutputCheckBox.Checked)
                     {
-                        var thisTabPage = queryOutputTabControl.TabPages[item.Key];
                         var thisTabControl = new TabControl();
-                        thisTabPage.Controls.Add(thisTabControl);
+                        tabPage.Controls.Add(thisTabControl);
+
+                        var innerTabPages = new List<TabPage>();
 
                         foreach (DataTable dataTable in item.Value.Tables)
                         {
-                            thisTabControl.TabPages.Add(dataTable.TableName, dataTable.TableName);
-
-                            var newTabPage = thisTabControl.TabPages[dataTable.TableName];
+                            var innerTabPage = new TabPage(dataTable.TableName);
+                            innerTabPages.Add(innerTabPage);
 
                             DataGridView dataGridView = new DataGridView();
                             dataGridView.DataSource = item.Value.Tables[0];
 
-                            dataGridView.Height = thisTabPage.Height;
-                            dataGridView.Width = thisTabPage.Width;
+                            dataGridView.Height = tabPage.Height;
+                            dataGridView.Width = tabPage.Width;
 
-                            newTabPage.Controls.Add(dataGridView);
-                            newTabPage.AutoScroll = true;
+                            innerTabPage.Controls.Add(dataGridView);
+                            innerTabPage.AutoScroll = true;
                         }
-                        thisTabPage.AutoScroll = true;
+
+                        innerTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
+
+                        thisTabControl.TabPages.AddRange(innerTabPages.ToArray());
+                        tabPage.AutoScroll = true;
                     }
                     else
                     {
-                        var thisTabPage = queryOutputTabControl.TabPages[item.Key];
                         DataGridView dataGridView = new DataGridView();
                         dataGridView.DataSource = item.Value.Tables[0];
-                        thisTabPage.Controls.Add(dataGridView);
-                        dataGridView.Height = thisTabPage.Height;
-                        dataGridView.Width = thisTabPage.Width;
-                        thisTabPage.AutoScroll = true;
+                        tabPage.Controls.Add(dataGridView);
+                        dataGridView.Height = tabPage.Height;
+                        dataGridView.Width = tabPage.Width;
+                        tabPage.AutoScroll = true;
                     }
                 }
             }
+
+            OutputTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
+
+            queryOutputTabControl.TabPages.AddRange(OutputTabPages.ToArray());
         }
 
         private void DisplayOutputInTabsAsync(string databaseName, DataSet dataSetWithKey)
         {
-            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
             queryOutputTabControl.TabPages.Add(databaseName, databaseName);
+            var thisTabPage = queryOutputTabControl.TabPages[databaseName];
+
             if (dataSetWithKey.Tables.Count > 0)
             {
                 if (multiTabOutputCheckBox.Checked)
                 {
-                    var thisTabPage = queryOutputTabControl.TabPages[databaseName];
                     var thisTabControl = new TabControl();
                     thisTabPage.Controls.Add(thisTabControl);
 
@@ -319,7 +336,6 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 else
                 {
-                    var thisTabPage = queryOutputTabControl.TabPages[databaseName];
                     DataGridView dataGridView = new DataGridView();
                     dataGridView.DataSource = dataSetWithKey.Tables[0];
                     thisTabPage.Controls.Add(dataGridView);
@@ -367,26 +383,32 @@ namespace SSDLMaintenanceTool.Forms
             if (connectionDetails.IsMultiTenant)
             {
                 var parallelOptions = new ParallelOptions();
-                parallelOptions.MaxDegreeOfParallelism = 10;
+                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 10 : ((int)parallelismDegreeNumericUpDown.Value);
                 Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
                 {
-                    var domain = domains[domainIndex];
-                    var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                    copyConnection.Database = domain.DatabaseName;
-                    var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
-                    if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
+                    try
                     {
-                        resultSet.Tables[0].TableName = copyConnection.Database;
-                        domainDataSet.TryAdd(copyConnection.Database, resultSet.Copy());
-
-                        DomainsExecuteCount++;
-                        var percentage = ((double)DomainsExecuteCount / (double)domains.Count) * 100;
-
-                        //Send the update to our UI thread
-                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        var domain = domains[domainIndex];
+                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
+                        copyConnection.Database = domain.DatabaseName;
+                        var resultSet = DAO.GetData(queryTextBox.Text, copyConnection);
+                        if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
+                            resultSet.Tables[0].TableName = copyConnection.Database;
+                            domainDataSet.TryAdd(copyConnection.Database, resultSet.Copy());
+
+                            //Send the update to our UI thread
+                            synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            SuccessDomainsCount++;
+                            var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
                             progressBarToolStrip.Value = (int)percentage;
                         }), null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        FailureDomainsCount++;
                     }
                 });
             }
@@ -399,6 +421,12 @@ namespace SSDLMaintenanceTool.Forms
                     return null;
                 }
                 domainDataSet.TryAdd(connectionDetails.Database, resultSet.Copy());
+
+                //Send the update to our UI thread
+                synchronizationContext.Post(new SendOrPostCallback(o =>
+                {
+                    progressBarToolStrip.Value = 100;
+                }), null);
             }
             return domainDataSet;
         }
@@ -410,7 +438,7 @@ namespace SSDLMaintenanceTool.Forms
             if (connectionDetails.IsMultiTenant)
             {
                 var parallelOptions = new ParallelOptions();
-                parallelOptions.MaxDegreeOfParallelism = 1;
+                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 1 : ((int)parallelismDegreeNumericUpDown.Value);
                 Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
                 {
                     try
@@ -422,20 +450,21 @@ namespace SSDLMaintenanceTool.Forms
                         if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
-                            DomainsExecuteCount++;
-                            var percentage = ((double)DomainsExecuteCount / (double)domains.Count) * 100;
 
                             //Send the update to our UI thread
                             synchronizationContext.Post(new SendOrPostCallback(o =>
                             {
+                                queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
                                 QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
+                                SuccessDomainsCount++;
+                                var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
                                 progressBarToolStrip.Value = (int)percentage;
                             }), null);
                         }
                     }
                     catch (Exception ex)
                     {
-
+                        FailureDomainsCount++;
                     }
                 });
 
@@ -443,19 +472,33 @@ namespace SSDLMaintenanceTool.Forms
                 synchronizationContext.Post(new SendOrPostCallback(o =>
                 {
                     statusLabelToolStrip.Text = "Completed";
+                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
+                    failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
                 }), null);
             }
             else
             {
-                var resultSet = DAO.GetData(queryTextBox.Text, connectionDetails);
-                if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
+                var resultSet = new DataSet();
+                try
                 {
-                    errorMessage = "No data found";
-                    return;
+                    resultSet = DAO.GetData(queryTextBox.Text, connectionDetails);
+                    if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
+                    {
+                        errorMessage = "No data found";
+                        return;
+                    }
+                    SuccessDomainsCount = 1;
+                }
+                catch (Exception ex)
+                {
+                    FailureDomainsCount = 1;
                 }
                 //Send the update to our UI thread
                 synchronizationContext.Post(new SendOrPostCallback(o =>
                 {
+                    statusLabelToolStrip.Text = "Completed";
+                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
+                    failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
                     QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy());
                 }), null);
             }
@@ -927,13 +970,13 @@ namespace SSDLMaintenanceTool.Forms
 
         private void queryTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+            if (e.KeyChar == (char)Keys.Back)
                 e.Handled = true;
         }
 
         private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+            if (e.KeyChar == (char)Keys.Back)
                 e.Handled = true;
         }
     }

@@ -29,13 +29,13 @@ namespace SSDLMaintenanceTool.Forms
 
         private void userNameTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+            if (e.KeyChar == (char)Keys.Back)
                 e.Handled = true;
         }
 
         private void passwordTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!Char.IsLetter(e.KeyChar) && !Char.IsControl(e.KeyChar))
+            if (e.KeyChar == (char)Keys.Back)
                 e.Handled = true;
         }
     }
