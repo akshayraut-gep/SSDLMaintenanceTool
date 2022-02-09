@@ -45,14 +45,14 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutioner_Load(object sender, EventArgs e)
         {
-            this.connectionStringsComboBox.DataSource = ConnectionStringHandler.ConnectionStrings;
-            this.connectionStringsComboBox.ValueMember = "Name";
-            this.connectionStringsComboBox.DisplayMember = "DisplayName";
-            this.connectionStringsComboBox.SelectedIndex = -1;
-            this.connectionStringsComboBox.Text = "Select a connection";
-            this.connectionStringsComboBox.SelectedIndexChanged += connectionStringsComboBox_SelectedIndexChanged;
-            this.exportDomainsButton.Enabled = false;
-            this.queryRichTextBox.ScrollBars = RichTextBoxScrollBars.Both;
+            connectionStringsComboBox.DataSource = ConnectionStringHandler.ConnectionStrings;
+            connectionStringsComboBox.ValueMember = "Name";
+            connectionStringsComboBox.DisplayMember = "DisplayName";
+            connectionStringsComboBox.SelectedIndex = -1;
+            connectionStringsComboBox.Text = "Select a connection";
+            connectionStringsComboBox.SelectedIndexChanged += connectionStringsComboBox_SelectedIndexChanged;
+            exportDomainsButton.Enabled = false;
+            queryRichTextBox.ScrollBars = RichTextBoxScrollBars.Both;
 
             List<QueryTemplate> queryTemplates = new List<QueryTemplate>();
             queryTemplates.Add(new QueryTemplate { Name = "Select a template", Value = "" });
@@ -63,25 +63,29 @@ namespace SSDLMaintenanceTool.Forms
                 QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\Publish-Predefined-Migration-Part-01.sql")
             });
 
-            this.savedTemplatesComboBox.Enabled = false;
-            this.savedTemplatesComboBox.DataSource = queryTemplates;
-            this.savedTemplatesComboBox.DisplayMember = "Name";
-            this.savedTemplatesComboBox.ValueMember = "Value";
-            this.savedTemplatesComboBox.SelectedIndex = 0;
+            savedTemplatesComboBox.Enabled = false;
+            savedTemplatesComboBox.DataSource = queryTemplates;
+            savedTemplatesComboBox.DisplayMember = "Name";
+            savedTemplatesComboBox.ValueMember = "Value";
+            savedTemplatesComboBox.SelectedIndex = 0;
 
-            this.QueryCompleted = new Dictionary<string, QueryCompletion>();
-            this.QueryCompleted.Add(GlobalConstants.PublishPredefinedQueriesMigration, PredefinedQueriesCompleted);
-            this.QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
+            QueryCompleted = new Dictionary<string, QueryCompletion>();
+            QueryCompleted.Add(GlobalConstants.PublishPredefinedQueriesMigration, PredefinedQueriesCompleted);
+            QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
-            this.queryOutputTabControl.Width = this.Width - 20;
-            this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
-            this.progressBarToolStrip.Minimum = 0;
-            this.progressBarToolStrip.Maximum = 100;
-            this.successDomainsToolStrip.Text = "";
-            this.failureDomainsToolStrip.Text = "";
-            queryOutputTabControl.Height = this.Height - queryOutputTabControl.Top;
+            queryOutputTabControl.Width = Width - 20;
+            queryOutputTabControl.Height = Height - queryOutputTabControl.Top - 50;
+            queryOutputTabControl.Height = Height - queryOutputTabControl.Top;
+
+            queryProgressBarToolStrip.Minimum = 0;
+            queryProgressBarToolStrip.Maximum = 100;
+            successDomainsToolStrip.Text = "";
+            failureDomainsToolStrip.Text = "";
+
+            loadDomainsProgressBarToolStrip.Minimum = 0;
+            loadDomainsProgressBarToolStrip.Maximum = 100;
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -112,11 +116,13 @@ namespace SSDLMaintenanceTool.Forms
             }
             EnableUIForQueryExecution(false);
             queryOutputTabControl.TabPages.Clear();
-            progressBarToolStrip.Value = 0;
-            statusLabelToolStrip.Text = "Running";
+            queryProgressBarToolStrip.Value = 0;
+            queryStatusLabelToolStrip.Text = "Running";
+            loadDomainsProgressBarToolStrip.Value = 0;
+            loadDomainStatusLabelToolStrip.Text = "Loading domains is blocked - till query is being executed";
             SuccessDomainsCount = 0;
             FailureDomainsCount = 0;
-            this.OutputTabPages = new List<TabPage>();
+            OutputTabPages = new List<TabPage>();
 
             StartExecution(connectionDetails, domains, queryRichTextBox.Text, asyncCheckBox.Checked);
         }
@@ -190,24 +196,26 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryFailed(Exception ex)
         {
-            statusLabelToolStrip.Text = "Failed";
+            queryStatusLabelToolStrip.Text = "Failed";
+            loadDomainStatusLabelToolStrip.Text = "Ready";
             MessageBox.Show(ex.Message);
         }
 
         private void QueryExecutionCompleted()
         {
-            statusLabelToolStrip.Text = "Completed";
+            queryStatusLabelToolStrip.Text = "Completed";
+            loadDomainStatusLabelToolStrip.Text = "Ready";
             successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
             failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
-            if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
+            if (useSavedTemplateCheckBox.Checked && savedTemplatesComboBox.SelectedIndex > 0 && savedTemplatesComboBox.SelectedValue.HasContent())
             {
-                var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
+                var selectedQueryTemplate = (savedTemplatesComboBox.SelectedItem as QueryTemplate);
                 if (selectedQueryTemplate == null)
                 {
                     MessageBox.Show("Template is not available");
                     return;
                 }
-                this.QueryCompleted[selectedQueryTemplate.Value]();
+                QueryCompleted[selectedQueryTemplate.Value]();
             }
             else
             {
@@ -408,7 +416,7 @@ namespace SSDLMaintenanceTool.Forms
                         {
                             SuccessDomainsCount++;
                             var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
-                            progressBarToolStrip.Value = (int)percentage;
+                            queryProgressBarToolStrip.Value = (int)percentage;
                         }), null);
                         }
                     }
@@ -431,7 +439,7 @@ namespace SSDLMaintenanceTool.Forms
                 //Send the update to our UI thread
                 synchronizationContext.Post(new SendOrPostCallback(o =>
                 {
-                    progressBarToolStrip.Value = 100;
+                    queryProgressBarToolStrip.Value = 100;
                 }), null);
             }
             return domainDataSet;
@@ -463,7 +471,7 @@ namespace SSDLMaintenanceTool.Forms
                                 QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy());
                                 SuccessDomainsCount++;
                                 var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
-                                progressBarToolStrip.Value = (int)percentage;
+                                queryProgressBarToolStrip.Value = (int)percentage;
                             }), null);
                         }
                     }
@@ -476,7 +484,8 @@ namespace SSDLMaintenanceTool.Forms
                 //Send the update to our UI thread
                 synchronizationContext.Post(new SendOrPostCallback(o =>
                 {
-                    statusLabelToolStrip.Text = "Completed";
+                    queryStatusLabelToolStrip.Text = "Completed";
+                    loadDomainStatusLabelToolStrip.Text = "Ready";
                     successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
                     failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
                 }), null);
@@ -501,7 +510,8 @@ namespace SSDLMaintenanceTool.Forms
                 //Send the update to our UI thread
                 synchronizationContext.Post(new SendOrPostCallback(o =>
                 {
-                    statusLabelToolStrip.Text = "Completed";
+                    queryStatusLabelToolStrip.Text = "Completed";
+                    loadDomainStatusLabelToolStrip.Text = "Ready";
                     successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
                     failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
                     QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy());
@@ -535,6 +545,10 @@ namespace SSDLMaintenanceTool.Forms
             }
 
             EnableUIForDomainList(false);
+            loadDomainsProgressBarToolStrip.Value = 0;
+            loadDomainStatusLabelToolStrip.Text = "Running";
+            queryProgressBarToolStrip.Value = 0;
+            queryStatusLabelToolStrip.Text = "Query execution is blocked - till domains are being loaded";
 
             //Send the update to our UI thread
             Task.Run(() =>
@@ -547,6 +561,9 @@ namespace SSDLMaintenanceTool.Forms
                     {
                         EnableUIForDomainList();
                         PopulateDomainsCheckListBox();
+                        loadDomainsProgressBarToolStrip.Value = 100;
+                        loadDomainStatusLabelToolStrip.Text = "Completed";
+                        queryStatusLabelToolStrip.Text = "Ready";
                     }), null);
                 }
                 catch (Exception ex)
@@ -623,23 +640,23 @@ namespace SSDLMaintenanceTool.Forms
 
         private void PopulateDomainsCheckListBox()
         {
-            this.domainsCheckListBox.SelectedIndexChanged -= DomainsCheckListBox_SelectedIndexChanged;
-            this.domainsCheckListBox.DataSource = Domains;
-            this.domainsCheckListBox.ValueMember = "Name";
-            this.domainsCheckListBox.DisplayMember = "DisplayName";
-            this.exportDomainsButton.Enabled = true;
-            this.domainsCheckListBox.SelectedIndexChanged += DomainsCheckListBox_SelectedIndexChanged;
+            domainsCheckListBox.SelectedIndexChanged -= DomainsCheckListBox_SelectedIndexChanged;
+            domainsCheckListBox.DataSource = Domains;
+            domainsCheckListBox.ValueMember = "Name";
+            domainsCheckListBox.DisplayMember = "DisplayName";
+            exportDomainsButton.Enabled = true;
+            domainsCheckListBox.SelectedIndexChanged += DomainsCheckListBox_SelectedIndexChanged;
 
             var checkedDomains = Domains.Where(a => a.IsChecked).ToList();
             if (checkedDomains.Count > 0)
             {
                 foreach (var checkedDomain in checkedDomains)
                 {
-                    for (int i = 0; i < this.domainsCheckListBox.Items.Count; i++)
+                    for (int i = 0; i < domainsCheckListBox.Items.Count; i++)
                     {
-                        if ((this.domainsCheckListBox.Items[i] as Domain).Name == checkedDomain.Name)
+                        if ((domainsCheckListBox.Items[i] as Domain).Name == checkedDomain.Name)
                         {
-                            this.domainsCheckListBox.SetItemChecked(i, true);
+                            domainsCheckListBox.SetItemChecked(i, true);
                         }
                     }
                 }
@@ -649,13 +666,13 @@ namespace SSDLMaintenanceTool.Forms
         public ConnectionDetails GetSelectedConnectionDetails(out string validationMessage)
         {
             validationMessage = "";
-            if (this.connectionStringsComboBox.SelectedValue == null)
+            if (connectionStringsComboBox.SelectedValue == null)
             {
                 validationMessage = "Select a connection";
                 return null;
             }
 
-            var connectionDetail = ConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == this.connectionStringsComboBox.SelectedValue.ToString());
+            var connectionDetail = ConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == connectionStringsComboBox.SelectedValue.ToString());
             if (connectionDetail == null)
             {
                 validationMessage = "Connection string not available";
@@ -666,12 +683,12 @@ namespace SSDLMaintenanceTool.Forms
 
         private void DomainsCheckListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.domainsCheckListBox.Items != null && this.domainsCheckListBox.Items.Count > 0)
+            if (domainsCheckListBox.Items != null && domainsCheckListBox.Items.Count > 0)
             {
-                for (int j = 0; j < this.domainsCheckListBox.Items.Count; j++)
+                for (int j = 0; j < domainsCheckListBox.Items.Count; j++)
                 {
-                    var isDomainSelected = this.domainsCheckListBox.GetItemChecked(j);
-                    var itemDomain = this.domainsCheckListBox.Items[j] as Domain;
+                    var isDomainSelected = domainsCheckListBox.GetItemChecked(j);
+                    var itemDomain = domainsCheckListBox.Items[j] as Domain;
                     if (itemDomain != null)
                     {
                         itemDomain.IsChecked = isDomainSelected;
@@ -682,9 +699,9 @@ namespace SSDLMaintenanceTool.Forms
 
                         if (itemDomain.Name == "SelectAll" && IsAllDomainsSelected != isDomainSelected)
                         {
-                            for (int i = 0; i < this.domainsCheckListBox.Items.Count; i++)
+                            for (int i = 0; i < domainsCheckListBox.Items.Count; i++)
                             {
-                                this.domainsCheckListBox.SetItemChecked(i, isDomainSelected);
+                                domainsCheckListBox.SetItemChecked(i, isDomainSelected);
                             }
                             IsAllDomainsSelected = isDomainSelected;
                         }
@@ -695,7 +712,7 @@ namespace SSDLMaintenanceTool.Forms
 
         private void connectionStringsComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.domainsCheckListBox.DataSource = null;
+            domainsCheckListBox.DataSource = null;
         }
 
         private void exportDomainsButton_Click(object sender, EventArgs e)
@@ -921,15 +938,15 @@ namespace SSDLMaintenanceTool.Forms
 
         private void useSavedTemplateCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            this.savedTemplatesComboBox.Enabled = this.useSavedTemplateCheckBox.Checked;
-            this.queryRichTextBox.ReadOnly = this.useSavedTemplateCheckBox.Checked;
+            savedTemplatesComboBox.Enabled = useSavedTemplateCheckBox.Checked;
+            queryRichTextBox.ReadOnly = useSavedTemplateCheckBox.Checked;
         }
 
         private void savedTemplatesComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.useSavedTemplateCheckBox.Checked && this.savedTemplatesComboBox.SelectedIndex > 0 && this.savedTemplatesComboBox.SelectedValue.HasContent())
+            if (useSavedTemplateCheckBox.Checked && savedTemplatesComboBox.SelectedIndex > 0 && savedTemplatesComboBox.SelectedValue.HasContent())
             {
-                var selectedQueryTemplate = (this.savedTemplatesComboBox.SelectedItem as QueryTemplate);
+                var selectedQueryTemplate = (savedTemplatesComboBox.SelectedItem as QueryTemplate);
                 if (selectedQueryTemplate == null)
                 {
                     MessageBox.Show("Template is not available");
@@ -964,8 +981,8 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutioner_SizeChanged(object sender, EventArgs e)
         {
-            this.queryOutputTabControl.Width = this.Width - 20;
-            this.queryOutputTabControl.Height = this.Height - this.queryOutputTabControl.Top - 50;
+            queryOutputTabControl.Width = Width - 20;
+            queryOutputTabControl.Height = Height - queryOutputTabControl.Top - 50;
         }
 
         private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)

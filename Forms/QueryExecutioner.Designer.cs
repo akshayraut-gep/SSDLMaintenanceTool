@@ -44,14 +44,16 @@
             this.displayQueryOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.multiTabOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
-            this.progressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
-            this.statusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
+            this.queryProgressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
+            this.queryStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.successDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.failureDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.queryRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.loadDomainsProgressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
+            this.loadDomainStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -230,8 +232,10 @@
             // 
             this.bottomStatusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.bottomStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.progressBarToolStrip,
-            this.statusLabelToolStrip,
+            this.loadDomainsProgressBarToolStrip,
+            this.loadDomainStatusLabelToolStrip,
+            this.queryProgressBarToolStrip,
+            this.queryStatusLabelToolStrip,
             this.successDomainsToolStrip,
             this.failureDomainsToolStrip});
             this.bottomStatusStrip.Location = new System.Drawing.Point(0, 749);
@@ -240,16 +244,16 @@
             this.bottomStatusStrip.TabIndex = 17;
             this.bottomStatusStrip.Text = "statusStrip1";
             // 
-            // progressBarToolStrip
+            // queryProgressBarToolStrip
             // 
-            this.progressBarToolStrip.Name = "progressBarToolStrip";
-            this.progressBarToolStrip.Size = new System.Drawing.Size(200, 24);
+            this.queryProgressBarToolStrip.Name = "queryProgressBarToolStrip";
+            this.queryProgressBarToolStrip.Size = new System.Drawing.Size(200, 24);
             // 
-            // statusLabelToolStrip
+            // queryStatusLabelToolStrip
             // 
-            this.statusLabelToolStrip.Name = "statusLabelToolStrip";
-            this.statusLabelToolStrip.Size = new System.Drawing.Size(88, 25);
-            this.statusLabelToolStrip.Text = "Loading...";
+            this.queryStatusLabelToolStrip.Name = "queryStatusLabelToolStrip";
+            this.queryStatusLabelToolStrip.Size = new System.Drawing.Size(60, 25);
+            this.queryStatusLabelToolStrip.Text = "Ready";
             // 
             // successDomainsToolStrip
             // 
@@ -296,6 +300,17 @@
             this.queryRichTextBox.Size = new System.Drawing.Size(747, 166);
             this.queryRichTextBox.TabIndex = 22;
             this.queryRichTextBox.Text = "";
+            // 
+            // loadDomainsProgressBarToolStrip
+            // 
+            this.loadDomainsProgressBarToolStrip.Name = "loadDomainsProgressBarToolStrip";
+            this.loadDomainsProgressBarToolStrip.Size = new System.Drawing.Size(200, 24);
+            // 
+            // loadDomainStatusLabelToolStrip
+            // 
+            this.loadDomainStatusLabelToolStrip.Name = "loadDomainStatusLabelToolStrip";
+            this.loadDomainStatusLabelToolStrip.Size = new System.Drawing.Size(60, 25);
+            this.loadDomainStatusLabelToolStrip.Text = "Ready";
             // 
             // QueryExecutioner
             // 
@@ -353,13 +368,15 @@
         private System.Windows.Forms.CheckBox displayQueryOutputCheckBox;
         private System.Windows.Forms.CheckBox multiTabOutputCheckBox;
         private System.Windows.Forms.StatusStrip bottomStatusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel statusLabelToolStrip;
-        private System.Windows.Forms.ToolStripProgressBar progressBarToolStrip;
+        private System.Windows.Forms.ToolStripStatusLabel queryStatusLabelToolStrip;
+        private System.Windows.Forms.ToolStripProgressBar queryProgressBarToolStrip;
         private System.Windows.Forms.CheckBox asyncCheckBox;
         private System.Windows.Forms.ToolStripStatusLabel successDomainsToolStrip;
         private System.Windows.Forms.ToolStripStatusLabel failureDomainsToolStrip;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown parallelismDegreeNumericUpDown;
         private System.Windows.Forms.RichTextBox queryRichTextBox;
+        private System.Windows.Forms.ToolStripProgressBar loadDomainsProgressBarToolStrip;
+        private System.Windows.Forms.ToolStripStatusLabel loadDomainStatusLabelToolStrip;
     }
 }
