@@ -118,10 +118,10 @@ namespace SSDLMaintenanceTool.Forms
             FailureDomainsCount = 0;
             this.OutputTabPages = new List<TabPage>();
 
-            StartExecution(connectionDetails, domains, asyncCheckBox.Checked);
+            StartExecution(connectionDetails, domains, queryRichTextBox.Text, asyncCheckBox.Checked);
         }
 
-        private void StartExecution(ConnectionDetails connectionDetails, List<Domain> domains, bool isAsync)
+        private void StartExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query, bool isAsync)
         {
             Task.Run(() =>
             {
@@ -129,11 +129,11 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     if (isAsync)
                     {
-                        StartQueryExecutionAsync(connectionDetails, domains);
+                        StartQueryExecutionAsync(connectionDetails, domains, query);
                     }
                     else
                     {
-                        StartQueryExecution(connectionDetails, domains);
+                        StartQueryExecution(connectionDetails, domains, query);
                     }
                 }
                 catch (Exception ex)
@@ -155,10 +155,10 @@ namespace SSDLMaintenanceTool.Forms
             });
         }
 
-        private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains)
+        private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query)
         {
             //QueryResultDataSet = ExecuteQuery(connectionDetails, checkDomains, out var errorMessage);
-            ExecuteQueryAsync(connectionDetails, domains, out var errorMessage); ;
+            ExecuteQueryAsync(connectionDetails, domains, query, out var errorMessage); ;
 
             //Send the update to our UI thread
             synchronizationContext.Post(new SendOrPostCallback(o =>
@@ -171,9 +171,9 @@ namespace SSDLMaintenanceTool.Forms
             }), null);
         }
 
-        private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains)
+        private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query)
         {
-            QueryResultDataSet = ExecuteQuery(connectionDetails, domains, out var errorMessage);
+            QueryResultDataSet = ExecuteQuery(connectionDetails, domains, query, out var errorMessage);
 
             //Send the update to our UI thread
             synchronizationContext.Post(new SendOrPostCallback(o =>
@@ -381,7 +381,7 @@ namespace SSDLMaintenanceTool.Forms
             return checkedDomains;
         }
 
-        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> domains, out string errorMessage)
+        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> domains, string query, out string errorMessage)
         {
             var domainDataSet = new ConcurrentDictionary<string, DataSet>();
             errorMessage = "";
@@ -397,7 +397,7 @@ namespace SSDLMaintenanceTool.Forms
                         var domain = domains[domainIndex];
                         var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                         copyConnection.Database = domain.DatabaseName;
-                        var resultSet = DAO.GetData(queryRichTextBox.Text, copyConnection);
+                        var resultSet = DAO.GetData(query, copyConnection);
                         if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
@@ -420,7 +420,7 @@ namespace SSDLMaintenanceTool.Forms
             }
             else
             {
-                var resultSet = DAO.GetData(queryRichTextBox.Text, connectionDetails);
+                var resultSet = DAO.GetData(query, connectionDetails);
                 if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
                 {
                     errorMessage = "No data found";
@@ -437,7 +437,7 @@ namespace SSDLMaintenanceTool.Forms
             return domainDataSet;
         }
 
-        public void ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, out string errorMessage)
+        public void ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, out string errorMessage)
         {
             errorMessage = "";
 
@@ -452,7 +452,7 @@ namespace SSDLMaintenanceTool.Forms
                         var domain = domains[domainIndex];
                         var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                         copyConnection.Database = domain.DatabaseName;
-                        var resultSet = DAO.GetData(queryRichTextBox.Text, copyConnection);
+                        var resultSet = DAO.GetData(query, copyConnection);
                         if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
@@ -486,7 +486,7 @@ namespace SSDLMaintenanceTool.Forms
                 var resultSet = new DataSet();
                 try
                 {
-                    resultSet = DAO.GetData(queryRichTextBox.Text, connectionDetails);
+                    resultSet = DAO.GetData(query, connectionDetails);
                     if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
                     {
                         errorMessage = "No data found";
@@ -521,7 +521,7 @@ namespace SSDLMaintenanceTool.Forms
             var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
             copyConnection.Database = "master";
 
-            if (copyConnection.IsInputCredentialsRequired)
+            if (copyConnection.IsInputCredentialsRequired && !copyConnection.IsMFA)
             {
                 var credentialsPrompt = new CredentialsPrompt();
                 credentialsPrompt.ShowDialog(this);

@@ -1,6 +1,8 @@
 ﻿using SSDLMaintenanceTool.Models;
 using System;
 using System.Data;
+using System.Data.Odbc;
+using System.Data.OleDb;
 using System.Data.SqlClient;
 
 namespace SSDLMaintenanceTool.Implementations
@@ -14,11 +16,33 @@ namespace SSDLMaintenanceTool.Implementations
 
         public DataSet GetData(string query, ConnectionDetails connectionDetails)
         {
+            if (connectionDetails.IsMFA)
+                return GetDataWithMFA(query, connectionDetails);
+            else
+                return GetDataWithoutMFA(query, connectionDetails);
+        }
+
+        public DataSet GetDataWithoutMFA(string query, ConnectionDetails connectionDetails)
+        {
+            DataSet dataSet = new DataSet();
+
             var connectionString = GetConnectionString(connectionDetails);
             SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(query, connectionString);
             sqlDataAdapter.SelectCommand.CommandTimeout = 0;
-            DataSet dataSet = new DataSet();
             sqlDataAdapter.Fill(dataSet);
+
+            return dataSet;
+        }
+
+        public DataSet GetDataWithMFA(string query, ConnectionDetails connectionDetails)
+        {
+            DataSet dataSet = new DataSet();
+
+            OdbcConnection con = new OdbcConnection("Driver={ODBC Driver 17 for SQL Server};SERVER=" + connectionDetails.Server + "; DATABASE=" + connectionDetails.Database + ";Authentication=ActiveDirectoryInteractive;UID=");
+            OdbcDataAdapter odbcDataAdapter = new OdbcDataAdapter(query, con);
+            odbcDataAdapter.SelectCommand.CommandTimeout = 0;
+            odbcDataAdapter.Fill(dataSet);
+
             return dataSet;
         }
     }
