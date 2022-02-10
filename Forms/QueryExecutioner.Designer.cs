@@ -218,15 +218,15 @@
             this.displayQueryOutputCheckBox.AutoSize = true;
             this.displayQueryOutputCheckBox.Location = new System.Drawing.Point(6, 33);
             this.displayQueryOutputCheckBox.Name = "displayQueryOutputCheckBox";
-            this.displayQueryOutputCheckBox.Size = new System.Drawing.Size(86, 24);
+            this.displayQueryOutputCheckBox.Size = new System.Drawing.Size(158, 24);
             this.displayQueryOutputCheckBox.TabIndex = 15;
-            this.displayQueryOutputCheckBox.Text = "Display";
+            this.displayQueryOutputCheckBox.Text = "Single tab display";
             this.displayQueryOutputCheckBox.UseVisualStyleBackColor = true;
             // 
             // multiTabOutputCheckBox
             // 
             this.multiTabOutputCheckBox.AutoSize = true;
-            this.multiTabOutputCheckBox.Location = new System.Drawing.Point(101, 33);
+            this.multiTabOutputCheckBox.Location = new System.Drawing.Point(170, 33);
             this.multiTabOutputCheckBox.Name = "multiTabOutputCheckBox";
             this.multiTabOutputCheckBox.Size = new System.Drawing.Size(155, 24);
             this.multiTabOutputCheckBox.TabIndex = 16;
@@ -280,7 +280,7 @@
             // asyncCheckBox
             // 
             this.asyncCheckBox.AutoSize = true;
-            this.asyncCheckBox.Location = new System.Drawing.Point(279, 33);
+            this.asyncCheckBox.Location = new System.Drawing.Point(260, 34);
             this.asyncCheckBox.Name = "asyncCheckBox";
             this.asyncCheckBox.Size = new System.Drawing.Size(78, 24);
             this.asyncCheckBox.TabIndex = 18;
@@ -290,7 +290,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 34);
+            this.label4.Location = new System.Drawing.Point(10, 34);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(141, 20);
             this.label4.TabIndex = 20;
@@ -298,9 +298,9 @@
             // 
             // parallelismDegreeNumericUpDown
             // 
-            this.parallelismDegreeNumericUpDown.Location = new System.Drawing.Point(153, 32);
+            this.parallelismDegreeNumericUpDown.Location = new System.Drawing.Point(157, 32);
             this.parallelismDegreeNumericUpDown.Name = "parallelismDegreeNumericUpDown";
-            this.parallelismDegreeNumericUpDown.Size = new System.Drawing.Size(120, 26);
+            this.parallelismDegreeNumericUpDown.Size = new System.Drawing.Size(85, 26);
             this.parallelismDegreeNumericUpDown.TabIndex = 21;
             // 
             // queryRichTextBox
@@ -332,9 +332,9 @@
             this.groupBox1.Controls.Add(this.parallelismDegreeNumericUpDown);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.asyncCheckBox);
-            this.groupBox1.Location = new System.Drawing.Point(337, 525);
+            this.groupBox1.Location = new System.Drawing.Point(352, 525);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(369, 62);
+            this.groupBox1.Size = new System.Drawing.Size(354, 62);
             this.groupBox1.TabIndex = 26;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Run options";
@@ -347,7 +347,7 @@
             this.groupBox2.Controls.Add(this.canExportToExcelCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(16, 525);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(315, 99);
+            this.groupBox2.Size = new System.Drawing.Size(330, 99);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output options";
