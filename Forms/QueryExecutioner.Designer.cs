@@ -320,7 +320,7 @@
             // onlyListDomainsCheckBox
             // 
             this.onlyListDomainsCheckBox.AutoSize = true;
-            this.onlyListDomainsCheckBox.Location = new System.Drawing.Point(153, 70);
+            this.onlyListDomainsCheckBox.Location = new System.Drawing.Point(170, 70);
             this.onlyListDomainsCheckBox.Name = "onlyListDomainsCheckBox";
             this.onlyListDomainsCheckBox.Size = new System.Drawing.Size(153, 24);
             this.onlyListDomainsCheckBox.TabIndex = 23;
