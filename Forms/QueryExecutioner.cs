@@ -439,7 +439,7 @@ namespace SSDLMaintenanceTool.Forms
                         var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
                         copyConnection.Database = domain.DatabaseName;
                         var resultSet = DAO.GetData(query, copyConnection);
-                        if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
+                        if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count > 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count > 0)
                         {
                             resultSet.Tables[0].TableName = copyConnection.Database;
 

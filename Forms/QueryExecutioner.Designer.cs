@@ -66,7 +66,7 @@
             // executeQueryButton
             // 
             this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.executeQueryButton.Location = new System.Drawing.Point(573, 595);
+            this.executeQueryButton.Location = new System.Drawing.Point(573, 592);
             this.executeQueryButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.executeQueryButton.Name = "executeQueryButton";
             this.executeQueryButton.Size = new System.Drawing.Size(133, 32);
@@ -347,7 +347,7 @@
             this.groupBox2.Controls.Add(this.canExportToExcelCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(16, 525);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(315, 100);
+            this.groupBox2.Size = new System.Drawing.Size(315, 99);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output options";
