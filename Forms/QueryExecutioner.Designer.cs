@@ -41,8 +41,6 @@
             this.useSavedTemplateCheckBox = new System.Windows.Forms.CheckBox();
             this.filterDomainsTextBox = new System.Windows.Forms.TextBox();
             this.canExportToExcelCheckBox = new System.Windows.Forms.CheckBox();
-            this.displayQueryOutputCheckBox = new System.Windows.Forms.CheckBox();
-            this.multiTabOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
             this.loadDomainsProgressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
             this.loadDomainStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
@@ -54,9 +52,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.queryRichTextBox = new System.Windows.Forms.RichTextBox();
-            this.onlyListDomainsCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.displayOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.mainPanel = new System.Windows.Forms.Panel();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
@@ -103,8 +101,9 @@
             this.queryOutputTabControl.Location = new System.Drawing.Point(7, 642);
             this.queryOutputTabControl.Name = "queryOutputTabControl";
             this.queryOutputTabControl.SelectedIndex = 0;
-            this.queryOutputTabControl.Size = new System.Drawing.Size(200, 100);
+            this.queryOutputTabControl.Size = new System.Drawing.Size(200, 50);
             this.queryOutputTabControl.TabIndex = 4;
+            this.queryOutputTabControl.SizeChanged += new System.EventHandler(this.queryOutputTabControl_SizeChanged);
             // 
             // domainsCheckListBox
             // 
@@ -215,26 +214,6 @@
             this.canExportToExcelCheckBox.Text = "Export to Excel";
             this.canExportToExcelCheckBox.UseVisualStyleBackColor = true;
             // 
-            // displayQueryOutputCheckBox
-            // 
-            this.displayQueryOutputCheckBox.AutoSize = true;
-            this.displayQueryOutputCheckBox.Location = new System.Drawing.Point(6, 33);
-            this.displayQueryOutputCheckBox.Name = "displayQueryOutputCheckBox";
-            this.displayQueryOutputCheckBox.Size = new System.Drawing.Size(158, 24);
-            this.displayQueryOutputCheckBox.TabIndex = 15;
-            this.displayQueryOutputCheckBox.Text = "Single tab display";
-            this.displayQueryOutputCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // multiTabOutputCheckBox
-            // 
-            this.multiTabOutputCheckBox.AutoSize = true;
-            this.multiTabOutputCheckBox.Location = new System.Drawing.Point(170, 33);
-            this.multiTabOutputCheckBox.Name = "multiTabOutputCheckBox";
-            this.multiTabOutputCheckBox.Size = new System.Drawing.Size(155, 24);
-            this.multiTabOutputCheckBox.TabIndex = 16;
-            this.multiTabOutputCheckBox.Text = "Multi tabs display";
-            this.multiTabOutputCheckBox.UseVisualStyleBackColor = true;
-            // 
             // bottomStatusStrip
             // 
             this.bottomStatusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -247,7 +226,7 @@
             this.failureDomainsToolStrip});
             this.bottomStatusStrip.Location = new System.Drawing.Point(0, 749);
             this.bottomStatusStrip.Name = "bottomStatusStrip";
-            this.bottomStatusStrip.Size = new System.Drawing.Size(919, 32);
+            this.bottomStatusStrip.Size = new System.Drawing.Size(763, 32);
             this.bottomStatusStrip.TabIndex = 17;
             this.bottomStatusStrip.Text = "statusStrip1";
             // 
@@ -319,16 +298,6 @@
             this.queryRichTextBox.TabIndex = 22;
             this.queryRichTextBox.Text = "";
             // 
-            // onlyListDomainsCheckBox
-            // 
-            this.onlyListDomainsCheckBox.AutoSize = true;
-            this.onlyListDomainsCheckBox.Location = new System.Drawing.Point(170, 70);
-            this.onlyListDomainsCheckBox.Name = "onlyListDomainsCheckBox";
-            this.onlyListDomainsCheckBox.Size = new System.Drawing.Size(153, 24);
-            this.onlyListDomainsCheckBox.TabIndex = 23;
-            this.onlyListDomainsCheckBox.Text = "Only list domains";
-            this.onlyListDomainsCheckBox.UseVisualStyleBackColor = true;
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.parallelismDegreeNumericUpDown);
@@ -343,9 +312,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.displayQueryOutputCheckBox);
-            this.groupBox2.Controls.Add(this.multiTabOutputCheckBox);
-            this.groupBox2.Controls.Add(this.onlyListDomainsCheckBox);
+            this.groupBox2.Controls.Add(this.displayOptionsComboBox);
             this.groupBox2.Controls.Add(this.canExportToExcelCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(7, 521);
             this.groupBox2.Name = "groupBox2";
@@ -353,6 +320,16 @@
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output options";
+            // 
+            // displayOptionsComboBox
+            // 
+            this.displayOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.displayOptionsComboBox.FormattingEnabled = true;
+            this.displayOptionsComboBox.Location = new System.Drawing.Point(6, 25);
+            this.displayOptionsComboBox.Name = "displayOptionsComboBox";
+            this.displayOptionsComboBox.Size = new System.Drawing.Size(317, 28);
+            this.displayOptionsComboBox.TabIndex = 28;
+            this.displayOptionsComboBox.SelectedIndexChanged += new System.EventHandler(this.displayOptionsComboBox_SelectedIndexChanged);
             // 
             // mainPanel
             // 
@@ -373,14 +350,14 @@
             this.mainPanel.Controls.Add(this.exportDomainsButton);
             this.mainPanel.Location = new System.Drawing.Point(12, 12);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(866, 807);
+            this.mainPanel.Size = new System.Drawing.Size(725, 707);
             this.mainPanel.TabIndex = 28;
             // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(919, 781);
+            this.ClientSize = new System.Drawing.Size(763, 781);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.mainPanel);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -417,8 +394,6 @@
         private System.Windows.Forms.CheckBox useSavedTemplateCheckBox;
         private System.Windows.Forms.TextBox filterDomainsTextBox;
         private System.Windows.Forms.CheckBox canExportToExcelCheckBox;
-        private System.Windows.Forms.CheckBox displayQueryOutputCheckBox;
-        private System.Windows.Forms.CheckBox multiTabOutputCheckBox;
         private System.Windows.Forms.StatusStrip bottomStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel queryStatusLabelToolStrip;
         private System.Windows.Forms.ToolStripProgressBar queryProgressBarToolStrip;
@@ -430,9 +405,9 @@
         private System.Windows.Forms.ToolStripProgressBar loadDomainsProgressBarToolStrip;
         private System.Windows.Forms.ToolStripStatusLabel loadDomainStatusLabelToolStrip;
         private System.Windows.Forms.ToolStripStatusLabel successDomainsToolStrip;
-        private System.Windows.Forms.CheckBox onlyListDomainsCheckBox;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Panel mainPanel;
+        private System.Windows.Forms.ComboBox displayOptionsComboBox;
     }
 }

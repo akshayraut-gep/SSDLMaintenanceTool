@@ -157,6 +157,7 @@
     <Compile Include="Models\ConnectionDetails.cs" />
     <Compile Include="Models\Domain.cs" />
     <Compile Include="Models\EnvironmentSetting.cs" />
+    <Compile Include="Models\NameValueModel.cs" />
     <Compile Include="Models\QueryTemplate.cs" />
     <Compile Include="Models\QueryType.cs" />
     <Compile Include="Models\StepTaskJson.cs" />
