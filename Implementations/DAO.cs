@@ -11,7 +11,7 @@ namespace SSDLMaintenanceTool.Implementations
     {
         private string GetConnectionString(ConnectionDetails connectionDetails)
         {
-            return "Server=" + connectionDetails.Server + ";Database=" + connectionDetails.Database + ";User Id=" + connectionDetails.UserName + (connectionDetails.IsMFA ? "" : ";Password=" + connectionDetails.Password) + "; MultipleActiveResultSets = True; ConnectRetryCount = 3; ConnectRetryInterval = 10; Connection Timeout = 30; Trusted_Connection = False; Encrypt = True;";
+            return "Server=" + connectionDetails.Server + ";Database=" + connectionDetails.Database + ";User Id=" + connectionDetails.UserName + (connectionDetails.IsMFA ? "" : ";Password=" + connectionDetails.Password) + "; MultipleActiveResultSets = True; ConnectRetryCount = 3; ConnectRetryInterval = 10; Connection Timeout = 30; Trusted_Connection = False;" + (connectionDetails.Environment == "Local" ? "" : "Encrypt = True;");
         }
 
         public DataSet GetData(string query, ConnectionDetails connectionDetails)

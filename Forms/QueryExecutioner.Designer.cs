@@ -48,25 +48,27 @@
             this.loadDomainStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.queryProgressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
             this.queryStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
+            this.successDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.failureDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.queryRichTextBox = new System.Windows.Forms.RichTextBox();
-            this.successDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.onlyListDomainsCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.mainPanel = new System.Windows.Forms.Panel();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.mainPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // executeQueryButton
             // 
             this.executeQueryButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.executeQueryButton.Location = new System.Drawing.Point(573, 592);
+            this.executeQueryButton.Location = new System.Drawing.Point(564, 588);
             this.executeQueryButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.executeQueryButton.Name = "executeQueryButton";
             this.executeQueryButton.Size = new System.Drawing.Size(133, 32);
@@ -79,7 +81,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.label1.Location = new System.Drawing.Point(12, 66);
+            this.label1.Location = new System.Drawing.Point(3, 62);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(64, 20);
             this.label1.TabIndex = 3;
@@ -89,7 +91,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.label2.Location = new System.Drawing.Point(12, 324);
+            this.label2.Location = new System.Drawing.Point(3, 320);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(51, 20);
             this.label2.TabIndex = 3;
@@ -98,7 +100,7 @@
             // queryOutputTabControl
             // 
             this.queryOutputTabControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.queryOutputTabControl.Location = new System.Drawing.Point(16, 646);
+            this.queryOutputTabControl.Location = new System.Drawing.Point(7, 642);
             this.queryOutputTabControl.Name = "queryOutputTabControl";
             this.queryOutputTabControl.SelectedIndex = 0;
             this.queryOutputTabControl.Size = new System.Drawing.Size(200, 100);
@@ -113,7 +115,7 @@
             "A",
             "B",
             "C"});
-            this.domainsCheckListBox.Location = new System.Drawing.Point(116, 141);
+            this.domainsCheckListBox.Location = new System.Drawing.Point(107, 137);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
             this.domainsCheckListBox.Size = new System.Drawing.Size(590, 165);
             this.domainsCheckListBox.TabIndex = 5;
@@ -122,7 +124,7 @@
             // loadDomainsButton
             // 
             this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.loadDomainsButton.Location = new System.Drawing.Point(116, 60);
+            this.loadDomainsButton.Location = new System.Drawing.Point(107, 56);
             this.loadDomainsButton.Name = "loadDomainsButton";
             this.loadDomainsButton.Size = new System.Drawing.Size(183, 32);
             this.loadDomainsButton.TabIndex = 6;
@@ -140,7 +142,7 @@
             "QC",
             "UAT",
             "Production"});
-            this.connectionStringsComboBox.Location = new System.Drawing.Point(116, 12);
+            this.connectionStringsComboBox.Location = new System.Drawing.Point(107, 8);
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
             this.connectionStringsComboBox.Size = new System.Drawing.Size(590, 28);
             this.connectionStringsComboBox.TabIndex = 7;
@@ -149,7 +151,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.label3.Location = new System.Drawing.Point(12, 15);
+            this.label3.Location = new System.Drawing.Point(3, 11);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(98, 20);
             this.label3.TabIndex = 8;
@@ -158,7 +160,7 @@
             // exportDomainsButton
             // 
             this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.exportDomainsButton.Location = new System.Drawing.Point(525, 60);
+            this.exportDomainsButton.Location = new System.Drawing.Point(516, 56);
             this.exportDomainsButton.Name = "exportDomainsButton";
             this.exportDomainsButton.Size = new System.Drawing.Size(181, 32);
             this.exportDomainsButton.TabIndex = 10;
@@ -176,7 +178,7 @@
             "QC",
             "UAT",
             "Production"});
-            this.savedTemplatesComboBox.Location = new System.Drawing.Point(270, 321);
+            this.savedTemplatesComboBox.Location = new System.Drawing.Point(261, 317);
             this.savedTemplatesComboBox.Name = "savedTemplatesComboBox";
             this.savedTemplatesComboBox.Size = new System.Drawing.Size(436, 28);
             this.savedTemplatesComboBox.TabIndex = 11;
@@ -186,7 +188,7 @@
             // 
             this.useSavedTemplateCheckBox.AutoSize = true;
             this.useSavedTemplateCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.useSavedTemplateCheckBox.Location = new System.Drawing.Point(116, 323);
+            this.useSavedTemplateCheckBox.Location = new System.Drawing.Point(107, 319);
             this.useSavedTemplateCheckBox.Name = "useSavedTemplateCheckBox";
             this.useSavedTemplateCheckBox.Size = new System.Drawing.Size(134, 24);
             this.useSavedTemplateCheckBox.TabIndex = 12;
@@ -196,7 +198,7 @@
             // 
             // filterDomainsTextBox
             // 
-            this.filterDomainsTextBox.Location = new System.Drawing.Point(117, 109);
+            this.filterDomainsTextBox.Location = new System.Drawing.Point(108, 105);
             this.filterDomainsTextBox.Name = "filterDomainsTextBox";
             this.filterDomainsTextBox.Size = new System.Drawing.Size(589, 26);
             this.filterDomainsTextBox.TabIndex = 13;
@@ -271,6 +273,12 @@
             this.queryStatusLabelToolStrip.Size = new System.Drawing.Size(60, 25);
             this.queryStatusLabelToolStrip.Text = "Ready";
             // 
+            // successDomainsToolStrip
+            // 
+            this.successDomainsToolStrip.Name = "successDomainsToolStrip";
+            this.successDomainsToolStrip.Size = new System.Drawing.Size(147, 25);
+            this.successDomainsToolStrip.Text = "Success domains";
+            // 
             // failureDomainsToolStrip
             // 
             this.failureDomainsToolStrip.Name = "failureDomainsToolStrip";
@@ -305,17 +313,11 @@
             // 
             // queryRichTextBox
             // 
-            this.queryRichTextBox.Location = new System.Drawing.Point(16, 353);
+            this.queryRichTextBox.Location = new System.Drawing.Point(7, 349);
             this.queryRichTextBox.Name = "queryRichTextBox";
             this.queryRichTextBox.Size = new System.Drawing.Size(690, 166);
             this.queryRichTextBox.TabIndex = 22;
             this.queryRichTextBox.Text = "";
-            // 
-            // successDomainsToolStrip
-            // 
-            this.successDomainsToolStrip.Name = "successDomainsToolStrip";
-            this.successDomainsToolStrip.Size = new System.Drawing.Size(147, 25);
-            this.successDomainsToolStrip.Text = "Success domains";
             // 
             // onlyListDomainsCheckBox
             // 
@@ -332,7 +334,7 @@
             this.groupBox1.Controls.Add(this.parallelismDegreeNumericUpDown);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.asyncCheckBox);
-            this.groupBox1.Location = new System.Drawing.Point(352, 525);
+            this.groupBox1.Location = new System.Drawing.Point(343, 521);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(354, 62);
             this.groupBox1.TabIndex = 26;
@@ -345,34 +347,42 @@
             this.groupBox2.Controls.Add(this.multiTabOutputCheckBox);
             this.groupBox2.Controls.Add(this.onlyListDomainsCheckBox);
             this.groupBox2.Controls.Add(this.canExportToExcelCheckBox);
-            this.groupBox2.Location = new System.Drawing.Point(16, 525);
+            this.groupBox2.Location = new System.Drawing.Point(7, 521);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(330, 99);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output options";
             // 
+            // mainPanel
+            // 
+            this.mainPanel.Controls.Add(this.connectionStringsComboBox);
+            this.mainPanel.Controls.Add(this.groupBox2);
+            this.mainPanel.Controls.Add(this.executeQueryButton);
+            this.mainPanel.Controls.Add(this.groupBox1);
+            this.mainPanel.Controls.Add(this.label1);
+            this.mainPanel.Controls.Add(this.queryRichTextBox);
+            this.mainPanel.Controls.Add(this.label2);
+            this.mainPanel.Controls.Add(this.queryOutputTabControl);
+            this.mainPanel.Controls.Add(this.filterDomainsTextBox);
+            this.mainPanel.Controls.Add(this.domainsCheckListBox);
+            this.mainPanel.Controls.Add(this.useSavedTemplateCheckBox);
+            this.mainPanel.Controls.Add(this.loadDomainsButton);
+            this.mainPanel.Controls.Add(this.savedTemplatesComboBox);
+            this.mainPanel.Controls.Add(this.label3);
+            this.mainPanel.Controls.Add(this.exportDomainsButton);
+            this.mainPanel.Location = new System.Drawing.Point(12, 12);
+            this.mainPanel.Name = "mainPanel";
+            this.mainPanel.Size = new System.Drawing.Size(866, 807);
+            this.mainPanel.TabIndex = 28;
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(919, 781);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.queryRichTextBox);
             this.Controls.Add(this.bottomStatusStrip);
-            this.Controls.Add(this.filterDomainsTextBox);
-            this.Controls.Add(this.useSavedTemplateCheckBox);
-            this.Controls.Add(this.savedTemplatesComboBox);
-            this.Controls.Add(this.exportDomainsButton);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.connectionStringsComboBox);
-            this.Controls.Add(this.loadDomainsButton);
-            this.Controls.Add(this.domainsCheckListBox);
-            this.Controls.Add(this.queryOutputTabControl);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.executeQueryButton);
+            this.Controls.Add(this.mainPanel);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "QueryExecutioner";
             this.Text = "DML Query Executioner";
@@ -385,6 +395,8 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.mainPanel.ResumeLayout(false);
+            this.mainPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -421,5 +433,6 @@
         private System.Windows.Forms.CheckBox onlyListDomainsCheckBox;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Panel mainPanel;
     }
 }

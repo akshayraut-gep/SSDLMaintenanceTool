@@ -76,9 +76,7 @@ namespace SSDLMaintenanceTool.Forms
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
-            queryOutputTabControl.Width = Width - 20;
-            queryOutputTabControl.Height = Height - queryOutputTabControl.Top - 50;
-            queryOutputTabControl.Height = Height - queryOutputTabControl.Top;
+            queryOutputTabControl.Height = 200;
 
             queryProgressBarToolStrip.Minimum = 0;
             queryProgressBarToolStrip.Maximum = 100;
@@ -89,6 +87,15 @@ namespace SSDLMaintenanceTool.Forms
             loadDomainsProgressBarToolStrip.Maximum = 100;
 
             DomainsWithResults = new List<string>();
+            mainPanel.AutoScroll = true;
+
+            mainPanel.Width = this.Width - 30;
+            mainPanel.Height = this.Height - 70;
+
+            if (mainPanel.VerticalScroll.Visible)
+                queryOutputTabControl.Width = Width - 55;
+            else
+                queryOutputTabControl.Width = Width - 40;
         }
 
         private void executeQueryButton_Click(object sender, EventArgs e)
@@ -295,6 +302,9 @@ namespace SSDLMaintenanceTool.Forms
             foreach (var item in dataSetCollection)
             {
                 TabPage tabPage = new TabPage(item.Key);
+                tabPage.Height = queryOutputTabControl.Height;
+                tabPage.Width = queryOutputTabControl.Width;
+
                 OutputTabPages.Add(tabPage);
 
                 if (item.Value.Tables.Count > 0)
@@ -314,8 +324,8 @@ namespace SSDLMaintenanceTool.Forms
                             DataGridView dataGridView = new DataGridView();
                             dataGridView.DataSource = item.Value.Tables[0];
 
-                            dataGridView.Height = tabPage.Height;
-                            dataGridView.Width = tabPage.Width;
+                            dataGridView.Height = innerTabPage.Height - 20;
+                            dataGridView.Width = innerTabPage.Width - 20;
 
                             dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
                             dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
@@ -334,16 +344,43 @@ namespace SSDLMaintenanceTool.Forms
                         DataGridView dataGridView = new DataGridView();
                         dataGridView.DataSource = item.Value.Tables[0];
                         tabPage.Controls.Add(dataGridView);
-                        dataGridView.Height = tabPage.Height;
-                        dataGridView.Width = tabPage.Width;
+                        dataGridView.Height = tabPage.Height - 50;
+                        dataGridView.Width = tabPage.Width - 50;
                         tabPage.AutoScroll = true;
                     }
                 }
+                //tabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
             }
 
             OutputTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
 
             queryOutputTabControl.TabPages.AddRange(OutputTabPages.ToArray());
+        }
+
+        private void DynamicallyCreatedTabPage_SizeChanged(object sender, EventArgs e)
+        {
+            TabPage dynamicTabPage = (sender as TabPage);
+            if (dynamicTabPage.Controls.Count > 0)
+            {
+                var innerFirstControl = dynamicTabPage.Controls[0];
+                if (innerFirstControl is DataGridView)
+                {
+                    var dataGridView = innerFirstControl as DataGridView;
+                    if (dataGridView != null)
+                    {
+                        dataGridView.Height = dynamicTabPage.Height - 20;
+                        dataGridView.Width = dynamicTabPage.Width - 20;
+                    }
+                }
+                else if (innerFirstControl is TabControl)
+                {
+                    var tabControl = innerFirstControl as TabControl;
+                    if (tabControl != null)
+                    {
+
+                    }
+                }
+            }
         }
 
         private void DisplayOutputInTabsAsync(string databaseName, DataSet dataSetWithKey)
@@ -367,8 +404,8 @@ namespace SSDLMaintenanceTool.Forms
                         DataGridView dataGridView = new DataGridView();
                         dataGridView.DataSource = dataSetWithKey.Tables[0];
 
-                        dataGridView.Height = thisTabPage.Height;
-                        dataGridView.Width = thisTabPage.Width;
+                        dataGridView.Height = thisTabPage.Height - 20;
+                        dataGridView.Width = thisTabPage.Width - 20;
 
                         dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
                         dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
@@ -383,8 +420,8 @@ namespace SSDLMaintenanceTool.Forms
                     DataGridView dataGridView = new DataGridView();
                     dataGridView.DataSource = dataSetWithKey.Tables[0];
                     thisTabPage.Controls.Add(dataGridView);
-                    dataGridView.Height = thisTabPage.Height;
-                    dataGridView.Width = thisTabPage.Width;
+                    dataGridView.Height = thisTabPage.Height - 20;
+                    dataGridView.Width = thisTabPage.Width - 20;
                     thisTabPage.AutoScroll = true;
                 }
             }
@@ -1039,8 +1076,13 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutioner_SizeChanged(object sender, EventArgs e)
         {
-            queryOutputTabControl.Width = Width - 20;
-            queryOutputTabControl.Height = Height - queryOutputTabControl.Top - 50;
+            mainPanel.Width = this.Width - 30;
+            mainPanel.Height = this.Height - 70;
+
+            if (mainPanel.VerticalScroll.Visible)
+                queryOutputTabControl.Width = Width - 55;
+            else
+                queryOutputTabControl.Width = Width - 40;
         }
 
         private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)
