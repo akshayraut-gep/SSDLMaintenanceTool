@@ -145,10 +145,11 @@ namespace SSDLMaintenanceTool.Forms
             }
 
             var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
-            if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
+            if (selectedExportOption != null && (selectedExportOption.Value == "ExportAllDomainsInOneFile"))
             {
-                exportFileNameInputDialog.WindowTitle = "Enter name of file being exported";
-                var dialogResult = exportFileNameInputDialog.ShowDialog();
+                exportFileNameInputDialog.WindowTitle = "Save as XLSX";
+                exportFileNameInputDialog.MainInstruction = "Enter name of file being exported";
+                var dialogResult = exportFileNameInputDialog.ShowDialog(this);
                 if (dialogResult != DialogResult.OK)
                 {
                     return;
