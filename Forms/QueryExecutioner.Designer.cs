@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.executeQueryButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,7 +41,6 @@
             this.savedTemplatesComboBox = new System.Windows.Forms.ComboBox();
             this.useSavedTemplateCheckBox = new System.Windows.Forms.CheckBox();
             this.filterDomainsTextBox = new System.Windows.Forms.TextBox();
-            this.canExportToExcelCheckBox = new System.Windows.Forms.CheckBox();
             this.bottomStatusStrip = new System.Windows.Forms.StatusStrip();
             this.loadDomainsProgressBarToolStrip = new System.Windows.Forms.ToolStripProgressBar();
             this.loadDomainStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
@@ -56,6 +56,8 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.displayOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.mainPanel = new System.Windows.Forms.Panel();
+            this.exportOptionsComboBox = new System.Windows.Forms.ComboBox();
+            this.exportFileNameInputDialog = new Ookii.Dialogs.WinForms.InputDialog(this.components);
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -204,16 +206,6 @@
             this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
             this.filterDomainsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filterDomainsTextBox_KeyPress);
             // 
-            // canExportToExcelCheckBox
-            // 
-            this.canExportToExcelCheckBox.AutoSize = true;
-            this.canExportToExcelCheckBox.Location = new System.Drawing.Point(6, 70);
-            this.canExportToExcelCheckBox.Name = "canExportToExcelCheckBox";
-            this.canExportToExcelCheckBox.Size = new System.Drawing.Size(141, 24);
-            this.canExportToExcelCheckBox.TabIndex = 14;
-            this.canExportToExcelCheckBox.Text = "Export to Excel";
-            this.canExportToExcelCheckBox.UseVisualStyleBackColor = true;
-            // 
             // bottomStatusStrip
             // 
             this.bottomStatusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -312,8 +304,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.exportOptionsComboBox);
             this.groupBox2.Controls.Add(this.displayOptionsComboBox);
-            this.groupBox2.Controls.Add(this.canExportToExcelCheckBox);
             this.groupBox2.Location = new System.Drawing.Point(7, 521);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(330, 99);
@@ -353,6 +345,19 @@
             this.mainPanel.Size = new System.Drawing.Size(725, 707);
             this.mainPanel.TabIndex = 28;
             // 
+            // exportOptionsComboBox
+            // 
+            this.exportOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.exportOptionsComboBox.FormattingEnabled = true;
+            this.exportOptionsComboBox.Location = new System.Drawing.Point(6, 65);
+            this.exportOptionsComboBox.Name = "exportOptionsComboBox";
+            this.exportOptionsComboBox.Size = new System.Drawing.Size(317, 28);
+            this.exportOptionsComboBox.TabIndex = 29;
+            // 
+            // exportFileNameInputDialog
+            // 
+            this.exportFileNameInputDialog.MainInstruction = "inputDialog1";
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -371,7 +376,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.mainPanel.ResumeLayout(false);
             this.mainPanel.PerformLayout();
             this.ResumeLayout(false);
@@ -393,7 +397,6 @@
         private System.Windows.Forms.ComboBox savedTemplatesComboBox;
         private System.Windows.Forms.CheckBox useSavedTemplateCheckBox;
         private System.Windows.Forms.TextBox filterDomainsTextBox;
-        private System.Windows.Forms.CheckBox canExportToExcelCheckBox;
         private System.Windows.Forms.StatusStrip bottomStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel queryStatusLabelToolStrip;
         private System.Windows.Forms.ToolStripProgressBar queryProgressBarToolStrip;
@@ -409,5 +412,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Panel mainPanel;
         private System.Windows.Forms.ComboBox displayOptionsComboBox;
+        private System.Windows.Forms.ComboBox exportOptionsComboBox;
+        private Ookii.Dialogs.WinForms.InputDialog exportFileNameInputDialog;
     }
 }

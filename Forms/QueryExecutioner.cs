@@ -78,6 +78,13 @@ namespace SSDLMaintenanceTool.Forms
             displayOptionsComboBox.ValueMember = "Value";
             displayOptionsComboBox.SelectedIndex = 0;
 
+            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "No Export", Value = "NoExport" });
+            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export one file per domain", Value = "ExportOneFilePerDomain" });
+            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export all domains in one file", Value = "ExportAllDomainsInOneFile" });
+            exportOptionsComboBox.DisplayMember = "Name";
+            exportOptionsComboBox.ValueMember = "Value";
+            exportOptionsComboBox.SelectedIndex = 0;
+
             QueryCompleted = new Dictionary<string, QueryCompletion>();
             QueryCompleted.Add(GlobalConstants.PublishPredefinedQueriesMigration, PredefinedQueriesCompleted);
             QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
@@ -136,6 +143,18 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 domains = ConvertToDomainDatabases();
             }
+
+            var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
+            if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
+            {
+                exportFileNameInputDialog.WindowTitle = "Enter name of file being exported";
+                var dialogResult = exportFileNameInputDialog.ShowDialog();
+                if (dialogResult != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+
             EnableUIForQueryExecution(false);
             queryOutputTabControl.TabPages.Clear();
             queryProgressBarToolStrip.Value = 0;
@@ -201,15 +220,19 @@ namespace SSDLMaintenanceTool.Forms
                     return;
                 }
 
-                if (canExportToExcelCheckBox.Checked)
+                var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
+                if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
                 {
+                    var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
+                    queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
+
                     VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
                     vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
                     vistaFolderBrowserDialog.UseDescriptionForTitle = true;
                     var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
                     if (saveFileDialogResult == DialogResult.OK)
                     {
-                        ExportDataSetCollectionToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                        ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
                     }
                 }
             }), null);
@@ -283,7 +306,9 @@ namespace SSDLMaintenanceTool.Forms
                         }
                         DisplayOutputInTabs(QueryResultDataSet);
                     }
-                    if (canExportToExcelCheckBox.Checked)
+
+                    var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
+                    if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
                     {
                         VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
                         vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
@@ -291,7 +316,10 @@ namespace SSDLMaintenanceTool.Forms
                         var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
                         if (saveFileDialogResult == DialogResult.OK)
                         {
-                            ExportDataSetCollectionToExcel(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                            var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
+                            queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
+
+                            ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
                         }
                     }
                 }
@@ -310,7 +338,8 @@ namespace SSDLMaintenanceTool.Forms
                 else
                 {
                     if (displayOption == "SingleResultSingleTab")
-                        DisplayOutputInTabsAsync(databaseName, dataSet);
+                        if (dataSet.Tables[0].Rows.Count > 0)
+                            DisplayOutputInTabsAsync(databaseName, dataSet);
                 }
             }
         }
@@ -603,7 +632,7 @@ namespace SSDLMaintenanceTool.Forms
                         else
                         {
                             resultSet = DAO.GetData(query, copyConnection);
-                            if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count != 0)
+                            if (resultSet != null && resultSet.Tables != null && resultSet.Tables.Count != 0 && resultSet.Tables[0] != null && resultSet.Tables[0].Rows.Count > 0)
                             {
                                 resultSet.Tables[0].TableName = copyConnection.Database;
                                 domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
@@ -975,7 +1004,7 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        void ExportDataSetCollectionToExcel(ConcurrentDictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
+        void ExportDataSetCollectionToExcel(List<KeyValuePair<string, DataSet>> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName, string exportOption, string exportFileName)
         {
             if (!usersSaveDirectoryPath.ToLower().EndsWith(this.Name.ToLower()))
                 usersSaveDirectoryPath += @"\" + this.Name;
@@ -983,9 +1012,40 @@ namespace SSDLMaintenanceTool.Forms
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
 
-            foreach (var item in dataSetCollection)
+            if (exportOption == "ExportOneFilePerDomain")
             {
-                var resolvedFilePath = resolvedDirectoryPath + item.Key + ".xlsx";
+                foreach (var item in dataSetCollection)
+                {
+                    var resolvedFilePath = resolvedDirectoryPath + item.Key + ".xlsx";
+                    using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
+                    {
+                        if (pck.Workbook.Worksheets.Count > 0)
+                        {
+                            for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                            {
+                                pck.Workbook.Worksheets.Delete(i);
+                            }
+                        }
+                        foreach (DataTable dataTable in item.Value.Tables)
+                        {
+                            try
+                            {
+                                ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
+                                ws.Cells["A1"].LoadFromDataTable(dataTable, true);
+                                ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                            pck.Save();
+                        }
+                    }
+                }
+            }
+            else if (exportOption == "ExportAllDomainsInOneFile")
+            {
+                var resolvedFilePath = resolvedDirectoryPath + exportFileName + ".xlsx";
                 using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
                 {
                     if (pck.Workbook.Worksheets.Count > 0)
@@ -995,19 +1055,20 @@ namespace SSDLMaintenanceTool.Forms
                             pck.Workbook.Worksheets.Delete(i);
                         }
                     }
-                    foreach (DataTable dataTable in item.Value.Tables)
+                    foreach (var item in dataSetCollection)
                     {
                         try
                         {
-                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
-                            ws.Cells["A1"].LoadFromDataTable(dataTable, true);
+                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(item.Value.Tables[0].TableName);
+                            ws.Cells["A1"].LoadFromDataTable(item.Value.Tables[0], true);
+                            ws.Cells[ws.Dimension.Address].AutoFitColumns();
                         }
                         catch (Exception ex)
                         {
 
                         }
-                        pck.Save();
                     }
+                    pck.Save();
                 }
             }
             var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
@@ -1196,11 +1257,11 @@ namespace SSDLMaintenanceTool.Forms
                     return;
                 }
                 if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
-                    canExportToExcelCheckBox.Enabled = true;
+                    exportOptionsComboBox.Enabled = true;
                 else
                 {
-                    canExportToExcelCheckBox.Enabled = false;
-                    canExportToExcelCheckBox.Checked = false;
+                    exportOptionsComboBox.SelectedIndex = 0;
+                    exportOptionsComboBox.Enabled = true;
                 }
             }
         }
