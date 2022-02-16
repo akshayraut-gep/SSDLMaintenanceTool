@@ -8,7 +8,6 @@ namespace SSDLMaintenanceTool.Constants
         public List<EnvironmentSetting> Environments { get; set; }
         public const string QueryExecutionerDomainExportDirectory = @"DomainExport";
         public const string QueryExecutionerQueryResultDirectory = @"QueryResult";
-        public const string PublishPredefinedQueriesMigration = "PublishPredefinedQueriesMigration";
         public const string GeneralQueries = "GeneralQueries";
 
         public GlobalConstants()

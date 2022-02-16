@@ -59,8 +59,8 @@ namespace SSDLMaintenanceTool.Forms
             queryTemplates.Add(new QueryTemplate { Name = "Select a template", Value = "" });
             queryTemplates.Add(new QueryTemplate
             {
-                Name = "Publish Predefined Queries Migration",
-                Value = GlobalConstants.PublishPredefinedQueriesMigration,
+                Name = "Publish Predefined queries migration",
+                Value = "PublishPredefinedQueriesMigration",
                 QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\Publish-Predefined-Migration-Part-01.sql"),
                 QueryCompletionCallback = new QueryCompletionCallback()
                 {
@@ -68,6 +68,12 @@ namespace SSDLMaintenanceTool.Forms
                     ClassName = "Forms.QueryExecutioner",
                     Method = "PredefinedQueriesCompleted"
                 }
+            });
+            queryTemplates.Add(new QueryTemplate
+            {
+                Name = "Main table columns mismatch detection",
+                Value = "MainTableColumnsMismatchDetection",
+                QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\main-table-master-columns-mismatch-detection.sql")
             });
 
             savedTemplatesComboBox.Enabled = false;

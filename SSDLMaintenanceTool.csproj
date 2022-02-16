@@ -230,6 +230,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Pictures\query-analysis.png" />
+    <Content Include="QueryTemplates\main-table-master-columns-mismatch-detection.sql" />
     <Content Include="QueryTemplates\Publish-Predefined-Migration-Part-01.sql" />
     <Content Include="QueryTemplates\Publish-Predefined-Migration-Part-02.sql" />
   </ItemGroup>
