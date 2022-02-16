@@ -11,6 +11,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -51,7 +52,6 @@ namespace SSDLMaintenanceTool.Forms
             connectionStringsComboBox.DisplayMember = "DisplayName";
             connectionStringsComboBox.SelectedIndex = -1;
             connectionStringsComboBox.Text = "Select a connection";
-            connectionStringsComboBox.SelectedIndexChanged += connectionStringsComboBox_SelectedIndexChanged;
             exportDomainsButton.Enabled = false;
             queryRichTextBox.ScrollBars = RichTextBoxScrollBars.Both;
 
@@ -61,7 +61,13 @@ namespace SSDLMaintenanceTool.Forms
             {
                 Name = "Publish Predefined Queries Migration",
                 Value = GlobalConstants.PublishPredefinedQueriesMigration,
-                QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\Publish-Predefined-Migration-Part-01.sql")
+                QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\Publish-Predefined-Migration-Part-01.sql"),
+                QueryCompletionCallback = new QueryCompletionCallback()
+                {
+                    Assembly = "SSDLMaintenanceTool",
+                    ClassName = "Forms.QueryExecutioner",
+                    Method = "PredefinedQueriesCompleted"
+                }
             });
 
             savedTemplatesComboBox.Enabled = false;
@@ -70,6 +76,7 @@ namespace SSDLMaintenanceTool.Forms
             savedTemplatesComboBox.ValueMember = "Value";
             savedTemplatesComboBox.SelectedIndex = 0;
 
+            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "No Display", Value = "NoDisplay" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Single result single tab", Value = "SingleResultSingleTab" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Multi result single tab", Value = "MultiResultSingleTab" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Only list domains with affected records", Value = "OnlyListDomainsWithAffectedRecords" });
@@ -86,8 +93,21 @@ namespace SSDLMaintenanceTool.Forms
             exportOptionsComboBox.SelectedIndex = 0;
 
             QueryCompleted = new Dictionary<string, QueryCompletion>();
-            QueryCompleted.Add(GlobalConstants.PublishPredefinedQueriesMigration, PredefinedQueriesCompleted);
-            QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
+
+            foreach (var queryTemplate in queryTemplates)
+            {
+                if (queryTemplate.QueryCompletionCallback != null)
+                {
+                    Assembly assembly = Assembly.Load(queryTemplate.QueryCompletionCallback.Assembly);
+                    Type t = assembly.GetType(queryTemplate.QueryCompletionCallback.Assembly + "." + queryTemplate.QueryCompletionCallback.ClassName);
+                    var method = t.GetMethod(queryTemplate.QueryCompletionCallback.Method);
+                    var function = (QueryCompletion)Delegate.CreateDelegate(typeof(QueryCompletion), this, method);
+
+                    QueryCompleted.Add(queryTemplate.Value, function);
+                }
+                else
+                    QueryCompleted.Add(GlobalConstants.GeneralQueries, QueryExecutionCompleted);
+            }
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
@@ -271,7 +291,7 @@ namespace SSDLMaintenanceTool.Forms
             failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
 
             var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-            if (selectedDisplayOption.Value == "OnlyListDomainsWithData")
+            if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
             {
                 DataSet dataSet = new DataSet();
                 dataSet.Tables.Add("DomainsWithResults");
@@ -329,7 +349,11 @@ namespace SSDLMaintenanceTool.Forms
 
         private void QueryExecutionCompletedAsync(string databaseName, DataSet dataSet, string displayOption)
         {
-            if (dataSet != null && dataSet.Tables.Count > 0)
+            if (displayOption == "OnlyListDomainsWithAffectedRecords")
+            {
+                DomainsWithResults.Add(databaseName);
+            }
+            else if (dataSet != null && dataSet.Tables.Count > 0)
             {
                 if (displayOption == "OnlyListDomainsWithData")
                 {
@@ -489,7 +513,7 @@ namespace SSDLMaintenanceTool.Forms
             }
         }
 
-        private void PredefinedQueriesCompleted()
+        public void PredefinedQueriesCompleted()
         {
             var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
             if (selectedDisplayOption.Value == "SingleResultSingleTab")
@@ -640,11 +664,6 @@ namespace SSDLMaintenanceTool.Forms
                             }
                         }
 
-                        if (displayOption == "OnlyListDomainsWithAffectedRecords")
-                        {
-                            DomainsWithResults.Add(copyConnection.Database);
-                        }
-
                         //Send the update to our UI thread
                         synchronizationContext.Post(new SendOrPostCallback(o =>
                         {
@@ -673,7 +692,7 @@ namespace SSDLMaintenanceTool.Forms
                     failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
 
                     var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-                    if (selectedDisplayOption.Value == "OnlyListDomainsWithData")
+                    if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
                     {
                         DataSet dataSet = new DataSet();
                         dataSet.Tables.Add("DomainsWithResults");
@@ -795,6 +814,8 @@ namespace SSDLMaintenanceTool.Forms
             loadDomainsButton.Enabled = value;
             domainsCheckListBox.SelectionMode = value ? SelectionMode.One : SelectionMode.None;
             executeQueryButton.Enabled = value;
+            displayOptionsComboBox.Enabled = value;
+            exportOptionsComboBox.Enabled = value;
         }
 
         private void EnableUIForQueryExecution(bool value = true)
@@ -914,6 +935,7 @@ namespace SSDLMaintenanceTool.Forms
         private void connectionStringsComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             domainsCheckListBox.DataSource = null;
+            IsAllDomainsSelected = false;
         }
 
         private void exportDomainsButton_Click(object sender, EventArgs e)
@@ -1256,13 +1278,6 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     MessageBox.Show("Template is not available");
                     return;
-                }
-                if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
-                    exportOptionsComboBox.Enabled = true;
-                else
-                {
-                    exportOptionsComboBox.SelectedIndex = 0;
-                    exportOptionsComboBox.Enabled = true;
                 }
             }
         }

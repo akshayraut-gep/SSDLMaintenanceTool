@@ -206,6 +206,7 @@
     <EmbeddedResource Include="Forms\QueryExecutioner.resx">
       <DependentUpon>QueryExecutioner.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Assets\query-templates.json" />
     <None Include="Assets\connection-strings.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

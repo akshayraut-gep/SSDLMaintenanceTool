@@ -147,6 +147,7 @@
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
             this.connectionStringsComboBox.Size = new System.Drawing.Size(590, 28);
             this.connectionStringsComboBox.TabIndex = 7;
+            this.connectionStringsComboBox.SelectedIndexChanged += new System.EventHandler(this.connectionStringsComboBox_SelectedIndexChanged);
             // 
             // label3
             // 
