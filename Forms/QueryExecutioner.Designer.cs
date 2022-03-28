@@ -48,15 +48,16 @@
             this.queryStatusLabelToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.successDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.failureDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
+            this.resultDomainsToolStrip = new System.Windows.Forms.ToolStripStatusLabel();
             this.asyncCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.queryRichTextBox = new System.Windows.Forms.RichTextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.exportOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.displayOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.mainPanel = new System.Windows.Forms.Panel();
-            this.exportOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.exportFileNameInputDialog = new Ookii.Dialogs.WinForms.InputDialog(this.components);
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
@@ -216,10 +217,11 @@
             this.queryProgressBarToolStrip,
             this.queryStatusLabelToolStrip,
             this.successDomainsToolStrip,
-            this.failureDomainsToolStrip});
+            this.failureDomainsToolStrip,
+            this.resultDomainsToolStrip});
             this.bottomStatusStrip.Location = new System.Drawing.Point(0, 749);
             this.bottomStatusStrip.Name = "bottomStatusStrip";
-            this.bottomStatusStrip.Size = new System.Drawing.Size(763, 32);
+            this.bottomStatusStrip.Size = new System.Drawing.Size(881, 32);
             this.bottomStatusStrip.TabIndex = 17;
             this.bottomStatusStrip.Text = "statusStrip1";
             // 
@@ -256,6 +258,12 @@
             this.failureDomainsToolStrip.Name = "failureDomainsToolStrip";
             this.failureDomainsToolStrip.Size = new System.Drawing.Size(131, 25);
             this.failureDomainsToolStrip.Text = "Failed domains";
+            // 
+            // resultDomainsToolStrip
+            // 
+            this.resultDomainsToolStrip.Name = "resultDomainsToolStrip";
+            this.resultDomainsToolStrip.Size = new System.Drawing.Size(131, 25);
+            this.resultDomainsToolStrip.Text = "Failed domains";
             // 
             // asyncCheckBox
             // 
@@ -314,6 +322,15 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output options";
             // 
+            // exportOptionsComboBox
+            // 
+            this.exportOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.exportOptionsComboBox.FormattingEnabled = true;
+            this.exportOptionsComboBox.Location = new System.Drawing.Point(6, 65);
+            this.exportOptionsComboBox.Name = "exportOptionsComboBox";
+            this.exportOptionsComboBox.Size = new System.Drawing.Size(317, 28);
+            this.exportOptionsComboBox.TabIndex = 29;
+            // 
             // displayOptionsComboBox
             // 
             this.displayOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -346,15 +363,6 @@
             this.mainPanel.Size = new System.Drawing.Size(725, 707);
             this.mainPanel.TabIndex = 28;
             // 
-            // exportOptionsComboBox
-            // 
-            this.exportOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.exportOptionsComboBox.FormattingEnabled = true;
-            this.exportOptionsComboBox.Location = new System.Drawing.Point(6, 65);
-            this.exportOptionsComboBox.Name = "exportOptionsComboBox";
-            this.exportOptionsComboBox.Size = new System.Drawing.Size(317, 28);
-            this.exportOptionsComboBox.TabIndex = 29;
-            // 
             // exportFileNameInputDialog
             // 
             this.exportFileNameInputDialog.MainInstruction = "inputDialog1";
@@ -363,7 +371,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(763, 781);
+            this.ClientSize = new System.Drawing.Size(881, 781);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.mainPanel);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -415,5 +423,6 @@
         private System.Windows.Forms.ComboBox displayOptionsComboBox;
         private System.Windows.Forms.ComboBox exportOptionsComboBox;
         private Ookii.Dialogs.WinForms.InputDialog exportFileNameInputDialog;
+        private System.Windows.Forms.ToolStripStatusLabel resultDomainsToolStrip;
     }
 }

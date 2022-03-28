@@ -326,6 +326,7 @@ namespace SSDLMaintenanceTool.Forms
                     return;
                 }
                 DomainsWithResults.Sort((a, b) => a.CompareTo(b));
+                resultDomainsToolStrip.Text = DomainsWithResults.Count + " has matching data";
 
                 foreach (var domain in DomainsWithResults)
                 {
@@ -449,6 +450,7 @@ namespace SSDLMaintenanceTool.Forms
                         var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
                         if (selectedDisplayOption.Value == "MultiResultSingleTab")
                         {
+                            int totalRecords = 0;
                             var thisTabControl = new TabControl();
                             tabPage.Controls.Add(thisTabControl);
                             thisTabControl.SizeChanged += DynamicallyCreatedTabControl_SizeChanged;
@@ -469,21 +471,38 @@ namespace SSDLMaintenanceTool.Forms
                                 innerTabPage.Controls.Add(dataGridView);
                                 innerTabPage.AutoScroll = true;
                                 innerTabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
+                                StatusStrip statusStrip = new StatusStrip();
+                                ToolStripStatusLabel rowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                                rowCountToolStripStatusLabel.Text = dataTable.TableName + " rows: " + dataTable.Rows.Count;
+                                statusStrip.Items.Add(rowCountToolStripStatusLabel);
+                                innerTabPage.Controls.Add(statusStrip);
+                                totalRecords += dataTable.Rows.Count;
                             }
 
                             innerTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
 
                             thisTabControl.TabPages.AddRange(innerTabPages.ToArray());
                             tabPage.AutoScroll = true;
+                            StatusStrip domainStatusStrip = new StatusStrip();
+                            ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                            domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + totalRecords;
+                            domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                            tabPage.Controls.Add(domainStatusStrip);
                         }
                         else
                         {
                             DataGridView dataGridView = new DataGridView();
-                            dataGridView.DataSource = item.Value.Tables[0];
+                            var dataTable = item.Value.Tables[0];
+                            dataGridView.DataSource = dataTable;
                             tabPage.Controls.Add(dataGridView);
                             dataGridView.Height = tabPage.Height - 50;
                             dataGridView.Width = tabPage.Width - 50;
                             tabPage.AutoScroll = true;
+                            StatusStrip domainStatusStrip = new StatusStrip();
+                            ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                            domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + dataTable.Rows.Count;
+                            domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                            tabPage.Controls.Add(domainStatusStrip);
                         }
                     }
                 }
@@ -556,6 +575,7 @@ namespace SSDLMaintenanceTool.Forms
                     var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
                     if (selectedDisplayOption.Value == "MultiResultSingleTab")
                     {
+                        int totalRecords = 0;
                         var innerTabControl = new TabControl();
                         tabPage.Controls.Add(innerTabControl);
                         innerTabControl.SizeChanged += DynamicallyCreatedTabControl_SizeChanged;
@@ -575,17 +595,34 @@ namespace SSDLMaintenanceTool.Forms
                             innerTabPage.Controls.Add(dataGridView);
                             innerTabPage.AutoScroll = true;
                             innerTabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
+                            StatusStrip statusStrip = new StatusStrip();
+                            ToolStripStatusLabel rowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                            rowCountToolStripStatusLabel.Text = dataTable.TableName + " rows: " + dataTable.Rows.Count;
+                            statusStrip.Items.Add(rowCountToolStripStatusLabel);
+                            innerTabPage.Controls.Add(statusStrip);
+                            totalRecords += dataTable.Rows.Count;
                         }
                         tabPage.AutoScroll = true;
+                        StatusStrip domainStatusStrip = new StatusStrip();
+                        ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                        domainRowCountToolStripStatusLabel.Text = databaseName + " rows: " + totalRecords;
+                        domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                        tabPage.Controls.Add(domainStatusStrip);
                     }
                     else
                     {
                         DataGridView dataGridView = new DataGridView();
+                        var dataTable = dataSetWithKey.Tables[0];
                         dataGridView.DataSource = dataSetWithKey.Tables[0];
                         tabPage.Controls.Add(dataGridView);
                         dataGridView.Height = tabPage.Height - 20;
                         dataGridView.Width = tabPage.Width - 20;
                         tabPage.AutoScroll = true;
+                        StatusStrip domainStatusStrip = new StatusStrip();
+                        ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                        domainRowCountToolStripStatusLabel.Text = databaseName + " rows: " + dataTable.Rows.Count;
+                        domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                        tabPage.Controls.Add(domainStatusStrip);
                     }
                 }
             }
@@ -667,7 +704,6 @@ namespace SSDLMaintenanceTool.Forms
                         {
                             if (hasData)
                             {
-                                resultSet.Tables[0].TableName = copyConnection.Database;
                                 domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
                             }
                         }
@@ -768,7 +804,6 @@ namespace SSDLMaintenanceTool.Forms
                             }
                             if (hasData && (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab"))
                             {
-                                resultSet.Tables[0].TableName = copyConnection.Database;
                                 domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
                             }
                         }
@@ -789,6 +824,11 @@ namespace SSDLMaintenanceTool.Forms
                     catch (Exception ex)
                     {
                         FailureDomainsCount++;
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
+                        }), null);
                     }
                 });
 
@@ -798,7 +838,11 @@ namespace SSDLMaintenanceTool.Forms
                     queryStatusLabelToolStrip.Text = "Completed";
                     loadDomainStatusLabelToolStrip.Text = "Ready";
                     successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
-                    failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
+
+                    if (FailureDomainsCount > 0)
+                    {
+                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
+                    }
 
                     var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
                     if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
@@ -848,6 +892,11 @@ namespace SSDLMaintenanceTool.Forms
                     loadDomainStatusLabelToolStrip.Text = "Ready";
                     successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
                     failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
+
+                    if (FailureDomainsCount > 0)
+                    {
+                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
+                    }
                     QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy(), displayOption);
                 }), null);
             }
@@ -941,7 +990,7 @@ namespace SSDLMaintenanceTool.Forms
 
         private void LoadSSDLDomains(ConnectionDetails copyConnection)
         {
-            var resultSet = DAO.GetData("SELECT Name FROM sys.databases WHERE Name LIKE '%[_]SSDL'", copyConnection);
+            var resultSet = DAO.GetData("SELECT Name FROM sys.databases WHERE Name LIKE '%[_]SSDL%'", copyConnection);
             if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
             {
                 MessageBox.Show("No SSDL domains found");
@@ -1080,21 +1129,14 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
-                        for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                        var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                        for (int i = 0; i < existingWorksheetsCount; i++)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
                     }
                     ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
                     ws.Cells["A1"].LoadFromDataTable(dataTable, true);
-                    var totalColumns = ws.Columns.Count();
-                    //ws.InsertColumn(totalColumns, 1);
-                    var lastColumn = ws.Dimension.End.Column;
-                    ws.Cells[1, lastColumn + 1].Value = "New Name";
-
-                    ws.Cells[2, lastColumn + 1].Value = "Akshay";
-                    var testAdd = ws.Cells[2, lastColumn + 1];
-                    ws.Cells[3, lastColumn + 1].Formula = "=" + ws.Cells[2, lastColumn + 1].Address;
                 }
                 catch (Exception ex)
                 {
@@ -1125,7 +1167,8 @@ namespace SSDLMaintenanceTool.Forms
                     {
                         if (pck.Workbook.Worksheets.Count > 0)
                         {
-                            for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                            var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                            for (int i = 0; i < existingWorksheetsCount; i++)
                             {
                                 pck.Workbook.Worksheets.Delete(i);
                             }
@@ -1163,7 +1206,8 @@ namespace SSDLMaintenanceTool.Forms
                     {
                         if (pck.Workbook.Worksheets.Count > 0)
                         {
-                            for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                            var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                            for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                             {
                                 pck.Workbook.Worksheets.Delete(i);
                             }
@@ -1192,7 +1236,8 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
-                        for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                        var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                        for (int i = 0; i < existingWorksheetsCount;)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
@@ -1230,7 +1275,8 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
-                        for (int i = 0; i < pck.Workbook.Worksheets.Count; i++)
+                        var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                        for (int i = 0; i < existingWorksheetsCount; i++)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
