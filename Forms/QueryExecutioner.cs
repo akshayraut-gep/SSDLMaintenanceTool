@@ -1130,7 +1130,7 @@ namespace SSDLMaintenanceTool.Forms
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
                         var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                        for (int i = 0; i < existingWorksheetsCount; i++)
+                        for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
@@ -1168,7 +1168,7 @@ namespace SSDLMaintenanceTool.Forms
                         if (pck.Workbook.Worksheets.Count > 0)
                         {
                             var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                            for (int i = 0; i < existingWorksheetsCount; i++)
+                            for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                             {
                                 pck.Workbook.Worksheets.Delete(i);
                             }
@@ -1237,7 +1237,7 @@ namespace SSDLMaintenanceTool.Forms
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
                         var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                        for (int i = 0; i < existingWorksheetsCount;)
+                        for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
@@ -1246,7 +1246,7 @@ namespace SSDLMaintenanceTool.Forms
                     {
                         try
                         {
-                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(item.Value.Tables[0].TableName);
+                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(item.Key);
                             ws.Cells["A1"].LoadFromDataTable(item.Value.Tables[0], true);
                             ws.Cells[ws.Dimension.Address].AutoFitColumns();
                         }
@@ -1276,7 +1276,7 @@ namespace SSDLMaintenanceTool.Forms
                     if (pck.Workbook.Worksheets.Count > 0)
                     {
                         var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                        for (int i = 0; i < existingWorksheetsCount; i++)
+                        for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                         {
                             pck.Workbook.Worksheets.Delete(i);
                         }
