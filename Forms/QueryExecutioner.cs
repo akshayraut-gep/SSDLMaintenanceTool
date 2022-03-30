@@ -24,6 +24,8 @@ namespace SSDLMaintenanceTool.Forms
         public DataSet DomainsTableSet { get; set; }
         public DAO DAO { get; set; }
         public ConnectionStringHandler _connectionStringHandler;
+        private DataTable combinedDomainResultDataTable;
+
         public List<Domain> Domains { get; set; }
         public List<Domain> BackupDomains { get; set; }
         private readonly SynchronizationContext synchronizationContext;
@@ -90,6 +92,7 @@ namespace SSDLMaintenanceTool.Forms
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Multi result single tab", Value = "MultiResultSingleTab" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Only list domains with affected records", Value = "OnlyListDomainsWithAffectedRecords" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Only list domains with data", Value = "OnlyListDomainsWithData" });
+            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Combine multi domain in one", Value = "CombineMultiDomainInOne" });
             displayOptionsComboBox.DisplayMember = "Name";
             displayOptionsComboBox.ValueMember = "Value";
             displayOptionsComboBox.SelectedIndex = 0;
@@ -120,7 +123,7 @@ namespace SSDLMaintenanceTool.Forms
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
-            queryOutputTabControl.Height = 200;
+            queryOutputTabControl.Height = 600;
 
             queryProgressBarToolStrip.Minimum = 0;
             queryProgressBarToolStrip.Maximum = 100;
@@ -366,7 +369,7 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 else
                 {
-                    if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
+                    if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab" || selectedDisplayOption.Value == "CombineMultiDomainInOne")
                     {
                         if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
                         {
@@ -385,10 +388,17 @@ namespace SSDLMaintenanceTool.Forms
                         var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
                         if (saveFileDialogResult == DialogResult.OK)
                         {
-                            var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
-                            queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
+                            if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
+                            {
+                                var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
+                                queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
 
-                            ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
+                                ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
+                            }
+                            else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
+                            {
+                                ExportDataTableToExcel(combinedDomainResultDataTable, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, exportFileNameInputDialog.Input);
+                            }
                         }
                     }
                 }
@@ -419,7 +429,7 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 else
                 {
-                    if (displayOption == "MultiResultSingleTab" || (displayOption == "SingleResultSingleTab" && dataSet.Tables[0].Rows.Count > 0))
+                    if ((displayOption == "SingleResultSingleTab" && dataSet.Tables[0].Rows.Count > 0) || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
                         DisplayOutputInTabsAsync(databaseName, dataSet);
                 }
             }
@@ -427,88 +437,122 @@ namespace SSDLMaintenanceTool.Forms
 
         private void DisplayOutputInTabs(ConcurrentDictionary<string, DataSet> dataSetCollection)
         {
-            foreach (var item in dataSetCollection)
+            var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
+            if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
             {
-                TabPage tabPage = new TabPage(item.Key);
+                foreach (var item in dataSetCollection)
+                {
+                    TabPage tabPage = new TabPage(item.Key);
+                    tabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
+
+                    OutputTabPages.Add(tabPage);
+
+                    if (item.Value.Tables.Count > 0)
+                    {
+                        var hasData = false;
+                        foreach (DataTable dataTable in item.Value.Tables)
+                        {
+                            if (dataTable != null && dataTable.Rows.Count > 0)
+                            {
+                                hasData = true;
+                                break;
+                            }
+                        }
+                        if (hasData)
+                        {
+                            if (selectedDisplayOption.Value == "MultiResultSingleTab")
+                            {
+                                int totalRecords = 0;
+                                var thisTabControl = new TabControl();
+                                tabPage.Controls.Add(thisTabControl);
+                                thisTabControl.SizeChanged += DynamicallyCreatedTabControl_SizeChanged;
+
+                                var innerTabPages = new List<TabPage>();
+
+                                foreach (DataTable dataTable in item.Value.Tables)
+                                {
+                                    var innerTabPage = new TabPage(dataTable.TableName);
+                                    innerTabPages.Add(innerTabPage);
+
+                                    DataGridView dataGridView = new DataGridView();
+                                    dataGridView.DataSource = dataTable;
+
+                                    dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
+                                    dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+
+                                    innerTabPage.Controls.Add(dataGridView);
+                                    innerTabPage.AutoScroll = true;
+                                    innerTabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
+                                    StatusStrip statusStrip = new StatusStrip();
+                                    ToolStripStatusLabel rowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                                    rowCountToolStripStatusLabel.Text = dataTable.TableName + " rows: " + dataTable.Rows.Count;
+                                    statusStrip.Items.Add(rowCountToolStripStatusLabel);
+                                    innerTabPage.Controls.Add(statusStrip);
+                                    totalRecords += dataTable.Rows.Count;
+                                }
+
+                                innerTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
+
+                                thisTabControl.TabPages.AddRange(innerTabPages.ToArray());
+                                tabPage.AutoScroll = true;
+                                StatusStrip domainStatusStrip = new StatusStrip();
+                                ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                                domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + totalRecords;
+                                domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                                tabPage.Controls.Add(domainStatusStrip);
+                            }
+                            else if (selectedDisplayOption.Value == "SingleResultSingleTab")
+                            {
+                                DataGridView dataGridView = new DataGridView();
+                                var dataTable = item.Value.Tables[0];
+                                dataGridView.DataSource = dataTable;
+                                tabPage.Controls.Add(dataGridView);
+                                dataGridView.Height = tabPage.Height - 50;
+                                dataGridView.Width = tabPage.Width - 50;
+                                tabPage.AutoScroll = true;
+                                StatusStrip domainStatusStrip = new StatusStrip();
+                                ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                                domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + dataTable.Rows.Count;
+                                domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                                tabPage.Controls.Add(domainStatusStrip);
+                            }
+                        }
+                    }
+
+                    tabPage.Height = queryOutputTabControl.Height;
+                    tabPage.Width = queryOutputTabControl.Width;
+                }
+            }
+            else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
+            {
+                this.combinedDomainResultDataTable = dataSetCollection.ElementAt(0).Value.Tables[0].Clone();
+                combinedDomainResultDataTable.Columns.Add("Domain").DataType = typeof(string);
+                foreach (var item in dataSetCollection)
+                {
+                    item.Value.Tables[0].Columns.Add("Domain").DataType = typeof(string);
+                    foreach (DataRow row in item.Value.Tables[0].Rows)
+                    {
+                        row["Domain"] = item.Key;
+                    }
+                    combinedDomainResultDataTable.Merge(item.Value.Tables[0], true, MissingSchemaAction.Ignore);
+                }
+
+                TabPage tabPage = new TabPage("Combined result from domains");
                 tabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
 
                 OutputTabPages.Add(tabPage);
 
-                if (item.Value.Tables.Count > 0)
-                {
-                    var hasData = false;
-                    foreach (DataTable dataTable in item.Value.Tables)
-                    {
-                        if (dataTable != null && dataTable.Rows.Count > 0)
-                        {
-                            hasData = true;
-                            break;
-                        }
-                    }
-                    if (hasData)
-                    {
-                        var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-                        if (selectedDisplayOption.Value == "MultiResultSingleTab")
-                        {
-                            int totalRecords = 0;
-                            var thisTabControl = new TabControl();
-                            tabPage.Controls.Add(thisTabControl);
-                            thisTabControl.SizeChanged += DynamicallyCreatedTabControl_SizeChanged;
-
-                            var innerTabPages = new List<TabPage>();
-
-                            foreach (DataTable dataTable in item.Value.Tables)
-                            {
-                                var innerTabPage = new TabPage(dataTable.TableName);
-                                innerTabPages.Add(innerTabPage);
-
-                                DataGridView dataGridView = new DataGridView();
-                                dataGridView.DataSource = dataTable;
-
-                                dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
-                                dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
-
-                                innerTabPage.Controls.Add(dataGridView);
-                                innerTabPage.AutoScroll = true;
-                                innerTabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
-                                StatusStrip statusStrip = new StatusStrip();
-                                ToolStripStatusLabel rowCountToolStripStatusLabel = new ToolStripStatusLabel();
-                                rowCountToolStripStatusLabel.Text = dataTable.TableName + " rows: " + dataTable.Rows.Count;
-                                statusStrip.Items.Add(rowCountToolStripStatusLabel);
-                                innerTabPage.Controls.Add(statusStrip);
-                                totalRecords += dataTable.Rows.Count;
-                            }
-
-                            innerTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
-
-                            thisTabControl.TabPages.AddRange(innerTabPages.ToArray());
-                            tabPage.AutoScroll = true;
-                            StatusStrip domainStatusStrip = new StatusStrip();
-                            ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
-                            domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + totalRecords;
-                            domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
-                            tabPage.Controls.Add(domainStatusStrip);
-                        }
-                        else
-                        {
-                            DataGridView dataGridView = new DataGridView();
-                            var dataTable = item.Value.Tables[0];
-                            dataGridView.DataSource = dataTable;
-                            tabPage.Controls.Add(dataGridView);
-                            dataGridView.Height = tabPage.Height - 50;
-                            dataGridView.Width = tabPage.Width - 50;
-                            tabPage.AutoScroll = true;
-                            StatusStrip domainStatusStrip = new StatusStrip();
-                            ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
-                            domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + dataTable.Rows.Count;
-                            domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
-                            tabPage.Controls.Add(domainStatusStrip);
-                        }
-                    }
-                }
-
-                tabPage.Height = queryOutputTabControl.Height;
-                tabPage.Width = queryOutputTabControl.Width;
+                DataGridView dataGridView = new DataGridView();
+                dataGridView.DataSource = combinedDomainResultDataTable;
+                tabPage.Controls.Add(dataGridView);
+                dataGridView.Height = tabPage.Height - 50;
+                dataGridView.Width = tabPage.Width - 50;
+                tabPage.AutoScroll = true;
+                StatusStrip domainStatusStrip = new StatusStrip();
+                ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                domainRowCountToolStripStatusLabel.Text = "Combined result" + " rows: " + combinedDomainResultDataTable.Rows.Count;
+                domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                tabPage.Controls.Add(domainStatusStrip);
             }
 
             OutputTabPages.Sort((s1, s2) => s1.Text.CompareTo(s2.Text));
@@ -609,7 +653,7 @@ namespace SSDLMaintenanceTool.Forms
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
                     }
-                    else
+                    else if (selectedDisplayOption.Value == "SingleResultSingleTab")
                     {
                         DataGridView dataGridView = new DataGridView();
                         var dataTable = dataSetWithKey.Tables[0];
@@ -623,6 +667,10 @@ namespace SSDLMaintenanceTool.Forms
                         domainRowCountToolStripStatusLabel.Text = databaseName + " rows: " + dataTable.Rows.Count;
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
+                    }
+                    else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
+                    {
+
                     }
                 }
             }
@@ -704,7 +752,10 @@ namespace SSDLMaintenanceTool.Forms
                         {
                             if (hasData)
                             {
-                                domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                if (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
+                                {
+                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                }
                             }
                         }
 
@@ -772,6 +823,7 @@ namespace SSDLMaintenanceTool.Forms
         public ConcurrentDictionary<string, DataSet> ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, out string errorMessage)
         {
             var domainDataSets = new ConcurrentDictionary<string, DataSet>();
+            var combinedDomainResultDataTable = new DataTable();
             errorMessage = "";
 
             if (connectionDetails.IsMultiTenant)
@@ -802,9 +854,12 @@ namespace SSDLMaintenanceTool.Forms
                                     break;
                                 }
                             }
-                            if (hasData && (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab"))
+                            if (hasData)
                             {
-                                domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                if (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
+                                {
+                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                }
                             }
                         }
 

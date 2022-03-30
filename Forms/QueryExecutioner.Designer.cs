@@ -104,7 +104,7 @@
             this.queryOutputTabControl.Location = new System.Drawing.Point(7, 642);
             this.queryOutputTabControl.Name = "queryOutputTabControl";
             this.queryOutputTabControl.SelectedIndex = 0;
-            this.queryOutputTabControl.Size = new System.Drawing.Size(200, 50);
+            this.queryOutputTabControl.Size = new System.Drawing.Size(715, 226);
             this.queryOutputTabControl.TabIndex = 4;
             this.queryOutputTabControl.SizeChanged += new System.EventHandler(this.queryOutputTabControl_SizeChanged);
             // 
@@ -219,7 +219,7 @@
             this.successDomainsToolStrip,
             this.failureDomainsToolStrip,
             this.resultDomainsToolStrip});
-            this.bottomStatusStrip.Location = new System.Drawing.Point(0, 749);
+            this.bottomStatusStrip.Location = new System.Drawing.Point(0, 886);
             this.bottomStatusStrip.Name = "bottomStatusStrip";
             this.bottomStatusStrip.Size = new System.Drawing.Size(881, 32);
             this.bottomStatusStrip.TabIndex = 17;
@@ -360,7 +360,7 @@
             this.mainPanel.Controls.Add(this.exportDomainsButton);
             this.mainPanel.Location = new System.Drawing.Point(12, 12);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(725, 707);
+            this.mainPanel.Size = new System.Drawing.Size(725, 871);
             this.mainPanel.TabIndex = 28;
             // 
             // exportFileNameInputDialog
@@ -371,7 +371,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(881, 781);
+            this.ClientSize = new System.Drawing.Size(881, 918);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.mainPanel);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
