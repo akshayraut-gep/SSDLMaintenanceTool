@@ -653,7 +653,7 @@ namespace SSDLMaintenanceTool.Forms
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
                     }
-                    else if (selectedDisplayOption.Value == "SingleResultSingleTab")
+                    else if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "OnlyListDomainsWithData")
                     {
                         DataGridView dataGridView = new DataGridView();
                         var dataTable = dataSetWithKey.Tables[0];
@@ -1173,6 +1173,7 @@ namespace SSDLMaintenanceTool.Forms
 
         void ExportDataTableToExcel(DataTable dataTable, string usersSaveDirectoryPath, string rootDirectoryName, string fileName = null)
         {
+            fileName = "data";
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + GlobalConstants.QueryExecutionerDomainExportDirectory + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
 
