@@ -413,7 +413,7 @@ namespace SSDLMaintenanceTool.Forms
             }
             else if (dataSet != null && dataSet.Tables.Count > 0)
             {
-                if (displayOption == "OnlyListDomainsWithData")
+                if (displayOption == "OnlyListDomainsWithData" || displayOption == "OnlyListDomainsWithAffectedRecords")
                 {
                     var hasData = false;
                     foreach (DataTable dataTable in dataSet.Tables)
@@ -653,7 +653,7 @@ namespace SSDLMaintenanceTool.Forms
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
                     }
-                    else if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "OnlyListDomainsWithData")
+                    else if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
                     {
                         DataGridView dataGridView = new DataGridView();
                         var dataTable = dataSetWithKey.Tables[0];
@@ -1173,8 +1173,13 @@ namespace SSDLMaintenanceTool.Forms
 
         void ExportDataTableToExcel(DataTable dataTable, string usersSaveDirectoryPath, string rootDirectoryName, string fileName = null)
         {
-            fileName = "data";
-            var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + GlobalConstants.QueryExecutionerDomainExportDirectory + @"\";
+            if (!fileName.HasContent())
+                fileName = "data";
+
+            if (!usersSaveDirectoryPath.ToLower().EndsWith(this.Name.ToLower()))
+                usersSaveDirectoryPath += @"\" + this.Name;
+
+            var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
 
             var resolvedFilePath = resolvedDirectoryPath + (fileName ?? dataTable.TableName) + ".xlsx";
