@@ -59,6 +59,7 @@
             this.displayOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.mainPanel = new System.Windows.Forms.Panel();
             this.exportFileNameInputDialog = new Ookii.Dialogs.WinForms.InputDialog(this.components);
+            this.domainFilterOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -81,20 +82,20 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
             this.label1.Location = new System.Drawing.Point(3, 62);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 20);
+            this.label1.Size = new System.Drawing.Size(70, 20);
             this.label1.TabIndex = 3;
             this.label1.Text = "Domain";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
             this.label2.Location = new System.Drawing.Point(3, 320);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(51, 20);
+            this.label2.Size = new System.Drawing.Size(56, 20);
             this.label2.TabIndex = 3;
             this.label2.Text = "Query";
             // 
@@ -117,16 +118,16 @@
             "A",
             "B",
             "C"});
-            this.domainsCheckListBox.Location = new System.Drawing.Point(107, 137);
+            this.domainsCheckListBox.Location = new System.Drawing.Point(118, 137);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
-            this.domainsCheckListBox.Size = new System.Drawing.Size(590, 165);
+            this.domainsCheckListBox.Size = new System.Drawing.Size(579, 165);
             this.domainsCheckListBox.TabIndex = 5;
             this.domainsCheckListBox.SelectedIndexChanged += new System.EventHandler(this.DomainsCheckListBox_SelectedIndexChanged);
             // 
             // loadDomainsButton
             // 
             this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.loadDomainsButton.Location = new System.Drawing.Point(107, 56);
+            this.loadDomainsButton.Location = new System.Drawing.Point(338, 56);
             this.loadDomainsButton.Name = "loadDomainsButton";
             this.loadDomainsButton.Size = new System.Drawing.Size(183, 32);
             this.loadDomainsButton.TabIndex = 6;
@@ -144,28 +145,28 @@
             "QC",
             "UAT",
             "Production"});
-            this.connectionStringsComboBox.Location = new System.Drawing.Point(107, 8);
+            this.connectionStringsComboBox.Location = new System.Drawing.Point(118, 8);
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
-            this.connectionStringsComboBox.Size = new System.Drawing.Size(590, 28);
+            this.connectionStringsComboBox.Size = new System.Drawing.Size(579, 28);
             this.connectionStringsComboBox.TabIndex = 7;
             this.connectionStringsComboBox.SelectedIndexChanged += new System.EventHandler(this.connectionStringsComboBox_SelectedIndexChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
             this.label3.Location = new System.Drawing.Point(3, 11);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(98, 20);
+            this.label3.Size = new System.Drawing.Size(109, 20);
             this.label3.TabIndex = 8;
             this.label3.Text = "Environment";
             // 
             // exportDomainsButton
             // 
             this.exportDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.exportDomainsButton.Location = new System.Drawing.Point(516, 56);
+            this.exportDomainsButton.Location = new System.Drawing.Point(527, 56);
             this.exportDomainsButton.Name = "exportDomainsButton";
-            this.exportDomainsButton.Size = new System.Drawing.Size(181, 32);
+            this.exportDomainsButton.Size = new System.Drawing.Size(170, 32);
             this.exportDomainsButton.TabIndex = 10;
             this.exportDomainsButton.Text = "Export domains";
             this.exportDomainsButton.UseVisualStyleBackColor = true;
@@ -201,9 +202,9 @@
             // 
             // filterDomainsTextBox
             // 
-            this.filterDomainsTextBox.Location = new System.Drawing.Point(108, 105);
+            this.filterDomainsTextBox.Location = new System.Drawing.Point(118, 105);
             this.filterDomainsTextBox.Name = "filterDomainsTextBox";
-            this.filterDomainsTextBox.Size = new System.Drawing.Size(589, 26);
+            this.filterDomainsTextBox.Size = new System.Drawing.Size(579, 26);
             this.filterDomainsTextBox.TabIndex = 13;
             this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
             this.filterDomainsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filterDomainsTextBox_KeyPress);
@@ -343,6 +344,7 @@
             // 
             // mainPanel
             // 
+            this.mainPanel.Controls.Add(this.domainFilterOptionsComboBox);
             this.mainPanel.Controls.Add(this.connectionStringsComboBox);
             this.mainPanel.Controls.Add(this.groupBox2);
             this.mainPanel.Controls.Add(this.executeQueryButton);
@@ -366,6 +368,14 @@
             // exportFileNameInputDialog
             // 
             this.exportFileNameInputDialog.MainInstruction = "inputDialog1";
+            // 
+            // domainFilterOptionsComboBox
+            // 
+            this.domainFilterOptionsComboBox.FormattingEnabled = true;
+            this.domainFilterOptionsComboBox.Location = new System.Drawing.Point(118, 59);
+            this.domainFilterOptionsComboBox.Name = "domainFilterOptionsComboBox";
+            this.domainFilterOptionsComboBox.Size = new System.Drawing.Size(212, 28);
+            this.domainFilterOptionsComboBox.TabIndex = 29;
             // 
             // QueryExecutioner
             // 
@@ -424,5 +434,6 @@
         private System.Windows.Forms.ComboBox exportOptionsComboBox;
         private Ookii.Dialogs.WinForms.InputDialog exportFileNameInputDialog;
         private System.Windows.Forms.ToolStripStatusLabel resultDomainsToolStrip;
+        private System.Windows.Forms.ComboBox domainFilterOptionsComboBox;
     }
 }

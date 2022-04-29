@@ -100,9 +100,19 @@ namespace SSDLMaintenanceTool.Forms
             exportOptionsComboBox.Items.Add(new NameValueModel { Name = "No Export", Value = "NoExport" });
             exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export one file per domain", Value = "ExportOneFilePerDomain" });
             exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export all domains in one file", Value = "ExportAllDomainsInOneFile" });
+            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export as is", Value = "ExportAsIs" });
             exportOptionsComboBox.DisplayMember = "Name";
             exportOptionsComboBox.ValueMember = "Value";
             exportOptionsComboBox.SelectedIndex = 0;
+
+            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "SSDL Micro DBs", Value = "SSDLMicroDBs" });
+            //domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "SSDL Buyer DBs", Value = "SSDLBuyerDBs" });
+            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "Non-SSDL Buyer DBs", Value = "NonSSDLBuyerDBs" });
+            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "All DBs", Value = "AllDBs" });
+            domainFilterOptionsComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            domainFilterOptionsComboBox.DisplayMember = "Name";
+            domainFilterOptionsComboBox.ValueMember = "Value";
+            domainFilterOptionsComboBox.SelectedIndex = 0;
 
             QueryCompleted = new Dictionary<string, QueryCompletion>();
 
@@ -123,7 +133,7 @@ namespace SSDLMaintenanceTool.Forms
 
             ConvertToDomainModel();
             PopulateDomainsCheckListBox();
-            queryOutputTabControl.Height = 600;
+            queryOutputTabControl.Height = 450;
 
             queryProgressBarToolStrip.Minimum = 0;
             queryProgressBarToolStrip.Maximum = 100;
@@ -158,10 +168,31 @@ namespace SSDLMaintenanceTool.Forms
                 return;
             }
 
-            if (queryRichTextBox.Text == null || queryRichTextBox.Text.Trim() == "")
+            if (!queryRichTextBox.Text.HasContent())
             {
                 MessageBox.Show("Query Text is mandatory");
                 return;
+            }
+
+            if (domainFilterOptionsComboBox.SelectedItem != null)
+            {
+                var selectedDomainFilter = (domainFilterOptionsComboBox.SelectedItem as NameValueModel).Value;
+                if (selectedDomainFilter != "SSDLMicroDBs")
+                {
+                    InputDialog promptForDangerous = new InputDialog();
+                    promptForDangerous.WindowTitle = "Be careful with script!";
+                    promptForDangerous.MainInstruction = "You're about to execute script(s) on database that might be non-SSDL. Please enter password";
+                    var dialogResult = promptForDangerous.ShowDialog(this);
+                    if (dialogResult != DialogResult.OK)
+                    {
+                        return;
+                    }
+                    if (promptForDangerous.Input != "IUnderstand")
+                    {
+
+                        return;
+                    }
+                }
             }
 
             if (DangerousScripts.Any(a => queryRichTextBox.Text.ToLower().Contains(a.ToLower())))
@@ -983,6 +1014,8 @@ namespace SSDLMaintenanceTool.Forms
                 copyConnection.Password = credentialsPrompt.Password;
             }
 
+            var domainFilterBeforeSearch = (domainFilterOptionsComboBox.SelectedItem as NameValueModel).Value;
+
             EnableUIForDomainList(false);
             loadDomainsProgressBarToolStrip.Value = 0;
             loadDomainStatusLabelToolStrip.Text = "Running";
@@ -994,7 +1027,7 @@ namespace SSDLMaintenanceTool.Forms
             {
                 try
                 {
-                    LoadSSDLDomains(copyConnection);
+                    LoadSSDLDomains(copyConnection, domainFilterBeforeSearch);
                     ConvertToDomainModel();
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
@@ -1043,11 +1076,35 @@ namespace SSDLMaintenanceTool.Forms
             queryRichTextBox.ReadOnly = !value;
         }
 
-        private void LoadSSDLDomains(ConnectionDetails copyConnection)
+        private void LoadSSDLDomains(ConnectionDetails copyConnection, string domainNameFilter = "")
         {
-            var resultSet = DAO.GetData("SELECT Name FROM sys.databases WHERE Name LIKE '%[_]SSDL%'", copyConnection);
+            var selectClause = "Name";
+            var filterCondition = "";
+
+            if (!domainNameFilter.HasContent() || domainNameFilter == "SSDLMicroDBs")
+            {
+                filterCondition = $"Name LIKE '%[_]SSDL'";
+            }
+            else
+            {
+                if (domainNameFilter == "SSDLBuyerDBs")
+                {
+                    filterCondition = $"Name LIKE '%[_]SSDL'";
+                    selectClause = "REPLACE(Name, '_SSDL', '') AS Name";
+                }
+                else if (domainNameFilter == "NonSSDLBuyerDBs")
+                {
+                    filterCondition = $"Name NOT LIKE '%[_]SSDL'";
+                }
+            }
+
+            if (filterCondition.HasContent())
+                filterCondition = "WHERE " + filterCondition;
+
+            var resultSet = DAO.GetData($"SELECT {selectClause} FROM sys.databases {filterCondition}", copyConnection);
             if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
             {
+                domainsCheckListBox.DataSource = null;
                 MessageBox.Show("No SSDL domains found");
                 return;
             }
