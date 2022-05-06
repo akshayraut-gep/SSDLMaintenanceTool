@@ -6,5 +6,6 @@
         public string DisplayName { get; set; }
         public string DatabaseName { get; set; }
         public bool IsChecked { get; set; }
+        public string BuyerPartnerCode { get; internal set; }
     }
 }

@@ -63,6 +63,26 @@ namespace SSDLMaintenanceTool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap cache_clear {
+            get {
+                object obj = ResourceManager.GetObject("cache_clear", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cache_clear_new {
+            get {
+                object obj = ResourceManager.GetObject("cache-clear-new", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap corrupt_file {
             get {
                 object obj = ResourceManager.GetObject("corrupt_file", resourceCulture);

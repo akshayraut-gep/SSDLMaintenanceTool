@@ -1,0 +1,110 @@
+[
+  {
+    "DisplayName": "DEV",
+    "Name": "DEV",
+    "ConnectionStringByRegions": [
+      {
+        "Server": "tcp:smartgepdev.database.windows.net,1433",
+        "Database": "DEVSmartConfiguration",
+        "IsInputCredentialsRequired": true,
+        "IsMFA": true,
+        "UserName": null,
+        "Password": null,
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "DEV",
+        "Region": "US",
+        "Instance": "1"
+      }
+    ]
+  },
+  {
+    "DisplayName": "QC",
+    "Name": "QC",
+    "ConnectionStringByRegions": [
+      {
+        "Server": "tcp:smartgepqaus.database.windows.net",
+        "Database": "QCSmartConfiguration",
+        "IsInputCredentialsRequired": true,
+        "IsMFA": true,
+        "UserName": null,
+        "Password": null,
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "QC",
+        "Region": "US",
+        "Instance": "1"
+      }
+    ]
+  },
+  {
+    "DisplayName": "UAT US",
+    "Name": "UAT",
+    "ConnectionStringByRegions": [
+      {
+        "Server": "gjc6phtaz8.database.windows.net",
+        "Database": "UATSmartConfiguration",
+        "IsInputCredentialsRequired": true,
+        "IsMFA": true,
+        "UserName": null,
+        "Password": null,
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "UAT",
+        "Region": "US",
+        "Instance": "1"
+      }
+    ]
+  },
+  {
+    "DisplayName": "PROD US 1 and 2",
+    "Name": "PROD",
+    "ConnectionStringByRegions": [
+      {
+        "Server": "gpag7ej4m0.database.windows.net",
+        "Database": "GEPSmartConfiguration",
+        "IsInputCredentialsRequired": false,
+        "IsMFA": false,
+        "UserName": "RM_DBReader",
+        "Password": "Password@321",
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "PROD",
+        "Region": "US",
+        "Instance": "1"
+      },
+      {
+        "Server": "smartgepprodus2.database.windows.net",
+        "Database": "GEPSmartConfiguration",
+        "IsInputCredentialsRequired": false,
+        "IsMFA": false,
+        "UserName": "RM_DBReader",
+        "Password": "Password@321",
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "PROD",
+        "Region": "US",
+        "Instance": "2"
+      }
+    ]
+  },
+  {
+    "DisplayName": "PROD EU",
+    "Name": "PRODEU",
+    "ConnectionStringByRegions": [
+      {
+        "Server": "drsmartgepprodeu.database.windows.net",
+        "Database": "GEPSmartConfiguration",
+        "IsInputCredentialsRequired": false,
+        "IsMFA": false,
+        "UserName": "RM_DBReader",
+        "Password": "Password@123",
+        "ConfigDBConnectionName": null,
+        "IsMultiTenant": false,
+        "Environment": "PROD",
+        "Region": "EU",
+        "Instance": "1"
+      }
+    ]
+  }
+]

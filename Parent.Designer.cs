@@ -33,9 +33,11 @@
             this.openQueryExecutionerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openPredefinedQueryEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileCorrutValidatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cacheClearAtGEPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileCorruptValidator = new System.Windows.Forms.Button();
             this.queryExecutorButton = new System.Windows.Forms.Button();
             this.queryEditorButton = new System.Windows.Forms.Button();
+            this.cacheClearAtGEPButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -56,7 +58,8 @@
             this.menuToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openQueryExecutionerToolStripMenuItem,
             this.openPredefinedQueryEditorToolStripMenuItem,
-            this.openFileCorrutValidatorToolStripMenuItem});
+            this.openFileCorrutValidatorToolStripMenuItem,
+            this.cacheClearAtGEPToolStripMenuItem});
             this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
             this.menuToolStripMenuItem.Size = new System.Drawing.Size(73, 29);
             this.menuToolStripMenuItem.Text = "Menu";
@@ -64,23 +67,30 @@
             // openQueryExecutionerToolStripMenuItem
             // 
             this.openQueryExecutionerToolStripMenuItem.Name = "openQueryExecutionerToolStripMenuItem";
-            this.openQueryExecutionerToolStripMenuItem.Size = new System.Drawing.Size(360, 34);
-            this.openQueryExecutionerToolStripMenuItem.Text = "Open QueryExecutioner";
+            this.openQueryExecutionerToolStripMenuItem.Size = new System.Drawing.Size(311, 34);
+            this.openQueryExecutionerToolStripMenuItem.Text = "QueryExecutioner";
             this.openQueryExecutionerToolStripMenuItem.Click += new System.EventHandler(this.openQueryExecutionerToolStripMenuItem_Click);
             // 
             // openPredefinedQueryEditorToolStripMenuItem
             // 
             this.openPredefinedQueryEditorToolStripMenuItem.Name = "openPredefinedQueryEditorToolStripMenuItem";
-            this.openPredefinedQueryEditorToolStripMenuItem.Size = new System.Drawing.Size(360, 34);
-            this.openPredefinedQueryEditorToolStripMenuItem.Text = "Open Pre-defined Query Editor";
+            this.openPredefinedQueryEditorToolStripMenuItem.Size = new System.Drawing.Size(311, 34);
+            this.openPredefinedQueryEditorToolStripMenuItem.Text = "Pre-defined Query Editor";
             this.openPredefinedQueryEditorToolStripMenuItem.Click += new System.EventHandler(this.openPredefinedQueryEditorToolStripMenuItem_Click);
             // 
             // openFileCorrutValidatorToolStripMenuItem
             // 
             this.openFileCorrutValidatorToolStripMenuItem.Name = "openFileCorrutValidatorToolStripMenuItem";
-            this.openFileCorrutValidatorToolStripMenuItem.Size = new System.Drawing.Size(360, 34);
-            this.openFileCorrutValidatorToolStripMenuItem.Text = "Open File Corrut Validator";
+            this.openFileCorrutValidatorToolStripMenuItem.Size = new System.Drawing.Size(311, 34);
+            this.openFileCorrutValidatorToolStripMenuItem.Text = "File Corrut Validator";
             this.openFileCorrutValidatorToolStripMenuItem.Click += new System.EventHandler(this.openFileCorrutValidatorToolStripMenuItem_Click);
+            // 
+            // cacheClearAtGEPToolStripMenuItem
+            // 
+            this.cacheClearAtGEPToolStripMenuItem.Name = "cacheClearAtGEPToolStripMenuItem";
+            this.cacheClearAtGEPToolStripMenuItem.Size = new System.Drawing.Size(311, 34);
+            this.cacheClearAtGEPToolStripMenuItem.Text = "GEP Cache Clear";
+            this.cacheClearAtGEPToolStripMenuItem.Click += new System.EventHandler(this.gEPCacheClearToolStripMenuItem_Click);
             // 
             // fileCorruptValidator
             // 
@@ -124,11 +134,26 @@
             this.queryEditorButton.UseVisualStyleBackColor = true;
             this.queryEditorButton.Click += new System.EventHandler(this.queryEditorButton_Click);
             // 
+            // cacheClearAtGEPButton
+            // 
+            this.cacheClearAtGEPButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.cacheClearAtGEPButton.Image = global::SSDLMaintenanceTool.Properties.Resources.cache_clear_new;
+            this.cacheClearAtGEPButton.Location = new System.Drawing.Point(410, 356);
+            this.cacheClearAtGEPButton.Name = "cacheClearAtGEPButton";
+            this.cacheClearAtGEPButton.Size = new System.Drawing.Size(219, 260);
+            this.cacheClearAtGEPButton.TabIndex = 4;
+            this.cacheClearAtGEPButton.Text = "GEP Cache Clear";
+            this.cacheClearAtGEPButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.cacheClearAtGEPButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.cacheClearAtGEPButton.UseVisualStyleBackColor = true;
+            this.cacheClearAtGEPButton.Click += new System.EventHandler(this.cacheClearAtGEPButton_Click);
+            // 
             // Parent
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(846, 659);
+            this.Controls.Add(this.cacheClearAtGEPButton);
             this.Controls.Add(this.fileCorruptValidator);
             this.Controls.Add(this.queryExecutorButton);
             this.Controls.Add(this.queryEditorButton);
@@ -153,6 +178,8 @@
         private System.Windows.Forms.Button queryEditorButton;
         private System.Windows.Forms.Button queryExecutorButton;
         private System.Windows.Forms.Button fileCorruptValidator;
+        private System.Windows.Forms.Button cacheClearAtGEPButton;
+        private System.Windows.Forms.ToolStripMenuItem cacheClearAtGEPToolStripMenuItem;
     }
 }
 

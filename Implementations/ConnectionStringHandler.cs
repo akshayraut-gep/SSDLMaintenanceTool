@@ -11,9 +11,9 @@ namespace SSDLMaintenanceTool.Implementations
     {
         public static List<ConnectionDetails> ConnectionStrings { get; set; }
 
-        static ConnectionStringHandler()
+        public ConnectionStringHandler(string connectionStringPath)
         {
-            var jsonFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"Assets\connection-strings.json");
+            var jsonFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), connectionStringPath);
             var json = File.ReadAllText(jsonFilePath);
             if (json.HasContent())
             {
@@ -37,6 +37,27 @@ namespace SSDLMaintenanceTool.Implementations
             copy.Environment = source.Environment;
             copy.Region = source.Region;
             copy.Instance = source.Instance;
+
+            if (source.ConnectionStringByRegions != null && source.ConnectionStringByRegions.Count > 0)
+            {
+                foreach (var connectionStringByRegionIterator in source.ConnectionStringByRegions)
+                {
+                    var copyConnectionStringByRegion = new ConnectionStringsByRegion();
+                    copyConnectionStringByRegion.Name = connectionStringByRegionIterator.Name;
+                    copyConnectionStringByRegion.Server = connectionStringByRegionIterator.Server;
+                    copyConnectionStringByRegion.Database = connectionStringByRegionIterator.Database;
+                    copyConnectionStringByRegion.IsInputCredentialsRequired = connectionStringByRegionIterator.IsInputCredentialsRequired;
+                    copyConnectionStringByRegion.IsMFA = connectionStringByRegionIterator.IsMFA;
+                    copyConnectionStringByRegion.UserName = connectionStringByRegionIterator.UserName;
+                    copyConnectionStringByRegion.Password = connectionStringByRegionIterator.Password;
+                    copyConnectionStringByRegion.ConfigDBConnectionName = connectionStringByRegionIterator.ConfigDBConnectionName;
+                    copyConnectionStringByRegion.IsMultiTenant = connectionStringByRegionIterator.IsMultiTenant;
+                    copyConnectionStringByRegion.Environment = connectionStringByRegionIterator.Environment;
+                    copyConnectionStringByRegion.Region = connectionStringByRegionIterator.Region;
+                    copyConnectionStringByRegion.Instance = connectionStringByRegionIterator.Instance;
+                    copy.ConnectionStringByRegions.Add(copyConnectionStringByRegion);
+                }
+            }
             return copy;
         }
     }

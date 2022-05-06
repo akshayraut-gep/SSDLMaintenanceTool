@@ -73,5 +73,22 @@ namespace SSDLMaintenanceTool
             OpenQueryExecutioner();
         }
         #endregion
+
+        #region GEP Cache Clear
+        private void OpenGEPCacheClear()
+        {
+            var gepCacheClear = new GEPCacheClear();
+            gepCacheClear.Show();
+        }
+        private void cacheClearAtGEPButton_Click(object sender, EventArgs e)
+        {
+            OpenGEPCacheClear();
+        }
+        #endregion
+
+        private void gEPCacheClearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenGEPCacheClear();
+        }
     }
 }
