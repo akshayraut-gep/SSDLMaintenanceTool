@@ -239,7 +239,6 @@
     <None Include="Pictures\corrupt-file.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Pictures\cache-clear.png" />
     <Content Include="Pictures\cache-clear-new.jpg" />
     <Content Include="Pictures\query-analysis.png" />
     <Content Include="QueryTemplates\main-table-master-columns-mismatch-detection.sql" />
