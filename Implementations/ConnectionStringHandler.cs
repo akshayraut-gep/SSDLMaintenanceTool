@@ -9,7 +9,7 @@ namespace SSDLMaintenanceTool.Implementations
 {
     public class ConnectionStringHandler
     {
-        public static List<ConnectionDetails> ConnectionStrings { get; set; }
+        public List<ConnectionDetails> ConnectionStrings { get; set; }
 
         public ConnectionStringHandler(string connectionStringPath)
         {

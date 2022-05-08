@@ -35,7 +35,7 @@ namespace SSDLMaintenanceTool.Forms
 
         private void GEPCacheClear_Load(object sender, EventArgs e)
         {
-            environmentComboBox.DataSource = ConnectionStringHandler.ConnectionStrings;
+            environmentComboBox.DataSource = _connectionStringHandler.ConnectionStrings;
             environmentComboBox.ValueMember = "Name";
             environmentComboBox.DisplayMember = "DisplayName";
             environmentComboBox.SelectedIndex = -1;
@@ -89,14 +89,14 @@ namespace SSDLMaintenanceTool.Forms
                     Domain domain = new Domain();
                     domain.Name = row["PartnerCode"].ToString();
                     domain.DisplayName = row["PartnerCode"].ToString();
-                    domain.DatabaseName = row["PartnerCode"].ToString();
+                    domain.BuyerPartnerCode = row["PartnerCode"].ToString();
                     BackupDomains.Add(domain);
                 }
             }
             Domains = BackupDomains.Select(a => new Domain()
             {
                 Name = a.Name,
-                DatabaseName = a.DatabaseName,
+                BuyerPartnerCode = a.BuyerPartnerCode,
                 DisplayName = a.DisplayName,
                 IsChecked = a.IsChecked
             }).ToList();
@@ -180,7 +180,7 @@ namespace SSDLMaintenanceTool.Forms
             }
         }
 
-        private async void clearCacheButton_Click(object sender, EventArgs e)
+        private void clearCacheButton_Click(object sender, EventArgs e)
         {
             var listOfBPCs = new List<string>();
             var selectedMode = (modeComboBox.SelectedItem as NameValueModel).Value;
@@ -222,7 +222,7 @@ namespace SSDLMaintenanceTool.Forms
                 return null;
             }
 
-            var connectionDetail = ConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == environmentComboBox.SelectedValue.ToString());
+            var connectionDetail = _connectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == environmentComboBox.SelectedValue.ToString());
             if (connectionDetail == null)
             {
                 validationMessage = "BPC is not available";
@@ -434,7 +434,7 @@ namespace SSDLMaintenanceTool.Forms
                 return null;
             }
 
-            var connectionDetail = ConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == environmentComboBox.SelectedValue.ToString());
+            var connectionDetail = _connectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == environmentComboBox.SelectedValue.ToString());
             if (connectionDetail == null)
             {
                 validationMessage = "Connection string not available";

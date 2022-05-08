@@ -72,19 +72,6 @@
         "Environment": "PROD",
         "Region": "US",
         "Instance": "1"
-      },
-      {
-        "Server": "smartgepprodus2.database.windows.net",
-        "Database": "GEPSmartConfiguration",
-        "IsInputCredentialsRequired": false,
-        "IsMFA": false,
-        "UserName": "RM_DBReader",
-        "Password": "Password@321",
-        "ConfigDBConnectionName": null,
-        "IsMultiTenant": false,
-        "Environment": "PROD",
-        "Region": "US",
-        "Instance": "2"
       }
     ]
   },

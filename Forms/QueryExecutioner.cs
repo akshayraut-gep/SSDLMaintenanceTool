@@ -22,7 +22,7 @@ namespace SSDLMaintenanceTool.Forms
     {
         public List<EnvironmentSetting> Environments { get; set; }
         public DataSet DomainsTableSet { get; set; }
-        public DAO DAO { get; set; }
+        public DAO dao;
         public ConnectionStringHandler _connectionStringHandler;
         private DataTable combinedDomainResultDataTable;
 
@@ -30,21 +30,23 @@ namespace SSDLMaintenanceTool.Forms
         public List<Domain> BackupDomains { get; set; }
         private readonly SynchronizationContext synchronizationContext;
         public delegate bool MethodInvokerWithDataSetResult();
-        public delegate void QueryCompletion();
+        public delegate void QueryCompletion(string exportingFileName = null);
         public Dictionary<string, QueryCompletion> QueryCompleted { get; set; }
         public ConcurrentDictionary<string, DataSet> QueryResultDataSet { get; set; }
         public bool IsAllDomainsSelected { get; set; }
         public int SuccessDomainsCount { get; set; }
         public int FailureDomainsCount { get; set; }
         public List<TabPage> OutputTabPages { get; set; }
-        public List<string> DomainsWithResults { get; set; }
+        public ConcurrentDictionary<string, string> DomainsWithResults { get; set; }
         public List<string> DangerousScripts { get; set; }
+        public List<NameValueModel> ExportOptions { get; set; }
+        public SortedList<int, QueryExecutionLog> QueryExecutionLogList { get; set; }
 
         public QueryExecutioner()
         {
             InitializeComponent();
-            DAO = new DAO();
-            _connectionStringHandler = new ConnectionStringHandler();
+            dao = new DAO();
+            _connectionStringHandler = new ConnectionStringHandler(@"Assets\connection-strings.json");
             synchronizationContext = SynchronizationContext.Current; //context from UI thread
         }
 
@@ -52,7 +54,7 @@ namespace SSDLMaintenanceTool.Forms
         {
             DangerousScripts = new List<string> { "insert", "update", "delete", "lock", "transaction", "exec", "drop", "alter", "truncate" };
 
-            connectionStringsComboBox.DataSource = ConnectionStringHandler.ConnectionStrings;
+            connectionStringsComboBox.DataSource = _connectionStringHandler.ConnectionStrings;
             connectionStringsComboBox.ValueMember = "Name";
             connectionStringsComboBox.DisplayMember = "DisplayName";
             connectionStringsComboBox.SelectedIndex = -1;
@@ -64,20 +66,20 @@ namespace SSDLMaintenanceTool.Forms
             queryTemplates.Add(new QueryTemplate { Name = "Select a template", Value = "" });
             queryTemplates.Add(new QueryTemplate
             {
-                Name = "Publish Predefined queries migration",
-                Value = "PublishPredefinedQueriesMigration",
+                Name = "<blank>",
+                Value = "",
                 QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\Publish-Predefined-Migration-Part-01.sql"),
                 QueryCompletionCallback = new QueryCompletionCallback()
                 {
                     Assembly = "SSDLMaintenanceTool",
                     ClassName = "Forms.QueryExecutioner",
-                    Method = "PredefinedQueriesCompleted"
+                    Method = ""
                 }
             });
             queryTemplates.Add(new QueryTemplate
             {
-                Name = "Main table columns mismatch detection",
-                Value = "MainTableColumnsMismatchDetection",
+                Name = "<blank>",
+                Value = "",
                 QueryTemplateFilePath = Path.Combine(Environment.CurrentDirectory.Replace(@"bin\Debug", ""), @"QueryTemplates\main-table-master-columns-mismatch-detection.sql")
             });
 
@@ -88,26 +90,27 @@ namespace SSDLMaintenanceTool.Forms
             savedTemplatesComboBox.SelectedIndex = 0;
 
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "No Display", Value = "NoDisplay" });
-            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Single result single tab", Value = "SingleResultSingleTab" });
-            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Multi result single tab", Value = "MultiResultSingleTab" });
+            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Multi result per domain", Value = "Display" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Only list domains with affected records", Value = "OnlyListDomainsWithAffectedRecords" });
             displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Only list domains with data", Value = "OnlyListDomainsWithData" });
-            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Combine multi domain in one", Value = "CombineMultiDomainInOne" });
+            displayOptionsComboBox.Items.Add(new NameValueModel { Name = "Display first result of multi domains in one tab", Value = "DisplayFirstResultMultiDomainsInSingleTab" });
             displayOptionsComboBox.DisplayMember = "Name";
             displayOptionsComboBox.ValueMember = "Value";
             displayOptionsComboBox.SelectedIndex = 0;
 
-            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "No Export", Value = "NoExport" });
-            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export one file per domain", Value = "ExportOneFilePerDomain" });
-            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export all domains in one file", Value = "ExportAllDomainsInOneFile" });
-            exportOptionsComboBox.Items.Add(new NameValueModel { Name = "Export as is", Value = "ExportAsIs" });
+            ExportOptions = new List<NameValueModel>();
+            ExportOptions.Add(new NameValueModel { Name = "No Export", Value = "NoExport" });
+            ExportOptions.Add(new NameValueModel { Name = "Export one file per domain", Value = "ExportOneFilePerDomain" });
+            ExportOptions.Add(new NameValueModel { Name = "Export first result per domain in one file", Value = "ExportFirstSheetPerDomainsInOneFile" });
+            ExportOptions.Add(new NameValueModel { Name = "Export first result per domain in single sheet", Value = "ExportFirstResultPerDomainsInSingleSheet" });
+            exportOptionsComboBox.DataSource = ExportOptions;
             exportOptionsComboBox.DisplayMember = "Name";
             exportOptionsComboBox.ValueMember = "Value";
             exportOptionsComboBox.SelectedIndex = 0;
 
             domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "SSDL Micro DBs", Value = "SSDLMicroDBs" });
-            //domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "SSDL Buyer DBs", Value = "SSDLBuyerDBs" });
-            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "Non-SSDL Buyer DBs", Value = "NonSSDLBuyerDBs" });
+            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "SSDL Buyer DBs", Value = "SSDLBuyerDBs" });
+            domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "All Buyer DBs", Value = "AllBuyerDBs" });
             domainFilterOptionsComboBox.Items.Add(new NameValueModel { Name = "All DBs", Value = "AllDBs" });
             domainFilterOptionsComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             domainFilterOptionsComboBox.DisplayMember = "Name";
@@ -118,17 +121,22 @@ namespace SSDLMaintenanceTool.Forms
 
             foreach (var queryTemplate in queryTemplates)
             {
-                if (queryTemplate.QueryCompletionCallback != null)
+                if (queryTemplate.Value.HasContent())
                 {
-                    Assembly assembly = Assembly.Load(queryTemplate.QueryCompletionCallback.Assembly);
-                    Type t = assembly.GetType(queryTemplate.QueryCompletionCallback.Assembly + "." + queryTemplate.QueryCompletionCallback.ClassName);
-                    var method = t.GetMethod(queryTemplate.QueryCompletionCallback.Method);
-                    var function = (QueryCompletion)Delegate.CreateDelegate(typeof(QueryCompletion), this, method);
-
-                    QueryCompleted.Add(queryTemplate.Value, function);
+                    if (queryTemplate.QueryCompletionCallback != null)
+                    {
+                        Assembly assembly = Assembly.Load(queryTemplate.QueryCompletionCallback.Assembly);
+                        Type t = assembly.GetType(queryTemplate.QueryCompletionCallback.Assembly + "." + queryTemplate.QueryCompletionCallback.ClassName);
+                        var method = t.GetMethod(queryTemplate.QueryCompletionCallback.Method);
+                        if (method != null)
+                        {
+                            var function = (QueryCompletion)Delegate.CreateDelegate(typeof(QueryCompletion), this, method);
+                            QueryCompleted.Add(queryTemplate.Value, function);
+                        }
+                    }
+                    else
+                        QueryCompleted.Add(queryTemplate.Value, QueryExecutionCompleted);
                 }
-                else
-                    QueryCompleted.Add(queryTemplate.Value, QueryExecutionCompleted);
             }
 
             ConvertToDomainModel();
@@ -143,7 +151,7 @@ namespace SSDLMaintenanceTool.Forms
             loadDomainsProgressBarToolStrip.Minimum = 0;
             loadDomainsProgressBarToolStrip.Maximum = 100;
 
-            DomainsWithResults = new List<string>();
+            DomainsWithResults = new ConcurrentDictionary<string, string>();
             mainPanel.AutoScroll = true;
 
             mainPanel.Width = this.Width - 30;
@@ -197,14 +205,15 @@ namespace SSDLMaintenanceTool.Forms
 
             if (DangerousScripts.Any(a => queryRichTextBox.Text.ToLower().Contains(a.ToLower())))
             {
-                exportFileNameInputDialog.WindowTitle = "Be careful with script";
-                exportFileNameInputDialog.MainInstruction = "You're about to execute script with Data Modification. Please enter password.";
-                var dialogResult = exportFileNameInputDialog.ShowDialog(this);
+                InputDialog promptForDangerous = new InputDialog();
+                promptForDangerous.WindowTitle = "Be careful with script";
+                promptForDangerous.MainInstruction = "You're about to execute script with Data Modification. Please enter password.";
+                var dialogResult = promptForDangerous.ShowDialog(this);
                 if (dialogResult != DialogResult.OK)
                 {
                     return;
                 }
-                if (exportFileNameInputDialog.Input != "AmICorrect?")
+                if (promptForDangerous.Input != "AmICorrect?")
                 {
                     return;
                 }
@@ -216,15 +225,32 @@ namespace SSDLMaintenanceTool.Forms
             {
                 if (domainsCheckListBox.CheckedItems.Count == 0)
                 {
-                    MessageBox.Show("Select at least one SSDL domain");
+                    MessageBox.Show("Select at least one domain.");
                     return;
+                }
+                if (domainsCheckListBox.CheckedItems.Count > 1)
+                {
+                    InputDialog promptForDangerous = new InputDialog();
+                    promptForDangerous.WindowTitle = "Be careful with script!";
+                    promptForDangerous.MainInstruction = $"You're about to execute script(s) on more than one domains. Please type {domainsCheckListBox.CheckedItems.Count} below and press OK.";
+                    var dialogResult = promptForDangerous.ShowDialog(this);
+                    if (dialogResult != DialogResult.OK)
+                    {
+                        return;
+                    }
+                    if (promptForDangerous.Input != domainsCheckListBox.CheckedItems.Count.ToString())
+                    {
+                        return;
+                    }
                 }
                 domains = ConvertToDomainDatabases();
             }
 
+            var exportingFileName = "";
             var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
-            if (selectedExportOption != null && (selectedExportOption.Value == "ExportAllDomainsInOneFile"))
+            if (selectedExportOption != null && (selectedExportOption.Value == "ExportFirstSheetPerDomainsInOneFile" || selectedExportOption.Value == "ExportFirstResultPerDomainsInSingleSheet"))
             {
+                InputDialog exportFileNameInputDialog = new InputDialog();
                 exportFileNameInputDialog.WindowTitle = "Save as XLSX";
                 exportFileNameInputDialog.MainInstruction = "Enter name of file being exported";
                 var dialogResult = exportFileNameInputDialog.ShowDialog(this);
@@ -232,6 +258,7 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     return;
                 }
+                exportingFileName = exportFileNameInputDialog.Input;
             }
 
             EnableUIForQueryExecution(false);
@@ -243,16 +270,28 @@ namespace SSDLMaintenanceTool.Forms
             SuccessDomainsCount = 0;
             FailureDomainsCount = 0;
             OutputTabPages = new List<TabPage>();
-            DomainsWithResults = new List<string>();
+            DomainsWithResults = new ConcurrentDictionary<string, string>();
             successDomainsToolStrip.Text = "";
             failureDomainsToolStrip.Text = "";
 
             var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
 
-            StartExecution(connectionDetails, domains, queryRichTextBox.Text, asyncCheckBox.Checked, selectedDisplayOption.Value);
+            StartExecution(connectionDetails, domains, queryRichTextBox.Text, asyncCheckBox.Checked, selectedDisplayOption.Value, selectedExportOption.Value, exportingFileName);
         }
 
-        private void StartExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query, bool isAsync, string displayOption)
+        private List<Domain> ConvertToDomainDatabases()
+        {
+            List<Domain> checkedDomains = new List<Domain>();
+            foreach (var checkedDomainItem in domainsCheckListBox.CheckedItems)
+            {
+                var checkedDomain = checkedDomainItem as Domain;
+                if (checkedDomain != null && checkedDomain.Name != "SelectAll")
+                    checkedDomains.Add(checkedDomain);
+            }
+            return checkedDomains;
+        }
+
+        private void StartExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query, bool isAsync, string displayOption, string exportOption, string exportingFileName)
         {
             Task.Run(() =>
             {
@@ -260,11 +299,11 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     if (isAsync)
                     {
-                        StartQueryExecutionAsync(connectionDetails, domains, query, displayOption);
+                        StartQueryExecutionAsync(connectionDetails, domains, query, displayOption, exportOption, exportingFileName);
                     }
                     else
                     {
-                        StartQueryExecution(connectionDetails, domains, query, displayOption);
+                        StartQueryExecution(connectionDetails, domains, query, displayOption, exportOption, exportingFileName);
                     }
                 }
                 catch (Exception ex)
@@ -286,7 +325,7 @@ namespace SSDLMaintenanceTool.Forms
             });
         }
 
-        private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption)
+        private void StartQueryExecutionAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, string exportOption, string exportingFileName)
         {
             QueryResultDataSet = ExecuteQueryAsync(connectionDetails, domains, query, displayOption, out var errorMessage);
 
@@ -299,8 +338,7 @@ namespace SSDLMaintenanceTool.Forms
                     return;
                 }
 
-                var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
-                if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
+                if (exportOption == "ExportOneFilePerDomain" || exportOption == "ExportFirstSheetPerDomainsInOneFile")
                 {
                     var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
                     queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
@@ -311,27 +349,317 @@ namespace SSDLMaintenanceTool.Forms
                     var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
                     if (saveFileDialogResult == DialogResult.OK)
                     {
-                        ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
+                        ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, exportOption, exportingFileName);
                     }
                 }
             }), null);
         }
 
-        private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption)
+        private void StartQueryExecution(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, string exportOption, string exportingFileName)
         {
-            QueryResultDataSet = ExecuteQuery(connectionDetails, domains, query, displayOption, out var errorMessage);
+            QueryResultDataSet = ExecuteQuery(connectionDetails, domains, query, displayOption, exportOption, out var errorMessage);
 
             //Send the update to our UI thread
             synchronizationContext.Post(new SendOrPostCallback(o =>
             {
-                EnableUIForQueryExecution();
                 if (errorMessage.HasContent())
                 {
                     MessageBox.Show(errorMessage);
                     return;
                 }
-                QueryExecutionCompleted();
+                QueryExecutionCompleted(exportingFileName);
             }), null);
+        }
+
+        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, string exportOption, out string errorMessage)
+        {
+            var domainDataSets = new ConcurrentDictionary<string, DataSet>();
+            errorMessage = "";
+            QueryExecutionLogList = new SortedList<int, QueryExecutionLog>(new DescendingComparer<int>());
+
+            if (connectionDetails.IsMultiTenant)
+            {
+                var parallelOptions = new ParallelOptions();
+                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 10 : ((int)parallelismDegreeNumericUpDown.Value);
+                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
+                {
+                    var domain = domains[domainIndex];
+                    var queryExecutionLog = new QueryExecutionLog();
+                    queryExecutionLog.DatabaseName = domain.DatabaseName;
+                    try
+                    {
+                        var resultSet = new DataSet();
+                        var rowsAffected = 0;
+                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
+                        copyConnection.Database = domain.DatabaseName;
+
+                        if (displayOption == "OnlyListDomainsWithAffectedRecords")
+                        {
+                            rowsAffected = dao.ChangeData(query, copyConnection);
+                            queryExecutionLog.RowsAffected = rowsAffected;
+                        }
+                        else
+                        {
+                            resultSet = dao.GetData(query, copyConnection);
+                        }
+
+                        var hasData = false;
+                        foreach (DataTable dataTable in resultSet.Tables)
+                        {
+                            if (dataTable != null && dataTable.Rows.Count > 0)
+                            {
+                                hasData = true;
+                                break;
+                            }
+                        }
+
+                        if (displayOption == "OnlyListDomainsWithData" && hasData)
+                        {
+                            DomainsWithResults.TryAdd(copyConnection.Database, "");
+                        }
+                        else if (displayOption == "OnlyListDomainsWithAffectedRecords" && rowsAffected > 0)
+                        {
+                            DomainsWithResults.TryAdd(copyConnection.Database, rowsAffected.ToString());
+                        }
+                        else
+                        {
+                            if (hasData)
+                            {
+                                if (displayOption == "Display" || displayOption == "DisplayFirstResultMultiDomainsInSingleTab" || exportOption == "ExportFirstResultPerDomainsInSingleSheet" || exportOption == "ExportOneFilePerDomain"
+                                || exportOption == "ExportFirstSheetPerDomainsInOneFile")
+                                {
+                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                }
+                            }
+                        }
+
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            SuccessDomainsCount++;
+                            var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
+                            queryProgressBarToolStrip.Value = (int)percentage;
+                        }), null);
+                    }
+                    catch (Exception ex)
+                    {
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            FailureDomainsCount++;
+                            queryExecutionLog.ErrorMessage = ex.Message;
+                        }), null);
+                    }
+                    QueryExecutionLogList.Add(domainIndex, queryExecutionLog);
+                });
+            }
+            else
+            {
+                var resultSet = new DataSet();
+                var rowsAffected = 0;
+                var queryExecutionLog = new QueryExecutionLog();
+                try
+                {
+                    if (displayOption == "OnlyListDomainsWithAffectedRecords")
+                    {
+                        rowsAffected = dao.ChangeData(query, connectionDetails);
+                        queryExecutionLog.RowsAffected = rowsAffected;
+                    }
+                    else
+                    {
+                        resultSet = dao.GetData(query, connectionDetails);
+                    }
+
+                    var hasData = false;
+                    foreach (DataTable dataTable in resultSet.Tables)
+                    {
+                        if (dataTable != null && dataTable.Rows.Count > 0)
+                        {
+                            hasData = true;
+                            break;
+                        }
+                    }
+
+                    if (displayOption == "OnlyListDomainsWithData" && hasData)
+                    {
+                        DomainsWithResults.TryAdd(connectionDetails.Database, "");
+                    }
+                    else if (displayOption == "OnlyListDomainsWithAffectedRecords" && rowsAffected > 0)
+                    {
+                        DomainsWithResults.TryAdd(connectionDetails.Database, rowsAffected.ToString());
+                    }
+                    else
+                    {
+                        if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
+                        {
+                            errorMessage = "No data found";
+                            return null;
+                        }
+                        resultSet.Tables[0].Namespace = connectionDetails.Database;
+                        var newSet = resultSet.Copy();
+                        domainDataSets.TryAdd(connectionDetails.Database, resultSet.Copy());
+                    }
+
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        queryProgressBarToolStrip.Value = 100;
+                    }), null);
+                }
+                catch (Exception ex)
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        FailureDomainsCount++;
+                        queryExecutionLog.ErrorMessage = ex.Message;
+                    }), null);
+                }
+                QueryExecutionLogList.Add(0, queryExecutionLog);
+            }
+            return domainDataSets;
+        }
+
+        public ConcurrentDictionary<string, DataSet> ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, out string errorMessage)
+        {
+            var domainDataSets = new ConcurrentDictionary<string, DataSet>();
+            var combinedDomainResultDataTable = new DataTable();
+            errorMessage = "";
+
+            if (connectionDetails.IsMultiTenant)
+            {
+                var parallelOptions = new ParallelOptions();
+                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 2 : ((int)parallelismDegreeNumericUpDown.Value);
+                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
+                {
+                    long rowsAffected = -1;
+                    try
+                    {
+                        var resultSet = new DataSet();
+                        var domain = domains[domainIndex];
+                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
+                        copyConnection.Database = domain.DatabaseName;
+                        if (displayOption == "OnlyListDomainsWithAffectedRecords")
+                        {
+                            rowsAffected = dao.ChangeData(query, copyConnection);
+                        }
+                        else
+                        {
+                            resultSet = dao.GetData(query, copyConnection);
+                            var hasData = false;
+                            foreach (DataTable dataTable in resultSet.Tables)
+                            {
+                                if (dataTable != null && dataTable.Rows.Count > 0)
+                                {
+                                    hasData = true;
+                                    break;
+                                }
+                            }
+                            if (hasData)
+                            {
+                                if (
+                                displayOption == "Display" || displayOption == "DisplayFirstResultMultiDomainsInSingleTab")
+                                {
+                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
+                                }
+                            }
+                        }
+
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            if (displayOption != "OnlyListDomainsWithAffectedRecords")
+                            {
+                                QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy(), displayOption, rowsAffected);
+                            }
+                            SuccessDomainsCount++;
+                            var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
+                            queryProgressBarToolStrip.Value = (int)percentage;
+                        }), null);
+                    }
+                    catch (Exception ex)
+                    {
+                        FailureDomainsCount++;
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
+                        }), null);
+                    }
+                });
+
+                //Send the update to our UI thread
+                synchronizationContext.Post(new SendOrPostCallback(o =>
+                {
+                    queryStatusLabelToolStrip.Text = "Completed";
+                    loadDomainStatusLabelToolStrip.Text = "Ready";
+                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
+
+                    if (FailureDomainsCount > 0)
+                    {
+                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
+                    }
+
+                    var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
+                    if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
+                    {
+                        DataSet dataSet = new DataSet();
+                        dataSet.Tables.Add("DomainsWithResults");
+                        dataSet.Tables[0].Columns.Add("Domain", typeof(string));
+                        dataSet.Tables[0].Columns.Add("Data", typeof(string));
+                        if (DomainsWithResults.Count == 0)
+                        {
+                            MessageBox.Show("No results");
+                            return;
+                        }
+                        //DomainsWithResults.Sort((a, b) => a.CompareTo(b));
+                        foreach (var domain in DomainsWithResults)
+                        {
+                            var dataRow = dataSet.Tables[0].NewRow();
+                            dataRow["Domain"] = domain.Key;
+                            dataRow["Data"] = domain.Value;
+                            dataSet.Tables[0].Rows.Add(dataRow);
+                        }
+                        DisplayOutputInTabsAsync("Domains with results", dataSet);
+                    }
+                }), null);
+            }
+            else
+            {
+                long rowsAffected = -1;
+                var resultSet = new DataSet();
+                try
+                {
+                    if (displayOption == "OnlyListDomainsWithAffectedRecords")
+                        dao.ChangeData(query, connectionDetails);
+                    else
+                    {
+                        resultSet = dao.GetData(query, connectionDetails);
+                        domainDataSets.TryAdd(connectionDetails.Database, resultSet.Copy());
+                    }
+                    SuccessDomainsCount = 1;
+                }
+                catch (Exception ex)
+                {
+                    FailureDomainsCount = 1;
+                }
+
+                //Send the update to our UI thread
+                synchronizationContext.Post(new SendOrPostCallback(o =>
+                {
+                    queryStatusLabelToolStrip.Text = "Completed";
+                    loadDomainStatusLabelToolStrip.Text = "Ready";
+                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
+                    failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
+
+                    if (FailureDomainsCount > 0)
+                    {
+                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
+                    }
+                    QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy(), displayOption, rowsAffected);
+                }), null);
+            }
+            return domainDataSets;
         }
 
         private void QueryFailed(Exception ex)
@@ -341,48 +669,87 @@ namespace SSDLMaintenanceTool.Forms
             MessageBox.Show(ex.Message);
         }
 
-        private void QueryExecutionCompleted()
+        private void QueryExecutionCompleted(string exportingFileName = null)
         {
             queryStatusLabelToolStrip.Text = "Completed";
             loadDomainStatusLabelToolStrip.Text = "Ready";
             successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
             failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
 
-            var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-            if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
+            var selectedDisplayOption = (displayOptionsComboBox.SelectedItem as NameValueModel).Value;
+            var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel).Value;
+
+            if (selectedDisplayOption == "DisplayFirstResultMultiDomainsInSingleTab" || selectedExportOption == "ExportFirstResultPerDomainsInSingleSheet")
             {
-                DataSet dataSet = new DataSet();
-                dataSet.Tables.Add("DomainsWithResults");
-                dataSet.Tables[0].Columns.Add("Domain", typeof(string));
+                if (QueryResultDataSet.Count > 0)
+                {
+                    this.combinedDomainResultDataTable = QueryResultDataSet.ElementAt(0).Value.Tables[0].Clone();
+                    combinedDomainResultDataTable.Columns.Add("Domain").DataType = typeof(string);
+                    foreach (var item in QueryResultDataSet)
+                    {
+                        item.Value.Tables[0].Columns.Add("Domain").DataType = typeof(string);
+                        foreach (DataRow row in item.Value.Tables[0].Rows)
+                        {
+                            row["Domain"] = item.Key;
+                        }
+                        combinedDomainResultDataTable.Merge(item.Value.Tables[0], true, MissingSchemaAction.Ignore);
+                    }
+                }
+            }
+
+            if (selectedDisplayOption == "OnlyListDomainsWithData" || selectedDisplayOption == "OnlyListDomainsWithAffectedRecords")
+            {
+                DataSet dataSetForDisplay = new DataSet();
+                dataSetForDisplay.Tables.Add("DomainsWithResults");
+                dataSetForDisplay.Tables[0].Columns.Add("Domain", typeof(string));
+                dataSetForDisplay.Tables[0].Columns.Add("Data", typeof(string));
                 if (DomainsWithResults.Count == 0)
                 {
                     MessageBox.Show("No records found in any of the SSDL domains");
-                    return;
                 }
-                DomainsWithResults.Sort((a, b) => a.CompareTo(b));
-                resultDomainsToolStrip.Text = DomainsWithResults.Count + " has matching data";
-
-                foreach (var domain in DomainsWithResults)
+                if (DomainsWithResults.Count > 0)
                 {
-                    var dataRow = dataSet.Tables[0].NewRow();
-                    dataRow["Domain"] = domain;
-                    dataSet.Tables[0].Rows.Add(dataRow);
-                }
-                DisplayOutputInTabsAsync("Domains with results", dataSet);
+                    //DomainsWithResults.Sort((a, b) => a.CompareTo(b));
+                    resultDomainsToolStrip.Text = DomainsWithResults.Count + " has matching data";
 
-                var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
-                if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
-                {
-                    VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
-                    vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
-                    vistaFolderBrowserDialog.UseDescriptionForTitle = true;
-                    var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
-                    if (saveFileDialogResult == DialogResult.OK)
+                    foreach (var domain in DomainsWithResults)
                     {
-                        var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
-                        queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
+                        var dataRow = dataSetForDisplay.Tables[0].NewRow();
+                        dataRow["Domain"] = domain.Key;
+                        dataRow["Data"] = domain.Value;
+                        dataSetForDisplay.Tables[0].Rows.Add(dataRow);
+                    }
+                    DisplayOutputInTabsAsync("Domains with results", dataSetForDisplay);
 
-                        ExportDataSetToExcel(dataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
+                    if (selectedExportOption.HasContent())
+                    {
+                        VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+                        vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
+                        vistaFolderBrowserDialog.UseDescriptionForTitle = true;
+                        var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
+                        if (saveFileDialogResult == DialogResult.OK)
+                        {
+                            if (selectedExportOption == "ExportOneFilePerDomain" || selectedExportOption == "ExportFirstSheetPerDomainsInOneFile")
+                            {
+                                DataSet dataSetForExport = new DataSet();
+                                foreach (var domain in DomainsWithResults)
+                                {
+                                    var dataTableForExport = new DataTable();
+                                    dataTableForExport.Columns.Add("Data");
+                                    dataTableForExport.TableName = domain.Key;
+
+                                    var dataRow = dataTableForExport.NewRow();
+                                    dataRow["Data"] = domain.Value;
+                                    dataTableForExport.Rows.Add(dataRow);
+                                    dataSetForExport.Tables.Add(dataTableForExport);
+                                }
+                                ExportDataSetToExcel(dataSetForExport, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption, exportingFileName.HasContent() ? exportingFileName : "DomainsWithResults");
+                            }
+                            else if (selectedExportOption == "ExportFirstResultPerDomainsInSingleSheet")
+                            {
+                                ExportDataTableToExcel(dataSetForDisplay.Tables[0], vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, exportingFileName.HasContent() ? exportingFileName : "DomainsWithResults");
+                            }
+                        }
                     }
                 }
             }
@@ -394,53 +761,65 @@ namespace SSDLMaintenanceTool.Forms
                     if (selectedQueryTemplate == null)
                     {
                         MessageBox.Show("Template is not available");
-                        return;
                     }
-                    QueryCompleted[selectedQueryTemplate.Value]();
+                    if (selectedQueryTemplate != null)
+                    {
+                        QueryCompleted[selectedQueryTemplate.Value]();
+                    }
                 }
                 else
                 {
-                    if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab" || selectedDisplayOption.Value == "CombineMultiDomainInOne")
+                    if (selectedDisplayOption == "Display" || selectedDisplayOption == "DisplayFirstResultMultiDomainsInSingleTab")
                     {
                         if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
                         {
                             MessageBox.Show("No records found in any of the SSDL domains");
-                            return;
                         }
-                        DisplayOutputInTabs(QueryResultDataSet);
+                        if (QueryResultDataSet != null && QueryResultDataSet.Count > 0)
+                        {
+                            DisplayOutputInTabs(QueryResultDataSet, selectedDisplayOption, selectedExportOption);
+                        }
                     }
 
-                    var selectedExportOption = (exportOptionsComboBox.SelectedItem as NameValueModel);
-                    if (selectedExportOption != null && (selectedExportOption.Value == "ExportOneFilePerDomain" || selectedExportOption.Value == "ExportAllDomainsInOneFile"))
+                    if (QueryResultDataSet != null && QueryResultDataSet.Count > 0)
                     {
-                        VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
-                        vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
-                        vistaFolderBrowserDialog.UseDescriptionForTitle = true;
-                        var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
-                        if (saveFileDialogResult == DialogResult.OK)
+                        if (selectedExportOption == "ExportOneFilePerDomain" || selectedExportOption == "ExportFirstSheetPerDomainsInOneFile" || selectedExportOption == "ExportFirstResultPerDomainsInSingleSheet")
                         {
-                            if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
+                            VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+                            vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
+                            vistaFolderBrowserDialog.UseDescriptionForTitle = true;
+                            var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
+                            if (saveFileDialogResult == DialogResult.OK)
                             {
-                                var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
-                                queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
+                                if (selectedExportOption == "ExportOneFilePerDomain" || selectedExportOption == "ExportFirstSheetPerDomainsInOneFile")
+                                {
+                                    var queryResultsList = QueryResultDataSet.Select(a => a).ToList();
+                                    queryResultsList.Sort((s1, s2) => s1.Key.CompareTo(s2.Key));
 
-                                ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption.Value, exportFileNameInputDialog.Input);
-                            }
-                            else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
-                            {
-                                ExportDataTableToExcel(combinedDomainResultDataTable, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, exportFileNameInputDialog.Input);
+                                    ExportDataSetCollectionToExcel(queryResultsList, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, selectedExportOption, exportingFileName);
+                                }
+                                else if (selectedExportOption == "ExportFirstResultPerDomainsInSingleSheet")
+                                {
+                                    ExportDataTableToExcel(combinedDomainResultDataTable, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory, exportingFileName);
+                                }
                             }
                         }
                     }
                 }
             }
+
+            if (QueryExecutionLogList != null && QueryExecutionLogList.Count > 0)
+            {
+                logsDataGridView.DataSource = QueryExecutionLogList.Select(a => a.Value).ToList();
+                logsDataGridView.Refresh();
+            }
         }
 
-        private void QueryExecutionCompletedAsync(string databaseName, DataSet dataSet, string displayOption)
+        private void QueryExecutionCompletedAsync(string databaseName, DataSet dataSet, string displayOption, long rowsAffected)
         {
             if (displayOption == "OnlyListDomainsWithAffectedRecords")
             {
-                DomainsWithResults.Add(databaseName);
+                DomainsWithResults.TryAdd(databaseName, rowsAffected.ToString());
             }
             else if (dataSet != null && dataSet.Tables.Count > 0)
             {
@@ -456,20 +835,19 @@ namespace SSDLMaintenanceTool.Forms
                         }
                     }
                     if (hasData)
-                        DomainsWithResults.Add(databaseName);
+                        DomainsWithResults.TryAdd(databaseName, rowsAffected.ToString());
                 }
                 else
                 {
-                    if ((displayOption == "SingleResultSingleTab" && dataSet.Tables[0].Rows.Count > 0) || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
+                    if (displayOption == "Display" || displayOption == "DisplayFirstResultMultiDomainsInSingleTab")
                         DisplayOutputInTabsAsync(databaseName, dataSet);
                 }
             }
         }
 
-        private void DisplayOutputInTabs(ConcurrentDictionary<string, DataSet> dataSetCollection)
+        private void DisplayOutputInTabs(ConcurrentDictionary<string, DataSet> dataSetCollection, string selectedDisplayOption, string selectedExportOption)
         {
-            var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-            if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "MultiResultSingleTab")
+            if (selectedDisplayOption == "Display")
             {
                 foreach (var item in dataSetCollection)
                 {
@@ -491,7 +869,7 @@ namespace SSDLMaintenanceTool.Forms
                         }
                         if (hasData)
                         {
-                            if (selectedDisplayOption.Value == "MultiResultSingleTab")
+                            if (selectedDisplayOption == "Display")
                             {
                                 int totalRecords = 0;
                                 var thisTabControl = new TabControl();
@@ -508,8 +886,8 @@ namespace SSDLMaintenanceTool.Forms
                                     DataGridView dataGridView = new DataGridView();
                                     dataGridView.DataSource = dataTable;
 
-                                    dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
-                                    dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+                                    //dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
+                                    //dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
 
                                     innerTabPage.Controls.Add(dataGridView);
                                     innerTabPage.AutoScroll = true;
@@ -532,21 +910,21 @@ namespace SSDLMaintenanceTool.Forms
                                 domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                                 tabPage.Controls.Add(domainStatusStrip);
                             }
-                            else if (selectedDisplayOption.Value == "SingleResultSingleTab")
-                            {
-                                DataGridView dataGridView = new DataGridView();
-                                var dataTable = item.Value.Tables[0];
-                                dataGridView.DataSource = dataTable;
-                                tabPage.Controls.Add(dataGridView);
-                                dataGridView.Height = tabPage.Height - 50;
-                                dataGridView.Width = tabPage.Width - 50;
-                                tabPage.AutoScroll = true;
-                                StatusStrip domainStatusStrip = new StatusStrip();
-                                ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
-                                domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + dataTable.Rows.Count;
-                                domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
-                                tabPage.Controls.Add(domainStatusStrip);
-                            }
+                            //else if (selectedDisplayOption == "SingleResultPerDomain")
+                            //{
+                            //    DataGridView dataGridView = new DataGridView();
+                            //    var dataTable = item.Value.Tables[0];
+                            //    dataGridView.DataSource = dataTable;
+                            //    tabPage.Controls.Add(dataGridView);
+                            //    dataGridView.Height = tabPage.Height - 50;
+                            //    dataGridView.Width = tabPage.Width - 50;
+                            //    tabPage.AutoScroll = true;
+                            //    StatusStrip domainStatusStrip = new StatusStrip();
+                            //    ToolStripStatusLabel domainRowCountToolStripStatusLabel = new ToolStripStatusLabel();
+                            //    domainRowCountToolStripStatusLabel.Text = item.Key + " rows: " + dataTable.Rows.Count;
+                            //    domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
+                            //    tabPage.Controls.Add(domainStatusStrip);
+                            //}
                         }
                     }
 
@@ -554,20 +932,8 @@ namespace SSDLMaintenanceTool.Forms
                     tabPage.Width = queryOutputTabControl.Width;
                 }
             }
-            else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
+            else if (selectedDisplayOption == "DisplayFirstResultMultiDomainsInSingleTab" || selectedExportOption == "ExportFirstResultPerDomainsInSingleSheet")
             {
-                this.combinedDomainResultDataTable = dataSetCollection.ElementAt(0).Value.Tables[0].Clone();
-                combinedDomainResultDataTable.Columns.Add("Domain").DataType = typeof(string);
-                foreach (var item in dataSetCollection)
-                {
-                    item.Value.Tables[0].Columns.Add("Domain").DataType = typeof(string);
-                    foreach (DataRow row in item.Value.Tables[0].Rows)
-                    {
-                        row["Domain"] = item.Key;
-                    }
-                    combinedDomainResultDataTable.Merge(item.Value.Tables[0], true, MissingSchemaAction.Ignore);
-                }
-
                 TabPage tabPage = new TabPage("Combined result from domains");
                 tabPage.SizeChanged += DynamicallyCreatedTabPage_SizeChanged;
 
@@ -648,7 +1014,7 @@ namespace SSDLMaintenanceTool.Forms
                 if (hasData)
                 {
                     var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-                    if (selectedDisplayOption.Value == "MultiResultSingleTab")
+                    if (selectedDisplayOption.Value == "Display")
                     {
                         int totalRecords = 0;
                         var innerTabControl = new TabControl();
@@ -664,8 +1030,8 @@ namespace SSDLMaintenanceTool.Forms
                             DataGridView dataGridView = new DataGridView();
                             dataGridView.DataSource = dataTable;
 
-                            dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
-                            dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+                            //dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.ColumnHeader);
+                            //dataGridView.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
 
                             innerTabPage.Controls.Add(dataGridView);
                             innerTabPage.AutoScroll = true;
@@ -684,7 +1050,7 @@ namespace SSDLMaintenanceTool.Forms
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
                     }
-                    else if (selectedDisplayOption.Value == "SingleResultSingleTab" || selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
+                    else if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
                     {
                         DataGridView dataGridView = new DataGridView();
                         var dataTable = dataSetWithKey.Tables[0];
@@ -699,294 +1065,12 @@ namespace SSDLMaintenanceTool.Forms
                         domainStatusStrip.Items.Add(domainRowCountToolStripStatusLabel);
                         tabPage.Controls.Add(domainStatusStrip);
                     }
-                    else if (selectedDisplayOption.Value == "CombineMultiDomainInOne")
+                    else if (selectedDisplayOption.Value == "DisplayFirstResultMultiDomainsInSingleTab")
                     {
 
                     }
                 }
             }
-        }
-
-        public void PredefinedQueriesCompleted()
-        {
-            var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-            if (selectedDisplayOption.Value == "SingleResultSingleTab")
-            {
-                if (QueryResultDataSet == null || QueryResultDataSet.Count == 0)
-                {
-                    MessageBox.Show("No records found in any of the SSDL domains");
-                    return;
-                }
-            }
-            VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
-            vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
-            vistaFolderBrowserDialog.UseDescriptionForTitle = true;
-            var saveFileDialogResult = vistaFolderBrowserDialog.ShowDialog(this);
-            if (saveFileDialogResult == DialogResult.OK)
-            {
-                ExportPublishPredefinedQueries(QueryResultDataSet, vistaFolderBrowserDialog.SelectedPath, GlobalConstants.QueryExecutionerQueryResultDirectory);
-            }
-        }
-
-        private List<Domain> ConvertToDomainDatabases()
-        {
-            List<Domain> checkedDomains = new List<Domain>();
-            foreach (var checkedDomainItem in domainsCheckListBox.CheckedItems)
-            {
-                var checkedDomain = checkedDomainItem as Domain;
-                if (checkedDomain != null && checkedDomain.Name != "SelectAll")
-                    checkedDomains.Add(checkedDomain);
-            }
-            return checkedDomains;
-        }
-
-        public ConcurrentDictionary<string, DataSet> ExecuteQuery(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, out string errorMessage)
-        {
-            var domainDataSets = new ConcurrentDictionary<string, DataSet>();
-            errorMessage = "";
-
-            if (connectionDetails.IsMultiTenant)
-            {
-                var parallelOptions = new ParallelOptions();
-                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 10 : ((int)parallelismDegreeNumericUpDown.Value);
-                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
-                {
-                    try
-                    {
-                        var resultSet = new DataSet();
-                        var rowsAffected = 0;
-                        var domain = domains[domainIndex];
-                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                        copyConnection.Database = domain.DatabaseName;
-                        if (displayOption == "OnlyListDomainsWithAffectedRecords")
-                        {
-                            rowsAffected = DAO.ChangeData(query, copyConnection);
-                        }
-                        else
-                        {
-                            resultSet = DAO.GetData(query, copyConnection);
-                        }
-
-                        var hasData = false;
-                        foreach (DataTable dataTable in resultSet.Tables)
-                        {
-                            if (dataTable != null && dataTable.Rows.Count > 0)
-                            {
-                                hasData = true;
-                                break;
-                            }
-                        }
-
-                        if ((displayOption == "OnlyListDomainsWithData" && hasData) || (displayOption == "OnlyListDomainsWithAffectedRecords" && rowsAffected > 0))
-                            DomainsWithResults.Add(copyConnection.Database);
-                        else
-                        {
-                            if (hasData)
-                            {
-                                if (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
-                                {
-                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
-                                }
-                            }
-                        }
-
-                        //Send the update to our UI thread
-                        synchronizationContext.Post(new SendOrPostCallback(o =>
-                        {
-                            SuccessDomainsCount++;
-                            var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
-                            queryProgressBarToolStrip.Value = (int)percentage;
-                        }), null);
-                    }
-                    catch (Exception ex)
-                    {
-                        FailureDomainsCount++;
-                    }
-                });
-            }
-            else
-            {
-                var resultSet = new DataSet();
-                var rowsAffected = 0;
-
-                if (displayOption == "OnlyListDomainsWithAffectedRecords")
-                {
-                    DAO.ChangeData(query, connectionDetails);
-                }
-                else
-                {
-                    resultSet = DAO.GetData(query, connectionDetails);
-                }
-
-                var hasData = false;
-                foreach (DataTable dataTable in resultSet.Tables)
-                {
-                    if (dataTable != null && dataTable.Rows.Count > 0)
-                    {
-                        hasData = true;
-                        break;
-                    }
-                }
-
-                if ((displayOption == "OnlyListDomainsWithData" && hasData) || (displayOption == "OnlyListDomainsWithAffectedRecords" && rowsAffected > 0))
-                    DomainsWithResults.Add(connectionDetails.Database);
-                else
-                {
-                    if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
-                    {
-                        errorMessage = "No data found";
-                        return null;
-                    }
-                    resultSet.Tables[0].Namespace = connectionDetails.Database;
-                    var newSet = resultSet.Copy();
-                    domainDataSets.TryAdd(connectionDetails.Database, resultSet.Copy());
-                }
-
-                //Send the update to our UI thread
-                synchronizationContext.Post(new SendOrPostCallback(o =>
-                {
-                    queryProgressBarToolStrip.Value = 100;
-                }), null);
-            }
-            return domainDataSets;
-        }
-
-        public ConcurrentDictionary<string, DataSet> ExecuteQueryAsync(ConnectionDetails connectionDetails, List<Domain> domains, string query, string displayOption, out string errorMessage)
-        {
-            var domainDataSets = new ConcurrentDictionary<string, DataSet>();
-            var combinedDomainResultDataTable = new DataTable();
-            errorMessage = "";
-
-            if (connectionDetails.IsMultiTenant)
-            {
-                var parallelOptions = new ParallelOptions();
-                parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegreeNumericUpDown.Value) == 0 ? 2 : ((int)parallelismDegreeNumericUpDown.Value);
-                Parallel.For(0, domains.Count, parallelOptions, (domainIndex) =>
-                {
-                    try
-                    {
-                        var resultSet = new DataSet();
-                        var domain = domains[domainIndex];
-                        var copyConnection = _connectionStringHandler.GetDeepCopy(connectionDetails);
-                        copyConnection.Database = domain.DatabaseName;
-                        if (displayOption == "OnlyListDomainsWithAffectedRecords")
-                        {
-                            DAO.ChangeData(query, copyConnection);
-                        }
-                        else
-                        {
-                            resultSet = DAO.GetData(query, copyConnection);
-                            var hasData = false;
-                            foreach (DataTable dataTable in resultSet.Tables)
-                            {
-                                if (dataTable != null && dataTable.Rows.Count > 0)
-                                {
-                                    hasData = true;
-                                    break;
-                                }
-                            }
-                            if (hasData)
-                            {
-                                if (displayOption == "SingleResultSingleTab" || displayOption == "MultiResultSingleTab" || displayOption == "CombineMultiDomainInOne")
-                                {
-                                    domainDataSets.TryAdd(copyConnection.Database, resultSet.Copy());
-                                }
-                            }
-                        }
-
-                        //Send the update to our UI thread
-                        synchronizationContext.Post(new SendOrPostCallback(o =>
-                        {
-                            if (displayOption != "OnlyListDomainsWithAffectedRecords")
-                            {
-                                QueryExecutionCompletedAsync(copyConnection.Database, resultSet.Copy(), displayOption);
-                            }
-
-                            SuccessDomainsCount++;
-                            var percentage = ((double)SuccessDomainsCount / (double)domains.Count) * 100;
-                            queryProgressBarToolStrip.Value = (int)percentage;
-                        }), null);
-                    }
-                    catch (Exception ex)
-                    {
-                        FailureDomainsCount++;
-                        //Send the update to our UI thread
-                        synchronizationContext.Post(new SendOrPostCallback(o =>
-                        {
-                            failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
-                        }), null);
-                    }
-                });
-
-                //Send the update to our UI thread
-                synchronizationContext.Post(new SendOrPostCallback(o =>
-                {
-                    queryStatusLabelToolStrip.Text = "Completed";
-                    loadDomainStatusLabelToolStrip.Text = "Ready";
-                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
-
-                    if (FailureDomainsCount > 0)
-                    {
-                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
-                    }
-
-                    var selectedDisplayOption = displayOptionsComboBox.SelectedItem as NameValueModel;
-                    if (selectedDisplayOption.Value == "OnlyListDomainsWithData" || selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
-                    {
-                        DataSet dataSet = new DataSet();
-                        dataSet.Tables.Add("DomainsWithResults");
-                        dataSet.Tables[0].Columns.Add("Domain", typeof(string));
-                        if (DomainsWithResults.Count == 0)
-                        {
-                            MessageBox.Show("No results");
-                            return;
-                        }
-                        DomainsWithResults.Sort((a, b) => a.CompareTo(b));
-                        foreach (var domain in DomainsWithResults)
-                        {
-                            var dataRow = dataSet.Tables[0].NewRow();
-                            dataRow["Domain"] = domain;
-                            dataSet.Tables[0].Rows.Add(dataRow);
-                        }
-                        DisplayOutputInTabsAsync("Domains with results", dataSet);
-                    }
-                }), null);
-            }
-            else
-            {
-                var resultSet = new DataSet();
-                try
-                {
-                    if (displayOption == "OnlyListDomainsWithAffectedRecords")
-                        DAO.ChangeData(query, connectionDetails);
-                    else
-                    {
-                        resultSet = DAO.GetData(query, connectionDetails);
-                        domainDataSets.TryAdd(connectionDetails.Database, resultSet.Copy());
-                    }
-                    SuccessDomainsCount = 1;
-                }
-                catch (Exception ex)
-                {
-                    FailureDomainsCount = 1;
-                }
-
-                //Send the update to our UI thread
-                synchronizationContext.Post(new SendOrPostCallback(o =>
-                {
-                    queryStatusLabelToolStrip.Text = "Completed";
-                    loadDomainStatusLabelToolStrip.Text = "Ready";
-                    successDomainsToolStrip.Text = SuccessDomainsCount + " successful";
-                    failureDomainsToolStrip.Text = FailureDomainsCount + " failed";
-
-                    if (FailureDomainsCount > 0)
-                    {
-                        MessageBox.Show("The query has failed on some databases. Please check the logs.");
-                    }
-                    QueryExecutionCompletedAsync(connectionDetails.Database, resultSet.Copy(), displayOption);
-                }), null);
-            }
-            return domainDataSets;
         }
 
         private void loadDomainsButton_Click(object sender, EventArgs e)
@@ -1080,28 +1164,34 @@ namespace SSDLMaintenanceTool.Forms
         {
             var selectClause = "Name";
             var filterCondition = "";
+            var query = "";
 
             if (!domainNameFilter.HasContent() || domainNameFilter == "SSDLMicroDBs")
             {
                 filterCondition = $"Name LIKE '%[_]SSDL'";
+                query = $"SELECT {selectClause} FROM sys.databases WHERE {filterCondition}";
             }
             else
             {
                 if (domainNameFilter == "SSDLBuyerDBs")
                 {
-                    filterCondition = $"Name LIKE '%[_]SSDL'";
-                    selectClause = "REPLACE(Name, '_SSDL', '') AS Name";
+                    query = @"With CTE AS
+                            (
+                                select name from sys.databases where name like '%[_]SSDL'
+                            )
+                            select a.name
+                            from sys.databases a
+                            join CTE b on a.name like(replace(b.name, '_SSDL', '') +'%') and a.name not like '%[_]%'
+                            ";
                 }
-                else if (domainNameFilter == "NonSSDLBuyerDBs")
+                else if (domainNameFilter == "AllBuyerDBs")
                 {
-                    filterCondition = $"Name NOT LIKE '%[_]SSDL'";
+                    filterCondition = $"Name NOT LIKE '%[_]%'";
+                    query = $"SELECT {selectClause} FROM sys.databases WHERE {filterCondition}";
                 }
             }
 
-            if (filterCondition.HasContent())
-                filterCondition = "WHERE " + filterCondition;
-
-            var resultSet = DAO.GetData($"SELECT {selectClause} FROM sys.databases {filterCondition}", copyConnection);
+            var resultSet = dao.GetData(query, copyConnection);
             if (resultSet == null || resultSet.Tables == null || resultSet.Tables.Count == 0 || resultSet.Tables[0] == null || resultSet.Tables[0].Rows.Count == 0)
             {
                 domainsCheckListBox.DataSource = null;
@@ -1170,7 +1260,7 @@ namespace SSDLMaintenanceTool.Forms
                 return null;
             }
 
-            var connectionDetail = ConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == connectionStringsComboBox.SelectedValue.ToString());
+            var connectionDetail = _connectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == connectionStringsComboBox.SelectedValue.ToString());
             if (connectionDetail == null)
             {
                 validationMessage = "Connection string not available";
@@ -1267,7 +1357,7 @@ namespace SSDLMaintenanceTool.Forms
                 Process.Start("explorer.exe", resolvedDirectoryPath);
         }
 
-        void ExportDataSetToExcel(DataSet dataSet, string usersSaveDirectoryPath, string rootDirectoryName)
+        void ExportDataSetToExcel(DataSet dataSet, string usersSaveDirectoryPath, string rootDirectoryName, string exportOption, string exportingFileName)
         {
             if (!usersSaveDirectoryPath.ToLower().EndsWith(this.Name.ToLower()))
                 usersSaveDirectoryPath += @"\" + this.Name;
@@ -1275,33 +1365,66 @@ namespace SSDLMaintenanceTool.Forms
             var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
             Directory.CreateDirectory(resolvedDirectoryPath);
 
-            foreach (DataTable dataTable in dataSet.Tables)
+            if (exportOption == "ExportOneFilePerDomain")
             {
-                var resolvedFilePath = resolvedDirectoryPath + dataTable.TableName + ".xlsx";
+                foreach (DataTable dataTable in dataSet.Tables)
+                {
+                    var resolvedFilePath = resolvedDirectoryPath + dataTable.TableName + ".xlsx";
 
+                    using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
+                    {
+                        try
+                        {
+                            if (pck.Workbook.Worksheets.Count > 0)
+                            {
+                                var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                                for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
+                                {
+                                    pck.Workbook.Worksheets.Delete(i);
+                                }
+                            }
+                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
+                            ws.Cells["A1"].LoadFromDataTable(dataTable, true);
+                            ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        pck.Save();
+                    }
+                }
+            }
+            else if (exportOption == "ExportFirstSheetPerDomainsInOneFile")
+            {
+                var resolvedFilePath = resolvedDirectoryPath + exportingFileName + ".xlsx";
                 using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
                 {
-                    try
+                    if (pck.Workbook.Worksheets.Count > 0)
                     {
-                        if (pck.Workbook.Worksheets.Count > 0)
+                        var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
+                        for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
                         {
-                            var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                            for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
-                            {
-                                pck.Workbook.Worksheets.Delete(i);
-                            }
+                            pck.Workbook.Worksheets.Delete(i);
                         }
-                        ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dataTable.TableName);
-                        ws.Cells["A1"].LoadFromDataTable(dataTable, true);
-                        ws.Cells[ws.Dimension.Address].AutoFitColumns();
                     }
-                    catch (Exception ex)
+                    foreach (DataTable item in dataSet.Tables)
                     {
+                        try
+                        {
+                            ExcelWorksheet ws = pck.Workbook.Worksheets.Add(item.TableName);
+                            ws.Cells["A1"].LoadFromDataTable(item, true);
+                            ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                        }
+                        catch (Exception ex)
+                        {
 
+                        }
                     }
                     pck.Save();
                 }
             }
+
             var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
             if (successDialogResult == DialogResult.Yes)
                 Process.Start("explorer.exe", resolvedDirectoryPath);
@@ -1347,7 +1470,7 @@ namespace SSDLMaintenanceTool.Forms
                     }
                 }
             }
-            else if (exportOption == "ExportAllDomainsInOneFile")
+            else if (exportOption == "ExportFirstSheetPerDomainsInOneFile")
             {
                 var resolvedFilePath = resolvedDirectoryPath + exportFileName + ".xlsx";
                 using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
@@ -1374,98 +1497,6 @@ namespace SSDLMaintenanceTool.Forms
                         }
                     }
                     pck.Save();
-                }
-            }
-            var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
-            if (successDialogResult == DialogResult.Yes)
-                Process.Start("explorer.exe", resolvedDirectoryPath);
-        }
-
-        void ExportPublishPredefinedQueries(ConcurrentDictionary<string, DataSet> dataSetCollection, string usersSaveDirectoryPath, string rootDirectoryName)
-        {
-            var resolvedDirectoryPath = usersSaveDirectoryPath + @"\" + rootDirectoryName + @"\";
-            Directory.CreateDirectory(resolvedDirectoryPath);
-
-            foreach (var item in dataSetCollection)
-            {
-                var resolvedFilePath = resolvedDirectoryPath + item.Key + ".xlsx";
-                using (ExcelPackage pck = new ExcelPackage(resolvedFilePath))
-                {
-                    if (pck.Workbook.Worksheets.Count > 0)
-                    {
-                        var existingWorksheetsCount = pck.Workbook.Worksheets.Count;
-                        for (int i = 0; i < existingWorksheetsCount; existingWorksheetsCount--)
-                        {
-                            pck.Workbook.Worksheets.Delete(i);
-                        }
-                    }
-                    foreach (DataTable dataTable in item.Value.Tables)
-                    {
-                        try
-                        {
-                            ExcelWorksheet worksheet = pck.Workbook.Worksheets.Add(dataTable.TableName);
-                            worksheet.Cells["B1"].LoadFromDataTable(dataTable, true);
-
-                            var childJobQueries = dataTable.Select("ParentJobId IS NOT NULL");
-
-                            if (childJobQueries != null && childJobQueries.Length > 0)
-                            {
-                                int rowStart = worksheet.Dimension.Start.Row;
-                                int rowEnd = worksheet.Dimension.End.Row;
-
-                                int columnStart = worksheet.Dimension.Start.Column;
-                                int columnEnd = worksheet.Dimension.End.Column;
-
-                                var dataExcelRange = worksheet.Cells[rowStart, columnStart, rowEnd, columnEnd];
-
-                                var jobIdColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
-                                                  where cell.Value != null && cell.Value.ToString() == "JobId"
-                                                  select cell.Start.Column;
-
-                                var jobIdColumnNumber = jobIdColumn.FirstOrDefault();
-
-                                var queryNameColumn = from cell in dataExcelRange //you can define your own range of cells for lookup
-                                                      where cell.Value != null && cell.Value.ToString() == "QueryName"
-                                                      select cell.Start.Column;
-
-                                var queryNameColumnNumber = queryNameColumn.FirstOrDefault();
-
-                                worksheet.Cells["A" + 1].Value = "New Query Name";
-
-                                foreach (DataRow childQueryRow in childJobQueries)
-                                {
-                                    var childJobId = childQueryRow["JobId"].ToString();
-                                    var parentJobId = childQueryRow["ParentJobId"].ToString();
-                                    var queryName = childQueryRow["QueryName"].ToString();
-
-                                    for (int parentQueryIterator = 2; parentQueryIterator <= rowEnd; parentQueryIterator++)
-                                    {
-                                        var parentJobIdCell = worksheet.Cells[parentQueryIterator, jobIdColumnNumber];
-                                        var parentQueryNameCell = worksheet.Cells[parentQueryIterator, queryNameColumnNumber];
-                                        if (parentJobIdCell != null && parentJobIdCell.Value != null && parentJobIdCell.Value.ToString() == parentJobId && parentQueryNameCell != null && parentQueryNameCell.Value != null && parentQueryNameCell.Value.ToString() == queryName)
-                                        {
-                                            for (int childQueryIterator = 2; childQueryIterator <= rowEnd; childQueryIterator++)
-                                            {
-                                                var childJobIdCell = worksheet.Cells[childQueryIterator, jobIdColumnNumber];
-                                                var childQueryNameCell = worksheet.Cells[childQueryIterator, queryNameColumnNumber];
-
-                                                if (childJobIdCell != null && childJobIdCell.Value != null && childJobIdCell.Value.ToString() == childJobId && childQueryNameCell != null && childQueryNameCell.Value != null && childQueryNameCell.Value.ToString() == queryName)
-                                                {
-                                                    worksheet.Cells["A" + childJobIdCell.Start.Row].Formula = "=" + worksheet.Cells["A" + parentJobIdCell.Start.Row].Address;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-
-                        }
-                        pck.Save();
-                    }
                 }
             }
             var successDialogResult = MessageBox.Show("File(s) have been exported.\nClick on Yes to open the file location.", "Success", MessageBoxButtons.YesNo);
@@ -1559,9 +1590,18 @@ namespace SSDLMaintenanceTool.Forms
                 var selectedDisplayOption = (displayOptionsComboBox.SelectedItem as NameValueModel);
                 if (selectedDisplayOption == null)
                 {
-                    MessageBox.Show("Template is not available");
+                    MessageBox.Show("Display option is not available");
                     return;
                 }
+                //if (selectedDisplayOption.Value == "OnlyListDomainsWithAffectedRecords")
+                //{
+                //    exportOptionsComboBox.SelectedItem = ExportOptions.Find(a => a.Value == "ExportAsIs");
+                //    exportOptionsComboBox.Enabled = false;
+                //}
+                //else
+                //{
+                //    exportOptionsComboBox.Enabled = true;
+                //}
             }
         }
     }

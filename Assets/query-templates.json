@@ -1,12 +1,12 @@
 [
   {
-    "Name": "Publish Predefined Queries Migration",
-    "Value": "PublishPredefinedQueriesMigration",
-    "QueryTemplateFilePath": "QueryTemplates\\Publish-Predefined-Migration-Part-01.sql",
+    "Name": "<blank>",
+    "Value": "",
+    "QueryTemplateFilePath": "<path to sql>",
     "QueryCompletionCallback": {
       "Assembly": "SSDLMaintenanceTool",
       "ClassFullyQualifiedAssemblyPath":  "QueryExecutioner",
-      "Method": "PredefinedQueriesCompleted"
+      "Method": "<delegate method>"
     }
   }
 ]

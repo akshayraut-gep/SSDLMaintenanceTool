@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.executeQueryButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -58,13 +57,16 @@
             this.exportOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.displayOptionsComboBox = new System.Windows.Forms.ComboBox();
             this.mainPanel = new System.Windows.Forms.Panel();
-            this.exportFileNameInputDialog = new Ookii.Dialogs.WinForms.InputDialog(this.components);
             this.domainFilterOptionsComboBox = new System.Windows.Forms.ComboBox();
+            this.logsPanel = new System.Windows.Forms.Panel();
+            this.logsDataGridView = new System.Windows.Forms.DataGridView();
             this.bottomStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.mainPanel.SuspendLayout();
+            this.logsPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // executeQueryButton
@@ -222,7 +224,7 @@
             this.resultDomainsToolStrip});
             this.bottomStatusStrip.Location = new System.Drawing.Point(0, 886);
             this.bottomStatusStrip.Name = "bottomStatusStrip";
-            this.bottomStatusStrip.Size = new System.Drawing.Size(881, 32);
+            this.bottomStatusStrip.Size = new System.Drawing.Size(1629, 32);
             this.bottomStatusStrip.TabIndex = 17;
             this.bottomStatusStrip.Text = "statusStrip1";
             // 
@@ -263,8 +265,8 @@
             // resultDomainsToolStrip
             // 
             this.resultDomainsToolStrip.Name = "resultDomainsToolStrip";
-            this.resultDomainsToolStrip.Size = new System.Drawing.Size(131, 25);
-            this.resultDomainsToolStrip.Text = "Failed domains";
+            this.resultDomainsToolStrip.Size = new System.Drawing.Size(133, 25);
+            this.resultDomainsToolStrip.Text = "Result domains";
             // 
             // asyncCheckBox
             // 
@@ -344,6 +346,7 @@
             // 
             // mainPanel
             // 
+            this.mainPanel.Controls.Add(this.logsPanel);
             this.mainPanel.Controls.Add(this.domainFilterOptionsComboBox);
             this.mainPanel.Controls.Add(this.connectionStringsComboBox);
             this.mainPanel.Controls.Add(this.groupBox2);
@@ -362,26 +365,46 @@
             this.mainPanel.Controls.Add(this.exportDomainsButton);
             this.mainPanel.Location = new System.Drawing.Point(12, 12);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(725, 871);
+            this.mainPanel.Size = new System.Drawing.Size(1605, 871);
             this.mainPanel.TabIndex = 28;
-            // 
-            // exportFileNameInputDialog
-            // 
-            this.exportFileNameInputDialog.MainInstruction = "inputDialog1";
             // 
             // domainFilterOptionsComboBox
             // 
+            this.domainFilterOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.domainFilterOptionsComboBox.FormattingEnabled = true;
             this.domainFilterOptionsComboBox.Location = new System.Drawing.Point(118, 59);
             this.domainFilterOptionsComboBox.Name = "domainFilterOptionsComboBox";
             this.domainFilterOptionsComboBox.Size = new System.Drawing.Size(212, 28);
             this.domainFilterOptionsComboBox.TabIndex = 29;
             // 
+            // logsPanel
+            // 
+            this.logsPanel.Controls.Add(this.logsDataGridView);
+            this.logsPanel.Location = new System.Drawing.Point(720, 8);
+            this.logsPanel.Name = "logsPanel";
+            this.logsPanel.Size = new System.Drawing.Size(866, 620);
+            this.logsPanel.TabIndex = 29;
+            // 
+            // logsDataGridView
+            // 
+            this.logsDataGridView.AllowUserToAddRows = false;
+            this.logsDataGridView.AllowUserToDeleteRows = false;
+            this.logsDataGridView.AllowUserToOrderColumns = true;
+            this.logsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.logsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.logsDataGridView.Location = new System.Drawing.Point(0, 0);
+            this.logsDataGridView.Name = "logsDataGridView";
+            this.logsDataGridView.ReadOnly = true;
+            this.logsDataGridView.RowHeadersWidth = 62;
+            this.logsDataGridView.RowTemplate.Height = 28;
+            this.logsDataGridView.Size = new System.Drawing.Size(866, 620);
+            this.logsDataGridView.TabIndex = 0;
+            // 
             // QueryExecutioner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(881, 918);
+            this.ClientSize = new System.Drawing.Size(1629, 918);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.mainPanel);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -397,6 +420,8 @@
             this.groupBox2.ResumeLayout(false);
             this.mainPanel.ResumeLayout(false);
             this.mainPanel.PerformLayout();
+            this.logsPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -432,8 +457,9 @@
         private System.Windows.Forms.Panel mainPanel;
         private System.Windows.Forms.ComboBox displayOptionsComboBox;
         private System.Windows.Forms.ComboBox exportOptionsComboBox;
-        private Ookii.Dialogs.WinForms.InputDialog exportFileNameInputDialog;
         private System.Windows.Forms.ToolStripStatusLabel resultDomainsToolStrip;
         private System.Windows.Forms.ComboBox domainFilterOptionsComboBox;
+        private System.Windows.Forms.Panel logsPanel;
+        private System.Windows.Forms.DataGridView logsDataGridView;
     }
 }

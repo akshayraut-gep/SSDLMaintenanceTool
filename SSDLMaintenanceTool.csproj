@@ -149,6 +149,7 @@
       <DependentUpon>GEPCacheClear.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\CSVHelper.cs" />
+    <Compile Include="Helpers\DescendingComparer.cs" />
     <Compile Include="Helpers\EPPlugExcelHelper.cs" />
     <Compile Include="Helpers\ExcelHelper.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="Models\Domain.cs" />
     <Compile Include="Models\EnvironmentSetting.cs" />
     <Compile Include="Models\NameValueModel.cs" />
+    <Compile Include="Models\QueryExecutionLog.cs" />
     <Compile Include="Models\QueryTemplate.cs" />
     <Compile Include="Models\QueryType.cs" />
     <Compile Include="Models\StepTaskJson.cs" />

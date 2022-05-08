@@ -84,10 +84,10 @@ namespace SSDLMaintenanceTool.Implementations
 
         public int ChangeData(string query, ConnectionDetails connectionDetails)
         {
-            var connectionString = GetConnectionString(connectionDetails);
             IDbCommand dbCommand;
             using (var dbConnection = GetConnectionWithCommand(query, connectionDetails, out dbCommand))
             {
+                dbCommand.CommandTimeout = 0;
                 dbConnection.Open();
                 using (dbCommand)
                 {
