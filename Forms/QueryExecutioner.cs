@@ -721,7 +721,7 @@ namespace SSDLMaintenanceTool.Forms
                     }
                     DisplayOutputInTabsAsync("Domains with results", dataSetForDisplay);
 
-                    if (selectedExportOption.HasContent())
+                    if (selectedExportOption.HasContent() && selectedExportOption.ToLower() != "NoExport".ToLower())
                     {
                         VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
                         vistaFolderBrowserDialog.Description = "Export Query Result - Select folder to export the file";
@@ -1163,7 +1163,7 @@ namespace SSDLMaintenanceTool.Forms
         private void LoadSSDLDomains(ConnectionDetails copyConnection, string domainNameFilter = "")
         {
             var selectClause = "Name";
-            var filterCondition = "";
+            string filterCondition;
             var query = "";
 
             if (!domainNameFilter.HasContent() || domainNameFilter == "SSDLMicroDBs")
@@ -1565,7 +1565,14 @@ namespace SSDLMaintenanceTool.Forms
                 e.Handled = true;
                 if (filterDomainsTextBox.Text.HasContent())
                 {
-                    filterDomainsTextBox.Text = filterDomainsTextBox.Text.Substring(0, filterDomainsTextBox.Text.Length - 1);
+                    if (filterDomainsTextBox.SelectedText.HasContent())
+                    {
+                        filterDomainsTextBox.Text = filterDomainsTextBox.Text.Replace(filterDomainsTextBox.SelectedText, "");
+                    }
+                    else
+                    {
+                        filterDomainsTextBox.Text = filterDomainsTextBox.Text.Substring(0, filterDomainsTextBox.Text.Length - 1);
+                    }
                     filterDomainsTextBox.SelectionStart = filterDomainsTextBox.TextLength;
                 }
             }

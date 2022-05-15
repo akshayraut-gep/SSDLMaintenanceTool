@@ -51,6 +51,8 @@
             this.parallelismDegreeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
             this.asyncCheckBox = new System.Windows.Forms.CheckBox();
+            this.cacheKeyNameTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.bottomStatusStrip.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.parallelismDegreeNumericUpDown)).BeginInit();
@@ -60,7 +62,7 @@
             // 
             this.environmentComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.environmentComboBox.FormattingEnabled = true;
-            this.environmentComboBox.Location = new System.Drawing.Point(136, 67);
+            this.environmentComboBox.Location = new System.Drawing.Point(161, 67);
             this.environmentComboBox.Name = "environmentComboBox";
             this.environmentComboBox.Size = new System.Drawing.Size(137, 28);
             this.environmentComboBox.TabIndex = 2;
@@ -79,7 +81,7 @@
             // clearCacheButton
             // 
             this.clearCacheButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.clearCacheButton.Location = new System.Drawing.Point(455, 382);
+            this.clearCacheButton.Location = new System.Drawing.Point(480, 472);
             this.clearCacheButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.clearCacheButton.Name = "clearCacheButton";
             this.clearCacheButton.Size = new System.Drawing.Size(133, 32);
@@ -102,7 +104,7 @@
             // 
             this.modeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.modeComboBox.FormattingEnabled = true;
-            this.modeComboBox.Location = new System.Drawing.Point(136, 24);
+            this.modeComboBox.Location = new System.Drawing.Point(161, 24);
             this.modeComboBox.Name = "modeComboBox";
             this.modeComboBox.Size = new System.Drawing.Size(263, 28);
             this.modeComboBox.TabIndex = 1;
@@ -110,10 +112,12 @@
             // 
             // filterDomainsTextBox
             // 
-            this.filterDomainsTextBox.Location = new System.Drawing.Point(136, 112);
+            this.filterDomainsTextBox.Location = new System.Drawing.Point(161, 112);
             this.filterDomainsTextBox.Name = "filterDomainsTextBox";
             this.filterDomainsTextBox.Size = new System.Drawing.Size(452, 26);
             this.filterDomainsTextBox.TabIndex = 15;
+            this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
+            this.filterDomainsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filterDomainsTextBox_KeyPress);
             // 
             // domainsCheckListBox
             // 
@@ -124,7 +128,7 @@
             "A",
             "B",
             "C"});
-            this.domainsCheckListBox.Location = new System.Drawing.Point(136, 144);
+            this.domainsCheckListBox.Location = new System.Drawing.Point(161, 144);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
             this.domainsCheckListBox.Size = new System.Drawing.Size(452, 165);
             this.domainsCheckListBox.TabIndex = 14;
@@ -132,7 +136,7 @@
             // loadDomainsButton
             // 
             this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.loadDomainsButton.Location = new System.Drawing.Point(422, 64);
+            this.loadDomainsButton.Location = new System.Drawing.Point(447, 64);
             this.loadDomainsButton.Name = "loadDomainsButton";
             this.loadDomainsButton.Size = new System.Drawing.Size(166, 32);
             this.loadDomainsButton.TabIndex = 16;
@@ -152,7 +156,7 @@
             // 
             // singleDomainBPCTextBox
             // 
-            this.singleDomainBPCTextBox.Location = new System.Drawing.Point(405, 24);
+            this.singleDomainBPCTextBox.Location = new System.Drawing.Point(430, 24);
             this.singleDomainBPCTextBox.Name = "singleDomainBPCTextBox";
             this.singleDomainBPCTextBox.Size = new System.Drawing.Size(183, 26);
             this.singleDomainBPCTextBox.TabIndex = 18;
@@ -161,7 +165,7 @@
             // 
             this.domainFilterOptionsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.domainFilterOptionsComboBox.FormattingEnabled = true;
-            this.domainFilterOptionsComboBox.Location = new System.Drawing.Point(279, 67);
+            this.domainFilterOptionsComboBox.Location = new System.Drawing.Point(304, 67);
             this.domainFilterOptionsComboBox.Name = "domainFilterOptionsComboBox";
             this.domainFilterOptionsComboBox.Size = new System.Drawing.Size(137, 28);
             this.domainFilterOptionsComboBox.TabIndex = 30;
@@ -228,7 +232,7 @@
             this.groupBox1.Controls.Add(this.parallelismDegreeNumericUpDown);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.asyncCheckBox);
-            this.groupBox1.Location = new System.Drawing.Point(234, 315);
+            this.groupBox1.Location = new System.Drawing.Point(259, 405);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(354, 62);
             this.groupBox1.TabIndex = 32;
@@ -261,11 +265,30 @@
             this.asyncCheckBox.Text = "Async";
             this.asyncCheckBox.UseVisualStyleBackColor = true;
             // 
+            // cacheKeyNameTextBox
+            // 
+            this.cacheKeyNameTextBox.Location = new System.Drawing.Point(161, 324);
+            this.cacheKeyNameTextBox.Name = "cacheKeyNameTextBox";
+            this.cacheKeyNameTextBox.Size = new System.Drawing.Size(183, 26);
+            this.cacheKeyNameTextBox.TabIndex = 33;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(12, 327);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(143, 20);
+            this.label5.TabIndex = 34;
+            this.label5.Text = "Cache Key name";
+            // 
             // GEPCacheClear
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(939, 619);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.cacheKeyNameTextBox);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.bottomStatusStrip);
             this.Controls.Add(this.domainFilterOptionsComboBox);
@@ -317,5 +340,7 @@
         private System.Windows.Forms.NumericUpDown parallelismDegreeNumericUpDown;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox asyncCheckBox;
+        private System.Windows.Forms.TextBox cacheKeyNameTextBox;
+        private System.Windows.Forms.Label label5;
     }
 }

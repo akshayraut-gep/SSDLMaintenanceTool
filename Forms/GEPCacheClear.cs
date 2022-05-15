@@ -56,6 +56,7 @@ namespace SSDLMaintenanceTool.Forms
 
         private void LoadSSDLDomains(ConnectionDetails copyConnection, string domainNameFilter = "")
         {
+            DomainsTableSet = new DataTable();
             if (!domainNameFilter.HasContent() || domainNameFilter == "SSDLDomains")
             {
                 foreach (var connectionStringByRegion in copyConnection.ConnectionStringByRegions)
@@ -210,7 +211,16 @@ namespace SSDLMaintenanceTool.Forms
                 }
                 listOfBPCs = ConvertToDomainBPCs();
             }
-            StartClearingCache(selectedEnvironment.Name, listOfBPCs, asyncCheckBox.Checked, parallelismDegreeNumericUpDown.Value);
+            EnableUIForCacheClear(false);
+            queryProgressBarToolStrip.Value = 0;
+            queryStatusLabelToolStrip.Text = "Running";
+            loadDomainsProgressBarToolStrip.Value = 0;
+            loadDomainStatusLabelToolStrip.Text = "Loading domains is blocked - till query is being executed";
+            SuccessDomainsCount = 0;
+            FailureDomainsCount = 0;
+            successDomainsToolStrip.Text = "";
+            failureDomainsToolStrip.Text = "";
+            StartClearingCache(selectedEnvironment.Name, listOfBPCs, asyncCheckBox.Checked, parallelismDegreeNumericUpDown.Value, cacheKeyNameTextBox.Text);
         }
 
         public ConnectionDetails GetSelectedEnvironmentName(out string validationMessage)
@@ -218,30 +228,30 @@ namespace SSDLMaintenanceTool.Forms
             validationMessage = "";
             if (environmentComboBox.SelectedValue == null)
             {
-                validationMessage = "Select a domain";
+                validationMessage = "Select an environment";
                 return null;
             }
 
             var connectionDetail = _connectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == environmentComboBox.SelectedValue.ToString());
             if (connectionDetail == null)
             {
-                validationMessage = "BPC is not available";
+                validationMessage = "Environment is invalid";
                 return null;
             }
             return connectionDetail;
         }
 
-        private void StartClearingCache(string environment, List<string> listOfBPCs, bool isAsync, decimal parallelismDegree)
+        private void StartClearingCache(string environment, List<string> listOfBPCs, bool isAsync, decimal parallelismDegree, string cacheKeyName)
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 try
                 {
-                    ClearCacheForBPCs(environment, listOfBPCs, parallelismDegree);
+                    await ClearCacheForBPCs(environment, listOfBPCs, parallelismDegree, cacheKeyName);
                     //Send the update to our UI thread
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
-                        EnableUIForQueryExecution();
+                        EnableUIForCacheClear();
                         ClearingCacheCompleted();
                     }), null);
                 }
@@ -258,61 +268,63 @@ namespace SSDLMaintenanceTool.Forms
                     //Send the update to our UI thread
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
-                        EnableUIForQueryExecution();
+                        EnableUIForCacheClear();
                     }), null);
                 }
-            });
+            }).Wait();
         }
 
-        private void ClearCacheForBPCs(string environment, List<string> listOfBPCs, decimal parallelismDegree)
+        private async Task ClearCacheForBPCs(string environment, List<string> listOfBPCs, decimal parallelismDegree, string cacheKeyName)
         {
             var parallelOptions = new ParallelOptions();
             parallelOptions.MaxDegreeOfParallelism = ((int)parallelismDegree) == 0 ? 10 : ((int)parallelismDegree);
-            Parallel.For(0, listOfBPCs.Count, parallelOptions, (async (BPC) =>
-             {
-                 try
-                 {
-                     var formDataDictionary = new Dictionary<string, string>();
-                     formDataDictionary.Add("environment", environment);
-                     formDataDictionary.Add("bpc", listOfBPCs[BPC]);
-                     formDataDictionary.Add("cacheKey", "");
+            var tasks = listOfBPCs.Select(async BPC =>
+            {
+                try
+                {
+                    var formDataDictionary = new Dictionary<string, string>();
+                    formDataDictionary.Add("environment", environment);
+                    formDataDictionary.Add("bpc", BPC);
+                    formDataDictionary.Add("cacheKey", cacheKeyName);
 
-                     var httpClient = new HttpClient();
+                    var httpClient = new HttpClient();
 
-                     var multipartFormDataContent = new FormUrlEncodedContent(formDataDictionary);
+                    var multipartFormDataContent = new FormUrlEncodedContent(formDataDictionary);
 
-                     var response = await httpClient.PostAsync("https://devops.gep.com/CacheClear/Cache", multipartFormDataContent);
-                     if (response != null)
-                     {
-                         if (response.StatusCode == HttpStatusCode.OK)
-                         {
-                             //Send the update to our UI thread
-                             synchronizationContext.Post(new SendOrPostCallback(o =>
-                              {
-                                  SuccessDomainsCount++;
-                                  var percentage = ((double)SuccessDomainsCount / (double)listOfBPCs.Count) * 100;
-                                  queryProgressBarToolStrip.Value = (int)percentage;
-                              }), null);
-                         }
-                     }
-                     else
-                     {
-                         //Send the update to our UI thread
-                         synchronizationContext.Post(new SendOrPostCallback(o =>
-                          {
-                              FailureDomainsCount++;
-                          }), null);
-                     }
-                 }
-                 catch (Exception ex)
-                 {
-                     //Send the update to our UI thread
-                     synchronizationContext.Post(new SendOrPostCallback(o =>
-                      {
-                          FailureDomainsCount++;
-                      }), null);
-                 }
-             }));
+                    var response = await httpClient.PostAsync("https://devops.gep.com/CacheClear/Cache", multipartFormDataContent);
+                    if (response != null)
+                    {
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            var responseBody = await response.Content.ReadAsStringAsync();
+                            //Send the update to our UI thread
+                            synchronizationContext.Post(new SendOrPostCallback(o =>
+                            {
+                                SuccessDomainsCount++;
+                                var percentage = ((double)SuccessDomainsCount / (double)listOfBPCs.Count) * 100;
+                                queryProgressBarToolStrip.Value = (int)percentage;
+                            }), null);
+                        }
+                    }
+                    else
+                    {
+                        //Send the update to our UI thread
+                        synchronizationContext.Post(new SendOrPostCallback(o =>
+                        {
+                            FailureDomainsCount++;
+                        }), null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Send the update to our UI thread
+                    synchronizationContext.Post(new SendOrPostCallback(o =>
+                    {
+                        FailureDomainsCount++;
+                    }), null);
+                }
+            });
+            await Task.WhenAll(tasks);
         }
 
         private void QueryFailed(Exception ex)
@@ -322,9 +334,11 @@ namespace SSDLMaintenanceTool.Forms
             MessageBox.Show(ex.Message);
         }
 
-        private void EnableUIForQueryExecution(bool value = true)
+        private void EnableUIForCacheClear(bool value = true)
         {
             EnableUIForDomainList(value);
+            clearCacheButton.Enabled = value;
+            cacheKeyNameTextBox.ReadOnly = !value;
         }
 
         private void loadDomainsButton_Click(object sender, EventArgs e)
@@ -441,6 +455,42 @@ namespace SSDLMaintenanceTool.Forms
                 return null;
             }
             return connectionDetail;
+        }
+
+        private void filterDomainsTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var filterText = filterDomainsTextBox.Text.ToLower();
+            var filteredDomains = new List<Domain>();
+            if (filterDomainsTextBox.Text.HasContent())
+            {
+                filteredDomains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterText) && a.Name != "SelectAll")
+                ;
+                filteredDomains.Insert(0, new Domain() { Name = "SelectAll", DisplayName = "Select all" });
+            }
+            else
+                filteredDomains = BackupDomains.FindAll(a => a.DisplayName.ToLower().Contains(filterText));
+
+            Domains = filteredDomains.Select(a => new Domain()
+            {
+                Name = a.Name,
+                DatabaseName = a.DatabaseName,
+                DisplayName = a.DisplayName,
+                IsChecked = a.IsChecked
+            }).ToList(); ;
+            PopulateDomainsCheckListBox();
+        }
+
+        private void filterDomainsTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Back)
+            {
+                e.Handled = true;
+                if (filterDomainsTextBox.Text.HasContent())
+                {
+                    filterDomainsTextBox.Text = filterDomainsTextBox.Text.Substring(0, filterDomainsTextBox.Text.Length - 1);
+                    filterDomainsTextBox.SelectionStart = filterDomainsTextBox.TextLength;
+                }
+            }
         }
     }
 }
