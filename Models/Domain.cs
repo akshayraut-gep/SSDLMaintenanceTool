@@ -3,6 +3,7 @@
     public class Domain
     {
         public string Name { get; set; }
+        public string ProjectName { get; set; }
         public string DisplayName { get; set; }
         public string DatabaseName { get; set; }
         public bool IsChecked { get; set; }

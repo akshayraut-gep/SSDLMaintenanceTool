@@ -1098,7 +1098,7 @@ namespace SSDLMaintenanceTool.Forms
                 copyConnection.Password = credentialsPrompt.Password;
             }
 
-            var domainFilterBeforeSearch = (domainFilterOptionsComboBox.SelectedItem as NameValueModel).Value;
+            var domainTypeFilterBeforeSearch = (domainFilterOptionsComboBox.SelectedItem as NameValueModel).Value;
 
             EnableUIForDomainList(false);
             loadDomainsProgressBarToolStrip.Value = 0;
@@ -1111,7 +1111,7 @@ namespace SSDLMaintenanceTool.Forms
             {
                 try
                 {
-                    LoadSSDLDomains(copyConnection, domainFilterBeforeSearch);
+                    LoadSSDLDomains(copyConnection, domainTypeFilterBeforeSearch);
                     ConvertToDomainModel();
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
@@ -1160,20 +1160,20 @@ namespace SSDLMaintenanceTool.Forms
             queryRichTextBox.ReadOnly = !value;
         }
 
-        private void LoadSSDLDomains(ConnectionDetails copyConnection, string domainNameFilter = "")
+        private void LoadSSDLDomains(ConnectionDetails copyConnection, string domainTypeFilter = "")
         {
             var selectClause = "Name";
             string filterCondition;
             var query = "";
 
-            if (!domainNameFilter.HasContent() || domainNameFilter == "SSDLMicroDBs")
+            if (!domainTypeFilter.HasContent() || domainTypeFilter == "SSDLMicroDBs")
             {
                 filterCondition = $"Name LIKE '%[_]SSDL'";
                 query = $"SELECT {selectClause} FROM sys.databases WHERE {filterCondition}";
             }
             else
             {
-                if (domainNameFilter == "SSDLBuyerDBs")
+                if (domainTypeFilter == "SSDLBuyerDBs")
                 {
                     query = @"With CTE AS
                             (
@@ -1184,7 +1184,7 @@ namespace SSDLMaintenanceTool.Forms
                             join CTE b on a.name like(replace(b.name, '_SSDL', '') +'%') and a.name not like '%[_]%'
                             ";
                 }
-                else if (domainNameFilter == "AllBuyerDBs")
+                else if (domainTypeFilter == "AllBuyerDBs")
                 {
                     filterCondition = $"Name NOT LIKE '%[_]%'";
                     query = $"SELECT {selectClause} FROM sys.databases WHERE {filterCondition}";

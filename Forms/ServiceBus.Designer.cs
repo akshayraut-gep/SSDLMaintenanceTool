@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.bpcTextBox = new System.Windows.Forms.TextBox();
-            this.bpcLabel = new System.Windows.Forms.Label();
             this.logsDataGridView = new System.Windows.Forms.DataGridView();
             this.getMessagesButton = new System.Windows.Forms.Button();
             this.connectionStringsComboBox = new System.Windows.Forms.ComboBox();
@@ -41,39 +39,23 @@
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
-            // bpcTextBox
-            // 
-            this.bpcTextBox.Location = new System.Drawing.Point(120, 51);
-            this.bpcTextBox.Name = "bpcTextBox";
-            this.bpcTextBox.Size = new System.Drawing.Size(249, 26);
-            this.bpcTextBox.TabIndex = 0;
-            // 
-            // bpcLabel
-            // 
-            this.bpcLabel.AutoSize = true;
-            this.bpcLabel.Location = new System.Drawing.Point(35, 54);
-            this.bpcLabel.Name = "bpcLabel";
-            this.bpcLabel.Size = new System.Drawing.Size(41, 20);
-            this.bpcLabel.TabIndex = 1;
-            this.bpcLabel.Text = "BPC";
-            // 
             // logsDataGridView
             // 
             this.logsDataGridView.AllowUserToAddRows = false;
             this.logsDataGridView.AllowUserToDeleteRows = false;
             this.logsDataGridView.AllowUserToOrderColumns = true;
             this.logsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.logsDataGridView.Location = new System.Drawing.Point(54, 384);
+            this.logsDataGridView.Location = new System.Drawing.Point(127, 272);
             this.logsDataGridView.Name = "logsDataGridView";
             this.logsDataGridView.ReadOnly = true;
             this.logsDataGridView.RowHeadersWidth = 62;
             this.logsDataGridView.RowTemplate.Height = 28;
-            this.logsDataGridView.Size = new System.Drawing.Size(760, 440);
+            this.logsDataGridView.Size = new System.Drawing.Size(844, 391);
             this.logsDataGridView.TabIndex = 2;
             // 
             // getMessagesButton
             // 
-            this.getMessagesButton.Location = new System.Drawing.Point(392, 41);
+            this.getMessagesButton.Location = new System.Drawing.Point(716, 211);
             this.getMessagesButton.Name = "getMessagesButton";
             this.getMessagesButton.Size = new System.Drawing.Size(187, 46);
             this.getMessagesButton.TabIndex = 3;
@@ -91,7 +73,7 @@
             "QC",
             "UAT",
             "Production"});
-            this.connectionStringsComboBox.Location = new System.Drawing.Point(131, 118);
+            this.connectionStringsComboBox.Location = new System.Drawing.Point(127, 18);
             this.connectionStringsComboBox.Name = "connectionStringsComboBox";
             this.connectionStringsComboBox.Size = new System.Drawing.Size(390, 28);
             this.connectionStringsComboBox.TabIndex = 10;
@@ -101,7 +83,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(16, 172);
+            this.label1.Location = new System.Drawing.Point(12, 72);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(70, 20);
             this.label1.TabIndex = 9;
@@ -111,7 +93,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
-            this.label3.Location = new System.Drawing.Point(16, 121);
+            this.label3.Location = new System.Drawing.Point(12, 21);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(109, 20);
             this.label3.TabIndex = 11;
@@ -120,7 +102,7 @@
             // loadDomainsButton
             // 
             this.loadDomainsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.loadDomainsButton.Location = new System.Drawing.Point(527, 115);
+            this.loadDomainsButton.Location = new System.Drawing.Point(523, 15);
             this.loadDomainsButton.Name = "loadDomainsButton";
             this.loadDomainsButton.Size = new System.Drawing.Size(183, 32);
             this.loadDomainsButton.TabIndex = 12;
@@ -137,14 +119,14 @@
             "A",
             "B",
             "C"});
-            this.domainsCheckListBox.Location = new System.Drawing.Point(131, 201);
+            this.domainsCheckListBox.Location = new System.Drawing.Point(127, 101);
             this.domainsCheckListBox.Name = "domainsCheckListBox";
             this.domainsCheckListBox.Size = new System.Drawing.Size(579, 165);
             this.domainsCheckListBox.TabIndex = 13;
             // 
             // filterDomainsTextBox
             // 
-            this.filterDomainsTextBox.Location = new System.Drawing.Point(131, 169);
+            this.filterDomainsTextBox.Location = new System.Drawing.Point(127, 69);
             this.filterDomainsTextBox.Name = "filterDomainsTextBox";
             this.filterDomainsTextBox.Size = new System.Drawing.Size(579, 26);
             this.filterDomainsTextBox.TabIndex = 14;
@@ -164,8 +146,6 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.getMessagesButton);
             this.Controls.Add(this.logsDataGridView);
-            this.Controls.Add(this.bpcLabel);
-            this.Controls.Add(this.bpcTextBox);
             this.Name = "ServiceBus";
             this.Text = "ServiceBus";
             this.Load += new System.EventHandler(this.ServiceBus_Load);
@@ -176,9 +156,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox bpcTextBox;
-        private System.Windows.Forms.Label bpcLabel;
         private System.Windows.Forms.DataGridView logsDataGridView;
         private System.Windows.Forms.Button getMessagesButton;
         private System.Windows.Forms.ComboBox connectionStringsComboBox;
