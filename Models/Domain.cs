@@ -7,5 +7,9 @@
         public string DatabaseName { get; set; }
         public bool IsChecked { get; set; }
         public string BuyerPartnerCode { get; internal set; }
+
+        public bool IsSubscriptionExists { get; set; }
+
+        public bool IsSubscriptionLock { get; set; }
     }
 }

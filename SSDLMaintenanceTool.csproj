@@ -148,6 +148,12 @@
     <Compile Include="Forms\GEPCacheClear.Designer.cs">
       <DependentUpon>GEPCacheClear.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ServiceBus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ServiceBus.Designer.cs">
+      <DependentUpon>ServiceBus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\CSVHelper.cs" />
     <Compile Include="Helpers\DescendingComparer.cs" />
     <Compile Include="Helpers\EPPlugExcelHelper.cs" />
@@ -198,6 +204,9 @@
     <EmbeddedResource Include="Forms\GEPCacheClear.resx">
       <DependentUpon>GEPCacheClear.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ServiceBus.resx">
+      <DependentUpon>ServiceBus.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Parent.resx">
       <DependentUpon>Parent.cs</DependentUpon>
     </EmbeddedResource>
@@ -213,6 +222,7 @@
       <DependentUpon>QueryExecutioner.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Assets\cache-clear-connection-strings.json" />
+    <None Include="Assets\service-bus-connection-strings.json" />
     <None Include="Assets\query-templates.json" />
     <None Include="Assets\connection-strings.json" />
     <None Include="packages.config" />

@@ -38,6 +38,8 @@
             this.queryExecutorButton = new System.Windows.Forms.Button();
             this.queryEditorButton = new System.Windows.Forms.Button();
             this.cacheClearAtGEPButton = new System.Windows.Forms.Button();
+            this.serviceBusButton = new System.Windows.Forms.Button();
+            this.serviceBusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,7 +51,7 @@
             this.menuToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(846, 33);
+            this.menuStrip1.Size = new System.Drawing.Size(983, 33);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -59,7 +61,8 @@
             this.openQueryExecutionerToolStripMenuItem,
             this.openPredefinedQueryEditorToolStripMenuItem,
             this.openFileCorrutValidatorToolStripMenuItem,
-            this.cacheClearAtGEPToolStripMenuItem});
+            this.cacheClearAtGEPToolStripMenuItem,
+            this.serviceBusToolStripMenuItem});
             this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
             this.menuToolStripMenuItem.Size = new System.Drawing.Size(73, 29);
             this.menuToolStripMenuItem.Text = "Menu";
@@ -96,7 +99,7 @@
             // 
             this.fileCorruptValidator.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.fileCorruptValidator.Image = global::SSDLMaintenanceTool.Properties.Resources.corrupt_file;
-            this.fileCorruptValidator.Location = new System.Drawing.Point(82, 356);
+            this.fileCorruptValidator.Location = new System.Drawing.Point(74, 334);
             this.fileCorruptValidator.Name = "fileCorruptValidator";
             this.fileCorruptValidator.Size = new System.Drawing.Size(219, 260);
             this.fileCorruptValidator.TabIndex = 3;
@@ -110,7 +113,7 @@
             // 
             this.queryExecutorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.queryExecutorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.query_analysis;
-            this.queryExecutorButton.Location = new System.Drawing.Point(410, 72);
+            this.queryExecutorButton.Location = new System.Drawing.Point(402, 50);
             this.queryExecutorButton.Name = "queryExecutorButton";
             this.queryExecutorButton.Size = new System.Drawing.Size(219, 260);
             this.queryExecutorButton.TabIndex = 2;
@@ -124,7 +127,7 @@
             // 
             this.queryEditorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.queryEditorButton.Image = global::SSDLMaintenanceTool.Properties.Resources.sql_configure_icon;
-            this.queryEditorButton.Location = new System.Drawing.Point(82, 72);
+            this.queryEditorButton.Location = new System.Drawing.Point(74, 50);
             this.queryEditorButton.Name = "queryEditorButton";
             this.queryEditorButton.Size = new System.Drawing.Size(219, 260);
             this.queryEditorButton.TabIndex = 1;
@@ -138,7 +141,7 @@
             // 
             this.cacheClearAtGEPButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.cacheClearAtGEPButton.Image = global::SSDLMaintenanceTool.Properties.Resources.cache_clear_new;
-            this.cacheClearAtGEPButton.Location = new System.Drawing.Point(410, 356);
+            this.cacheClearAtGEPButton.Location = new System.Drawing.Point(402, 334);
             this.cacheClearAtGEPButton.Name = "cacheClearAtGEPButton";
             this.cacheClearAtGEPButton.Size = new System.Drawing.Size(219, 260);
             this.cacheClearAtGEPButton.TabIndex = 4;
@@ -148,11 +151,32 @@
             this.cacheClearAtGEPButton.UseVisualStyleBackColor = true;
             this.cacheClearAtGEPButton.Click += new System.EventHandler(this.cacheClearAtGEPButton_Click);
             // 
+            // serviceBusButton
+            // 
+            this.serviceBusButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.serviceBusButton.Location = new System.Drawing.Point(700, 50);
+            this.serviceBusButton.Name = "serviceBusButton";
+            this.serviceBusButton.Size = new System.Drawing.Size(219, 260);
+            this.serviceBusButton.TabIndex = 5;
+            this.serviceBusButton.Text = "Service Bus";
+            this.serviceBusButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.serviceBusButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.serviceBusButton.UseVisualStyleBackColor = true;
+            this.serviceBusButton.Click += new System.EventHandler(this.serviceBusButton_Click);
+            // 
+            // serviceBusToolStripMenuItem
+            // 
+            this.serviceBusToolStripMenuItem.Name = "serviceBusToolStripMenuItem";
+            this.serviceBusToolStripMenuItem.Size = new System.Drawing.Size(311, 34);
+            this.serviceBusToolStripMenuItem.Text = "Service Bus";
+            this.serviceBusToolStripMenuItem.Click += new System.EventHandler(this.serviceBusToolStripMenuItem_Click);
+            // 
             // Parent
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(846, 659);
+            this.ClientSize = new System.Drawing.Size(983, 640);
+            this.Controls.Add(this.serviceBusButton);
             this.Controls.Add(this.cacheClearAtGEPButton);
             this.Controls.Add(this.fileCorruptValidator);
             this.Controls.Add(this.queryExecutorButton);
@@ -180,6 +204,8 @@
         private System.Windows.Forms.Button fileCorruptValidator;
         private System.Windows.Forms.Button cacheClearAtGEPButton;
         private System.Windows.Forms.ToolStripMenuItem cacheClearAtGEPToolStripMenuItem;
+        private System.Windows.Forms.Button serviceBusButton;
+        private System.Windows.Forms.ToolStripMenuItem serviceBusToolStripMenuItem;
     }
 }
 

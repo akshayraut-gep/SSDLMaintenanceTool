@@ -90,5 +90,21 @@ namespace SSDLMaintenanceTool
         {
             OpenGEPCacheClear();
         }
+
+        private void OpenServiceBus()
+        {
+            var serviceBus = new ServiceBus();
+            serviceBus.Show();
+        }
+
+        private void serviceBusButton_Click(object sender, EventArgs e)
+        {
+            OpenServiceBus();
+        }
+
+        private void serviceBusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenServiceBus();
+        }
     }
 }
