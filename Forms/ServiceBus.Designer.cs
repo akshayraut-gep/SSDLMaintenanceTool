@@ -36,6 +36,8 @@
             this.loadDomainsButton = new System.Windows.Forms.Button();
             this.domainsCheckListBox = new System.Windows.Forms.CheckedListBox();
             this.filterDomainsTextBox = new System.Windows.Forms.TextBox();
+            this.watcherGetMessagesButton = new System.Windows.Forms.Button();
+            this.watcherDeleteDuplicateMessagesButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.logsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,11 +57,11 @@
             // 
             // getMessagesButton
             // 
-            this.getMessagesButton.Location = new System.Drawing.Point(716, 211);
+            this.getMessagesButton.Location = new System.Drawing.Point(712, 101);
             this.getMessagesButton.Name = "getMessagesButton";
-            this.getMessagesButton.Size = new System.Drawing.Size(187, 46);
+            this.getMessagesButton.Size = new System.Drawing.Size(249, 46);
             this.getMessagesButton.TabIndex = 3;
-            this.getMessagesButton.Text = "Get messages";
+            this.getMessagesButton.Text = "Get messages for one BPC";
             this.getMessagesButton.UseVisualStyleBackColor = true;
             this.getMessagesButton.Click += new System.EventHandler(this.getMessagesButton_Click);
             // 
@@ -133,11 +135,31 @@
             this.filterDomainsTextBox.TextChanged += new System.EventHandler(this.filterDomainsTextBox_TextChanged);
             this.filterDomainsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.filterDomainsTextBox_KeyPress);
             // 
+            // watcherGetMessagesButton
+            // 
+            this.watcherGetMessagesButton.Location = new System.Drawing.Point(712, 159);
+            this.watcherGetMessagesButton.Name = "watcherGetMessagesButton";
+            this.watcherGetMessagesButton.Size = new System.Drawing.Size(249, 46);
+            this.watcherGetMessagesButton.TabIndex = 15;
+            this.watcherGetMessagesButton.Text = "Start watcher to get messages";
+            this.watcherGetMessagesButton.UseVisualStyleBackColor = true;
+            // 
+            // watcherDeleteDuplicateMessagesButton
+            // 
+            this.watcherDeleteDuplicateMessagesButton.Location = new System.Drawing.Point(712, 220);
+            this.watcherDeleteDuplicateMessagesButton.Name = "watcherDeleteDuplicateMessagesButton";
+            this.watcherDeleteDuplicateMessagesButton.Size = new System.Drawing.Size(249, 46);
+            this.watcherDeleteDuplicateMessagesButton.TabIndex = 16;
+            this.watcherDeleteDuplicateMessagesButton.Text = "Start watcher to delete duplicate";
+            this.watcherDeleteDuplicateMessagesButton.UseVisualStyleBackColor = true;
+            // 
             // ServiceBus
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(983, 675);
+            this.Controls.Add(this.watcherDeleteDuplicateMessagesButton);
+            this.Controls.Add(this.watcherGetMessagesButton);
             this.Controls.Add(this.filterDomainsTextBox);
             this.Controls.Add(this.domainsCheckListBox);
             this.Controls.Add(this.loadDomainsButton);
@@ -164,5 +186,7 @@
         private System.Windows.Forms.Button loadDomainsButton;
         private System.Windows.Forms.CheckedListBox domainsCheckListBox;
         private System.Windows.Forms.TextBox filterDomainsTextBox;
+        private System.Windows.Forms.Button watcherGetMessagesButton;
+        private System.Windows.Forms.Button watcherDeleteDuplicateMessagesButton;
     }
 }

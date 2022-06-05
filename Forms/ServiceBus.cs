@@ -36,6 +36,58 @@ namespace SSDLMaintenanceTool.Forms
             synchronizationContext = SynchronizationContext.Current; //context from UI thread
         }
 
+        private void ServiceBus_Load(object sender, EventArgs e)
+        {
+            connectionStringsComboBox.DataSource = _configDBConnectionStringHandler.ConnectionStrings;
+            connectionStringsComboBox.ValueMember = "Name";
+            connectionStringsComboBox.DisplayMember = "DisplayName";
+            connectionStringsComboBox.SelectedIndex = -1;
+            connectionStringsComboBox.Text = "Select a connection";
+            domainsCheckListBox.SelectionMode = SelectionMode.One;
+        }
+
+        private void connectionStringsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            domainsCheckListBox.DataSource = null;
+            IsAllDomainsSelected = false;
+        }
+
+        public ConnectionDetails GetSelectedConnectionDetails(out string validationMessage)
+        {
+            validationMessage = "";
+            if (connectionStringsComboBox.SelectedValue == null)
+            {
+                validationMessage = "Select a connection";
+                return null;
+            }
+
+            var connectionDetail = _configDBConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == connectionStringsComboBox.SelectedValue.ToString());
+            if (connectionDetail == null)
+            {
+                validationMessage = "Connection string not available";
+                return null;
+            }
+            return connectionDetail;
+        }
+
+        private void LoadResourceKeyValues(ConnectionDetails connectionDetails)
+        {
+            keyValuePairs = new Dictionary<string, string>();
+            var dataSet = dao.GetData("SELECT [ConfigKey], [ConfigValue] FROM [SSDL].[SPEND_RESOURCES]", connectionDetails);
+
+            if (dataSet != null && dataSet.Tables.Count > 0 && dataSet.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow row in dataSet.Tables[0].Rows)
+                {
+                    var configKey = row["ConfigKey"].ToString();
+                    if (!keyValuePairs.ContainsKey(configKey))
+                    {
+                        keyValuePairs.Add(configKey, row["ConfigValue"].ToString());
+                    }
+                }
+            }
+        }
+
         private void getMessagesButton_Click(object sender, EventArgs e)
         {
             var connectionDetails = GetSelectedConnectionDetails(out var valiationMessage);
@@ -65,66 +117,33 @@ namespace SSDLMaintenanceTool.Forms
 
                 if (microDBConnection != null)
                 {
-                    LoadResourceKeyValues(microDBConnection);
+                    EnableUIForQueryExecution(false);
 
                     Task.Run(async () =>
                     {
-                        await ProcessQueueResponse(selectedDomain);
+                        try
+                        {
+                            LoadResourceKeyValues(microDBConnection);
+
+                            await ProcessQueueResponse(selectedDomain);
+                        }
+                        catch (Exception ex)
+                        {
+                            synchronizationContext.Post(new SendOrPostCallback(o =>
+                            {
+                                MessageBox.Show(ex.Message);
+                            }), null);
+                        }
+                        finally
+                        {
+                            synchronizationContext.Post(new SendOrPostCallback(o =>
+                            {
+                                EnableUIForQueryExecution();
+                            }), null);
+                        }
                     });
                 }
             }
-        }
-
-        private void connectionStringsComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            domainsCheckListBox.DataSource = null;
-            IsAllDomainsSelected = false;
-        }
-
-        private void ServiceBus_Load(object sender, EventArgs e)
-        {
-            connectionStringsComboBox.DataSource = _configDBConnectionStringHandler.ConnectionStrings;
-            connectionStringsComboBox.ValueMember = "Name";
-            connectionStringsComboBox.DisplayMember = "DisplayName";
-            connectionStringsComboBox.SelectedIndex = -1;
-            connectionStringsComboBox.Text = "Select a connection";
-            domainsCheckListBox.SelectionMode = SelectionMode.One;
-        }
-
-        private void LoadResourceKeyValues(ConnectionDetails connectionDetails)
-        {
-            keyValuePairs = new Dictionary<string, string>();
-            var dataSet = dao.GetData("SELECT [ConfigKey], [ConfigValue] FROM [SSDL].[SPEND_RESOURCES]", connectionDetails);
-
-            if (dataSet != null && dataSet.Tables.Count > 0 && dataSet.Tables[0].Rows.Count > 0)
-            {
-                foreach (DataRow row in dataSet.Tables[0].Rows)
-                {
-                    var configKey = row["ConfigKey"].ToString();
-                    if (!keyValuePairs.ContainsKey(configKey))
-                    {
-                        keyValuePairs.Add(configKey, row["ConfigValue"].ToString());
-                    }
-                }
-            }
-        }
-
-        public ConnectionDetails GetSelectedConnectionDetails(out string validationMessage)
-        {
-            validationMessage = "";
-            if (connectionStringsComboBox.SelectedValue == null)
-            {
-                validationMessage = "Select a connection";
-                return null;
-            }
-
-            var connectionDetail = _configDBConnectionStringHandler.ConnectionStrings.FirstOrDefault(a => a.Name == connectionStringsComboBox.SelectedValue.ToString());
-            if (connectionDetail == null)
-            {
-                validationMessage = "Connection string not available";
-                return null;
-            }
-            return connectionDetail;
         }
 
         private void loadDomainsButton_Click(object sender, EventArgs e)
@@ -151,6 +170,8 @@ namespace SSDLMaintenanceTool.Forms
                 copyConnection.Password = credentialsPrompt.Password;
             }
 
+            EnableUIForQueryExecution(false);
+
             //Send the update to our UI thread
             Task.Run(() =>
             {
@@ -168,6 +189,7 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
+                        MessageBox.Show(ex.Message);
                         LoadingDomainsFailed(ex);
                     }), null);
                 }
@@ -175,6 +197,7 @@ namespace SSDLMaintenanceTool.Forms
                 {
                     synchronizationContext.Post(new SendOrPostCallback(o =>
                     {
+                        EnableUIForQueryExecution();
                     }), null);
                 }
             });
@@ -519,5 +542,15 @@ namespace SSDLMaintenanceTool.Forms
             DomainsTableSet = resultSet;
         }
 
+        private void EnableUIForQueryExecution(bool value = true)
+        {
+            connectionStringsComboBox.Enabled = value;
+            loadDomainsButton.Enabled = value;
+            domainsCheckListBox.SelectionMode = value ? SelectionMode.One : SelectionMode.None;
+            filterDomainsTextBox.ReadOnly = value;
+            getMessagesButton.Enabled = value;
+            watcherGetMessagesButton.Enabled = value;
+            watcherDeleteDuplicateMessagesButton.Enabled = value;
+        }
     }
 }
