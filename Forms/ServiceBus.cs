@@ -495,12 +495,14 @@ namespace SSDLMaintenanceTool.Forms
                     }
                     else
                     {
-                        await args.AbandonMessageAsync(args.Message);
+                        //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHE THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
+                        //await args.AbandonMessageAsync(args.Message);
                     }
                 }
                 else
                 {
-                    await args.AbandonMessageAsync(args.Message);
+                    //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHE THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
+                    //await args.AbandonMessageAsync(args.Message);
                 }
 
                 await Task.Delay(5000);
@@ -547,7 +549,7 @@ namespace SSDLMaintenanceTool.Forms
             connectionStringsComboBox.Enabled = value;
             loadDomainsButton.Enabled = value;
             domainsCheckListBox.SelectionMode = value ? SelectionMode.One : SelectionMode.None;
-            filterDomainsTextBox.ReadOnly = value;
+            filterDomainsTextBox.ReadOnly = !value;
             getMessagesButton.Enabled = value;
             watcherGetMessagesButton.Enabled = value;
             watcherDeleteDuplicateMessagesButton.Enabled = value;
