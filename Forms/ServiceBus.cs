@@ -495,13 +495,13 @@ namespace SSDLMaintenanceTool.Forms
                     }
                     else
                     {
-                        //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHE THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
+                        //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHES THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
                         //await args.AbandonMessageAsync(args.Message);
                     }
                 }
                 else
                 {
-                    //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHE THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
+                    //IF YOU CALL THIS THEN IT WILL INCREASE THE DELIVERY COUNT AND IF THAT BREACHES THE MAX DELIVERY COUNT LIMIT THEN THE MESSAGE WILL NOT BE PROCESSED ANYMORE.
                     //await args.AbandonMessageAsync(args.Message);
                 }
 

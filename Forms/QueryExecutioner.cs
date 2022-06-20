@@ -1181,13 +1181,17 @@ namespace SSDLMaintenanceTool.Forms
                             )
                             select a.name
                             from sys.databases a
-                            join CTE b on a.name like(replace(b.name, '_SSDL', '') +'%') and a.name not like '%[_]%'
+                            join CTE b on a.name like(replace(b.name, '_SSDL', '') +'%') and a.name not like '%[_]%[_]%'
                             ";
                 }
                 else if (domainTypeFilter == "AllBuyerDBs")
                 {
                     filterCondition = $"Name NOT LIKE '%[_]%'";
                     query = $"SELECT {selectClause} FROM sys.databases WHERE {filterCondition}";
+                }
+                else if (domainTypeFilter == "AllDBs")
+                {
+                    query = $"SELECT Name FROM sys.databases";
                 }
             }
 
